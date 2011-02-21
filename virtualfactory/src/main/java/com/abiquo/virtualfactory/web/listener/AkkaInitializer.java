@@ -27,6 +27,8 @@ import static com.abiquo.commons.amqp.config.DefaultConfiguration.getPort;
 import static com.abiquo.commons.amqp.config.DefaultConfiguration.getUserName;
 import static com.abiquo.commons.amqp.config.DefaultConfiguration.getVirtualHost;
 
+import static com.abiquo.commons.amqp.impl.datacenter.DatacenterConfiguration.*;
+
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
@@ -57,7 +59,7 @@ public class AkkaInitializer implements ServletContextListener {
 		int initPoolSize = Integer.parseInt(System.getProperty("abiquo.virtualfactory.min.workers", "1"));
 		int maxPoolSize = Integer.parseInt(System.getProperty("abiquo.virtualfactory.max.workers", "1"));
 		
-		worker.setDispatcher(Dispatchers.newExecutorBasedEventDrivenDispatcher("brown dispatcher")
+		worker.setDispatcher(Dispatchers.newExecutorBasedEventDrivenDispatcher("workers dispatcher")
 				.setCorePoolSize(initPoolSize)				
 			    .setMaxPoolSize(maxPoolSize)
 			    .setKeepAliveTimeInMillis(60000)
@@ -67,9 +69,9 @@ public class AkkaInitializer implements ServletContextListener {
 				getUserName(), getPassword(), getVirtualHost());
 		ActorRef connection = AMQP.newConnection(connectionParameters);
 		
-		AMQP.ExchangeParameters exchangeParameters = new AMQP.ExchangeParameters("my_direct_exchange", Direct.getInstance());
+		AMQP.ExchangeParameters exchangeParameters = new AMQP.ExchangeParameters(getExchangeName(), Direct.getInstance());
 
-        AMQP.ConsumerParameters consumerParameters = new AMQP.ConsumerParameters("some.routing", worker, exchangeParameters);
+        AMQP.ConsumerParameters consumerParameters = new AMQP.ConsumerParameters(getRoutingKey(), worker, getQueueName(), exchangeParameters);
         consumer = AMQP.newConsumer(connection, consumerParameters);
 	}
 }
