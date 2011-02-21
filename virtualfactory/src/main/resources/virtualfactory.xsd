@@ -20,6 +20,7 @@
 	</xs:complexType>
 
 
+
 	<!-- VIRTUAL MACHINE CREATION -->
 	<xs:complexType name="VirtualNIC">
 		<xs:sequence>
@@ -27,6 +28,19 @@
 			<xs:element name="macAddress" type="xs:string" />
 			<xs:element name="networkName" type="xs:string" />
 			<xs:element name="vlanTag" type="xs:string" />
+			<!-- -->
+			<xs:element name="leaseName" type="xs:string" />
+			<xs:element name="forwardMode" type="xs:string" /> <!-- nat, route, bridget, none -->
+			<xs:element name="ip" type="xs:string" />
+			<xs:element name="netAddress" type="xs:string" />
+			<xs:element name="gateway" type="xs:string" />
+			<xs:element name="mask" type="xs:string" />
+			<!-- -->
+			<xs:element name="primaryDNS" type="xs:string" />
+			<xs:element name="secondaryDNS" type="xs:string" />
+			<xs:element name="sufixDNS" type="xs:string" />
+
+			<!-- -->
 			<xs:element name="sequence" type="xs:string" />
 		</xs:sequence>
 	</xs:complexType>
@@ -72,7 +86,7 @@
 		<xs:complexContent>
 			<xs:extension base="vf:DiskDesc">
 				<xs:sequence>
-					<xs:element name="iqn" type="xs:string"/>
+					<xs:element name="iqn" type="xs:string" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
