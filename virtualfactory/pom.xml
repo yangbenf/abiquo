@@ -31,6 +31,12 @@
 			<artifactId>aimstub</artifactId>
 			<version>${version}</version>
 		</dependency>
+		
+		<dependency>
+		  <groupId>com.abiquo</groupId>
+		  <artifactId>commons-amqp</artifactId>
+		  <version>${version}</version>
+		</dependency>
 		<dependency>
 			<groupId>com.abiquo.abicloud</groupId>
 			<artifactId>tracer</artifactId>
@@ -214,6 +220,19 @@
 			<version>4.6</version>
 			<scope>test</scope>
 		</dependency>
+		
+		<!-- akka -->
+		<dependency>
+            <groupId>se.scalablesolutions.akka</groupId>
+            <artifactId>akka-actor</artifactId>
+            <version>1.0</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>se.scalablesolutions.akka</groupId>
+            <artifactId>akka-amqp</artifactId>
+            <version>1.0</version>
+        </dependency>
 	</dependencies>
 
 	<!--                                      -->

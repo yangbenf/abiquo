@@ -82,32 +82,46 @@ public abstract class DefaultConfiguration
     private Connection connection = null;
 
     public abstract void declareBrokerConfiguration(Channel channel) throws IOException;
+    
+    public static String getHost()
+    {
+    	return System.getProperty("abiquo.rabbitmq.host", "localhost");
+    }
+    
+    public static int getPort()
+    {
+    	return Integer.parseInt(System.getProperty("abiquo.rabbitmq.port", "5672"));
+    }
+    
+    public static String getUserName()
+    {
+    	return System.getProperty("abiquo.rabbitmq.username", "guest");
+    }
+    
+    public static String getPassword()
+    {
+    	return System.getProperty("abiquo.rabbitmq.password", "guest");
+    }
+    
+    public static String getVirtualHost()
+    {
+    	return System.getProperty("abiquo.rabbitmq.virtualHost", "/");
+    }
 
     protected DefaultConfiguration()
     {
-        String host = getProperty("abiquo.rabbitmq.host", "localhost");
-        int port = Integer.parseInt(getProperty("abiquo.rabbitmq.port", "5672"));
-        String username = getProperty("abiquo.rabbitmq.username", "guest");
-        String password = getProperty("abiquo.rabbitmq.password", "guest");
-
-        logger.info(String.format("RabbitMQ configuration. Host: %s, port: %d, username: %s", host,
-            port, username));
+        logger.info(String.format("RabbitMQ configuration. Host: %s, port: %d, username: %s", getHost(),
+            getPort(), getUserName()));
 
         factory = new ConnectionFactory();
 
-        factory.setHost(host);
-        factory.setPort(port);
-        factory.setUsername(username);
-        factory.setPassword(password);
-        factory.setVirtualHost("/");
+        factory.setHost(getHost());
+        factory.setPort(getPort());
+        factory.setUsername(getUserName());
+        factory.setPassword(getPassword());
+        factory.setVirtualHost(getVirtualHost());
 
         connection = null;
-    }
-
-    private String getProperty(String name, String defaultValue)
-    {
-        String value = System.getProperty(name);
-        return value == null ? defaultValue : value;
     }
 
     public String getRabbitMQHost()
