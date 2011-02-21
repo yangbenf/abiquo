@@ -10,6 +10,8 @@ import com.abiquo.ovfmanager.ovf.exceptions.XMLException;
 import com.abiquo.virtualfactory.model.jobs.CreateVirtualMachine;
 import com.abiquo.virtualfactory.model.jobs.ObjectFactory;
 import com.abiquo.virtualfactory.model.jobs.SnapshootVirtualMachine;
+import com.abiquo.virtualfactory.model.jobs.State;
+import com.abiquo.virtualfactory.model.jobs.VirtualMachineAction;
 
 public class VirtualFactoryTestJobs
 {
@@ -29,6 +31,13 @@ public class VirtualFactoryTestJobs
 
     }
 
+    public VirtualMachineAction testVirtualMachineAction()
+    {
+        return new VirtualMachineActionJobBuilder()
+            .connection("hypervisorID", "XEN", "10.60.1.15", "78889", "https", "root", "root")
+            .virtualMachineId("virtualMachineId").state(State.PAUSED).build();
+    }
+
     public SnapshootVirtualMachine testSnapshoo()
     {
         return new SnapshootVirtualMachineJobBuilder()
@@ -38,6 +47,9 @@ public class VirtualFactoryTestJobs
             .build();
     }
 
+    /**
+     * Serialization issues
+     */
     private ObjectFactory jobsObjectF;
 
     private JAXBContext context;
@@ -46,7 +58,8 @@ public class VirtualFactoryTestJobs
     {
         jobsObjectF = new ObjectFactory();
         context =
-            JAXBContext.newInstance(CreateVirtualMachine.class, SnapshootVirtualMachine.class);
+            JAXBContext.newInstance(CreateVirtualMachine.class, SnapshootVirtualMachine.class,
+                VirtualMachineAction.class);
     }
 
     public String serialize(Object any) throws XMLException
@@ -78,6 +91,11 @@ public class VirtualFactoryTestJobs
                     jobsObjectF.createSnapshootVirtualMachine((SnapshootVirtualMachine) any),
                     swriter);
             }
+            else if (any instanceof VirtualMachineAction)
+            {
+                marshall.marshal(
+                    jobsObjectF.createVirtualMachineAction((VirtualMachineAction) any), swriter);
+            }
 
             return swriter.toString();
         }
@@ -91,8 +109,9 @@ public class VirtualFactoryTestJobs
     {
         VirtualFactoryTestJobs testBuidler = new VirtualFactoryTestJobs();
 
-        System.err.println(testBuidler.serialize(testBuidler.testSnapshoo()));
-        //System.err.println(testBuidler.serialize(testBuidler.testCreateVirtualMachine()));
+        System.err.println(testBuidler.serialize(testBuidler.testVirtualMachineAction()));
+        //System.err.println(testBuidler.serialize(testBuidler.testSnapshoo()));
+        // System.err.println(testBuidler.serialize(testBuidler.testCreateVirtualMachine()));
 
     }
 

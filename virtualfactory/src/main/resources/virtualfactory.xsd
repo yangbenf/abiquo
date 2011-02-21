@@ -33,14 +33,10 @@
 
 
 
-
-
 	<xs:complexType name="HardwareConf">
 		<xs:sequence>
 			<xs:element name="virtualCpu" type="xs:int" />
 			<xs:element name="ramInMb" type="xs:int" />
-			<!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! <xs:element name="targetDatastore" 
-				type="xs:string" /> -->
 		</xs:sequence>
 	</xs:complexType>
 
