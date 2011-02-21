@@ -12,3 +12,4 @@ database/test/kinton-schema-test.sql
 bin-debug
 client/swf/src/main/resources/config/client-config.xml
 client/swf/src/main/resources/themes
+client/theme/themeBase/.project
