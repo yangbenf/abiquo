@@ -22,6 +22,7 @@
 package com.abiquo.commons.ampq.vsm;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import org.testng.annotations.Test;
 
@@ -36,7 +37,7 @@ public class DatacenterTest
 {
     public static void main(String[] args) throws IOException
     {
-        System.setProperty("abiquo.datacenter.id", "blablabla");
+        System.setProperty("abiquo.datacenter.id", UUID.randomUUID().toString());
         new DatacenterTest().basic();
     }
 
