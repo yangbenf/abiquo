@@ -19,25 +19,11 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.commons.amqp.impl.datacenter.domain;
+package com.abiquo.commons.amqp.impl.datacenter;
 
-import java.util.UUID;
+import com.abiquo.commons.amqp.impl.datacenter.domain.DatacenterNotification;
 
-import com.abiquo.commons.amqp.domain.Queuable;
-import com.abiquo.commons.amqp.util.JSONUtils;
-
-public class DatacenterJob implements Queuable
+public interface NotificationCallback
 {
-    public String dummy = UUID.randomUUID().toString();
-
-    @Override
-    public byte[] toByteArray()
-    {
-        return JSONUtils.serialize(this);
-    }
-
-    public static DatacenterJob fromByteArray(final byte[] bytes)
-    {
-        return JSONUtils.deserialize(bytes, DatacenterJob.class);
-    }
+    public void onMessage(DatacenterNotification notification);
 }

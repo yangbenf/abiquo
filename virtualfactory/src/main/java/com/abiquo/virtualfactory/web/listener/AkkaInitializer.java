@@ -26,8 +26,9 @@ import static com.abiquo.commons.amqp.config.DefaultConfiguration.getPassword;
 import static com.abiquo.commons.amqp.config.DefaultConfiguration.getPort;
 import static com.abiquo.commons.amqp.config.DefaultConfiguration.getUserName;
 import static com.abiquo.commons.amqp.config.DefaultConfiguration.getVirtualHost;
-
-import static com.abiquo.commons.amqp.impl.datacenter.DatacenterConfiguration.*;
+import static com.abiquo.commons.amqp.impl.datacenter.DatacenterConfiguration.getDatacenterDirectExchange;
+import static com.abiquo.commons.amqp.impl.datacenter.DatacenterConfiguration.getJobsQueue;
+import static com.abiquo.commons.amqp.impl.datacenter.DatacenterConfiguration.getJobsRoutingKey;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -40,38 +41,50 @@ import akka.dispatch.Dispatchers;
 
 import com.abiquo.virtualfactory.akka.QueueWorker;
 
-public class AkkaInitializer implements ServletContextListener {
+public class AkkaInitializer implements ServletContextListener
+{
 
-	private ActorRef consumer;
-	
-	@Override
-	public void contextDestroyed(ServletContextEvent sce) {
-		if (consumer != null)
-		{
-			consumer.stop();
-		}
-	}
+    private ActorRef consumer;
 
-	@Override
-	public void contextInitialized(ServletContextEvent sce) {
-		ActorRef worker = Actors.actorOf(QueueWorker.class);
-		
-		int initPoolSize = Integer.parseInt(System.getProperty("abiquo.virtualfactory.min.workers", "1"));
-		int maxPoolSize = Integer.parseInt(System.getProperty("abiquo.virtualfactory.max.workers", "1"));
-		
-		worker.setDispatcher(Dispatchers.newExecutorBasedEventDrivenDispatcher("workers dispatcher")
-				.setCorePoolSize(initPoolSize)				
-			    .setMaxPoolSize(maxPoolSize)
-			    .setKeepAliveTimeInMillis(60000)
-				.build());
-		
-		AMQP.ConnectionParameters connectionParameters = new AMQP.ConnectionParameters(getHost(), getPort(), 
-				getUserName(), getPassword(), getVirtualHost());
-		ActorRef connection = AMQP.newConnection(connectionParameters);
-		
-		AMQP.ExchangeParameters exchangeParameters = new AMQP.ExchangeParameters(getExchangeName(), Direct.getInstance());
+    @Override
+    public void contextDestroyed(ServletContextEvent sce)
+    {
+        if (consumer != null)
+        {
+            consumer.stop();
+        }
+    }
 
-        AMQP.ConsumerParameters consumerParameters = new AMQP.ConsumerParameters(getRoutingKey(), worker, getQueueName(), exchangeParameters);
+    @Override
+    public void contextInitialized(ServletContextEvent sce)
+    {
+        ActorRef worker = Actors.actorOf(QueueWorker.class);
+
+        int initPoolSize =
+            Integer.parseInt(System.getProperty("abiquo.virtualfactory.min.workers", "1"));
+        int maxPoolSize =
+            Integer.parseInt(System.getProperty("abiquo.virtualfactory.max.workers", "1"));
+
+        worker.setDispatcher(Dispatchers
+            .newExecutorBasedEventDrivenDispatcher("workers dispatcher").setCorePoolSize(
+                initPoolSize).setMaxPoolSize(maxPoolSize).setKeepAliveTimeInMillis(60000).build());
+
+        AMQP.ConnectionParameters connectionParameters =
+            new AMQP.ConnectionParameters(getHost(),
+                getPort(),
+                getUserName(),
+                getPassword(),
+                getVirtualHost());
+        ActorRef connection = AMQP.newConnection(connectionParameters);
+
+        AMQP.ExchangeParameters exchangeParameters =
+            new AMQP.ExchangeParameters(getDatacenterDirectExchange(), Direct.getInstance());
+
+        AMQP.ConsumerParameters consumerParameters =
+            new AMQP.ConsumerParameters(getJobsRoutingKey(),
+                worker,
+                getJobsQueue(),
+                exchangeParameters);
         consumer = AMQP.newConsumer(connection, consumerParameters);
-	}
+    }
 }

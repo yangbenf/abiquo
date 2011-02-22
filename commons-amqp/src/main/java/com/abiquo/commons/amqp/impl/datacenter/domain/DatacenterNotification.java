@@ -19,27 +19,25 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.commons.amqp.impl.datacenter;
+package com.abiquo.commons.amqp.impl.datacenter.domain;
 
-import static com.abiquo.commons.amqp.util.ProducerUtils.publishPersistentText;
+import java.util.UUID;
 
-import java.io.IOException;
+import com.abiquo.commons.amqp.domain.Queuable;
+import com.abiquo.commons.amqp.util.JSONUtils;
 
-import com.abiquo.commons.amqp.impl.datacenter.domain.DatacenterJob;
-import com.abiquo.commons.amqp.producer.BasicProducer;
-
-public class DatacenterProducer extends BasicProducer<DatacenterConfiguration, DatacenterJob>
+public class DatacenterNotification implements Queuable
 {
+    public String dummy = UUID.randomUUID().toString();
+
     @Override
-    public DatacenterConfiguration configurationInstance()
+    public byte[] toByteArray()
     {
-        return DatacenterConfiguration.getInstance();
+        return JSONUtils.serialize(this);
     }
 
-    @Override
-    public void publish(DatacenterJob message) throws IOException
+    public static DatacenterNotification fromByteArray(final byte[] bytes)
     {
-        publishPersistentText(channel, DatacenterConfiguration.getExchangeName(),
-            DatacenterConfiguration.getRoutingKey(), message.toByteArray());
+        return JSONUtils.deserialize(bytes, DatacenterNotification.class);
     }
 }
