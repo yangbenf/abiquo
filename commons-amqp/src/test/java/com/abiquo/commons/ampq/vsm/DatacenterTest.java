@@ -37,7 +37,6 @@ public class DatacenterTest
 {
     public static void main(String[] args) throws IOException
     {
-        System.setProperty("abiquo.datacenter.id", UUID.randomUUID().toString());
         new DatacenterTest().basic();
     }
 
@@ -57,7 +56,7 @@ public class DatacenterTest
 
         consumer.start();
 
-        JobsProducer jproducer = new JobsProducer();
+        JobsProducer jproducer = new JobsProducer(UUID.randomUUID().toString());
 
         jproducer.openChannel();
 

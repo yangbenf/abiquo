@@ -28,17 +28,6 @@ import com.rabbitmq.client.Channel;
 
 public class PingConfiguration extends DefaultConfiguration
 {
-    private static PingConfiguration singleton = null;
-
-    public static PingConfiguration getInstance()
-    {
-        if (singleton == null)
-        {
-            singleton = new PingConfiguration();
-        }
-
-        return singleton;
-    }
 
     @Override
     public void declareBrokerConfiguration(Channel channel) throws IOException

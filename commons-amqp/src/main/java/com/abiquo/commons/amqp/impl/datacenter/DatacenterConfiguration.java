@@ -28,43 +28,29 @@ import com.rabbitmq.client.Channel;
 
 public class DatacenterConfiguration extends DefaultConfiguration
 {
-    private static final String DATACENTER_ID_PROPERTY = "abiquo.datacenter.id";
+    private String datacenterId;
 
-    private static DatacenterConfiguration singleton = null;
-
+    // Exchange configurations
     private static final String DATACENTER_DIRECT_EXCHANGE = "abiquo.datacenter.direct";
 
-    // JOBS Configuration
+    // Jobs Configuration
     private static final String JOBS_ROUTING_KEY = "abiquo.datacenter.jobs";
 
     private static final String JOBS_QUEUE = JOBS_ROUTING_KEY;
 
-    // NOTIFICATIONS Configuration
+    // Notifications Configuration
     private static final String NOTIFICATIONS_ROUTING_KEY = "abiquo.datacenter.notifications";
 
     public static final String NOTIFICATIONS_QUEUE = NOTIFICATIONS_ROUTING_KEY;
-
-    private static String getDatacenterId()
-    {
-        String id = System.getProperty(DATACENTER_ID_PROPERTY);
-
-        if (id == null)
-        {
-            throw new IllegalArgumentException("Unable to get the required property "
-                + DATACENTER_ID_PROPERTY);
-        }
-
-        return id;
-    }
 
     public static String getDatacenterDirectExchange()
     {
         return DATACENTER_DIRECT_EXCHANGE;
     }
 
-    public static String getJobsRoutingKey()
+    public static String getJobsRoutingKey(final String datacenterId)
     {
-        return JOBS_ROUTING_KEY.concat(".").concat(getDatacenterId());
+        return JOBS_ROUTING_KEY.concat(".").concat(datacenterId);
     }
 
     public static String getNotificationsRoutingKey()
@@ -72,9 +58,9 @@ public class DatacenterConfiguration extends DefaultConfiguration
         return NOTIFICATIONS_ROUTING_KEY;
     }
 
-    public static String getJobsQueue()
+    public static String getJobsQueue(final String datacenterId)
     {
-        return JOBS_QUEUE.concat(".").concat(getDatacenterId());
+        return JOBS_QUEUE.concat(".").concat(datacenterId);
     }
 
     public static String getNotificationsQueue()
@@ -82,14 +68,14 @@ public class DatacenterConfiguration extends DefaultConfiguration
         return NOTIFICATIONS_QUEUE;
     }
 
-    public static DatacenterConfiguration getInstance()
+    public DatacenterConfiguration()
     {
-        if (singleton == null)
-        {
-            singleton = new DatacenterConfiguration();
-        }
+        this.datacenterId = null;
+    }
 
-        return singleton;
+    public DatacenterConfiguration(final String datacenterId)
+    {
+        this.datacenterId = datacenterId;
     }
 
     @Override
@@ -97,13 +83,18 @@ public class DatacenterConfiguration extends DefaultConfiguration
     {
         channel.exchangeDeclare(getDatacenterDirectExchange(), DirectExchange, Durable);
 
-        // Declare configuration for datacenter jobs
-        channel.queueDeclare(getJobsQueue(), Durable, NonExclusive, NonAutodelete, null);
-        channel.queueBind(getJobsQueue(), getDatacenterDirectExchange(), getJobsRoutingKey());
-
         // Declare configuration for datacenter job notifications
         channel.queueDeclare(getNotificationsQueue(), Durable, NonExclusive, NonAutodelete, null);
         channel.queueBind(getNotificationsQueue(), getDatacenterDirectExchange(),
             getNotificationsRoutingKey());
+
+        if (datacenterId != null)
+        {
+            // Declare configuration for datacenter jobs
+            channel.queueDeclare(getJobsQueue(datacenterId), Durable, NonExclusive, NonAutodelete,
+                null);
+            channel.queueBind(getJobsQueue(datacenterId), getDatacenterDirectExchange(),
+                getJobsRoutingKey(datacenterId));
+        }
     }
 }

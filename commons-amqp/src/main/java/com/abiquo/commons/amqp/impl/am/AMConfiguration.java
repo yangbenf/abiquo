@@ -34,18 +34,6 @@ public class AMConfiguration extends DefaultConfiguration
 
     public static final String AM_QUEUE = AM_ROUTING_KEY;
 
-    private static AMConfiguration singleton = null;
-
-    public static AMConfiguration getInstance()
-    {
-        if (singleton == null)
-        {
-            singleton = new AMConfiguration();
-        }
-
-        return singleton;
-    }
-
     @Override
     public void declareBrokerConfiguration(Channel channel) throws IOException
     {

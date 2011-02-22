@@ -30,13 +30,11 @@ import java.io.IOException;
 import com.abiquo.commons.amqp.impl.datacenter.domain.DatacenterNotification;
 import com.abiquo.commons.amqp.producer.BasicProducer;
 
-public class NotificationsProducer extends
-    BasicProducer<DatacenterConfiguration, DatacenterNotification>
+public class NotificationsProducer extends BasicProducer<DatacenterNotification>
 {
-    @Override
-    public DatacenterConfiguration configurationInstance()
+    public NotificationsProducer()
     {
-        return DatacenterConfiguration.getInstance();
+        super(new DatacenterConfiguration());
     }
 
     @Override

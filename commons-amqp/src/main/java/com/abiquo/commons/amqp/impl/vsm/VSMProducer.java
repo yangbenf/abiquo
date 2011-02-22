@@ -30,12 +30,11 @@ import java.io.IOException;
 import com.abiquo.commons.amqp.impl.vsm.domain.VirtualSystemEvent;
 import com.abiquo.commons.amqp.producer.BasicProducer;
 
-public class VSMProducer extends BasicProducer<VSMConfiguration, VirtualSystemEvent>
+public class VSMProducer extends BasicProducer<VirtualSystemEvent>
 {
-    @Override
-    public VSMConfiguration configurationInstance()
+    public VSMProducer()
     {
-        return VSMConfiguration.getInstance();
+        super(new VSMConfiguration());
     }
 
     @Override
