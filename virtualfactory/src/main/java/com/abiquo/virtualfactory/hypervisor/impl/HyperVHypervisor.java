@@ -23,7 +23,6 @@ package com.abiquo.virtualfactory.hypervisor.impl;
 import static com.abiquo.virtualfactory.utils.hyperv.HyperVUtils.enumToJIVariantArray;
 
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,9 +33,11 @@ import org.jinterop.dcom.impls.automation.IJIDispatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.virtualfactory.constants.MessageValues;
 import com.abiquo.virtualfactory.exception.HypervisorException;
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
+import com.abiquo.virtualfactory.hypervisor.Hypervisor;
 import com.abiquo.virtualfactory.machine.impl.HyperVMachine;
 import com.abiquo.virtualfactory.model.AbiCloudModel;
 import com.abiquo.virtualfactory.model.AbsVirtualMachine;
@@ -44,7 +45,6 @@ import com.abiquo.virtualfactory.model.IHypervisor;
 import com.abiquo.virtualfactory.model.State;
 import com.abiquo.virtualfactory.model.config.Configuration;
 import com.abiquo.virtualfactory.model.config.HyperVHypervisorConfiguration;
-import com.abiquo.virtualfactory.model.config.HypervisorConfiguration;
 import com.abiquo.virtualfactory.model.config.VirtualMachineConfiguration;
 import com.abiquo.virtualfactory.utils.hyperv.HyperVConstants;
 import com.hyper9.jwbem.SWbemLocator;
@@ -57,6 +57,7 @@ import com.hyper9.jwbem.msvm.virtualsystem.MsvmComputerSystem;
  * 
  * @author pnavarro
  */
+@Hypervisor(type = HypervisorType.HYPERV_301)
 public class HyperVHypervisor implements IHypervisor
 {
 
