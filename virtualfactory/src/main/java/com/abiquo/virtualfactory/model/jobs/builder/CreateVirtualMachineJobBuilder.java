@@ -75,7 +75,7 @@ public class CreateVirtualMachineJobBuilder extends VirtualFactoryJobBuilder
         nic.setNetworkName(networkName);
         nic.setVlanTag(vlanTag);
         nic.setSequence(sequence);
-
+        
         netConf.getVirtualNIC().add(nic);
 
         return this;
