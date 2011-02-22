@@ -65,6 +65,9 @@ public class AkkaInitializer implements ServletContextListener
         int maxPoolSize =
             Integer.parseInt(System.getProperty("abiquo.virtualfactory.max.workers", "1"));
 
+        // TODO check NULL property value
+        String datacenterId = System.getProperty("abiquo.datacenter.id");
+
         worker.setDispatcher(Dispatchers
             .newExecutorBasedEventDrivenDispatcher("workers dispatcher").setCorePoolSize(
                 initPoolSize).setMaxPoolSize(maxPoolSize).setKeepAliveTimeInMillis(60000).build());
@@ -81,9 +84,9 @@ public class AkkaInitializer implements ServletContextListener
             new AMQP.ExchangeParameters(getDatacenterDirectExchange(), Direct.getInstance());
 
         AMQP.ConsumerParameters consumerParameters =
-            new AMQP.ConsumerParameters(getJobsRoutingKey(),
+            new AMQP.ConsumerParameters(getJobsRoutingKey(datacenterId),
                 worker,
-                getJobsQueue(),
+                getJobsQueue(datacenterId),
                 exchangeParameters);
         consumer = AMQP.newConsumer(connection, consumerParameters);
     }
