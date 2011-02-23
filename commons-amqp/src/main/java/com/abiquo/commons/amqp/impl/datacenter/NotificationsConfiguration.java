@@ -21,26 +21,25 @@
 
 package com.abiquo.commons.amqp.impl.datacenter;
 
-import static com.abiquo.commons.amqp.impl.datacenter.NotificationsConfiguration.NOTIFICATIONS_EXCHANGE;
-import static com.abiquo.commons.amqp.impl.datacenter.NotificationsConfiguration.NOTIFICATIONS_ROUTING_KEY;
-import static com.abiquo.commons.amqp.util.ProducerUtils.publishPersistentText;
-
 import java.io.IOException;
 
-import com.abiquo.commons.amqp.impl.datacenter.domain.DatacenterNotification;
-import com.abiquo.commons.amqp.producer.BasicProducer;
+import com.abiquo.commons.amqp.config.DefaultConfiguration;
+import com.rabbitmq.client.Channel;
 
-public class NotificationsProducer extends BasicProducer<DatacenterNotification>
+public class NotificationsConfiguration extends DefaultConfiguration
 {
-    public NotificationsProducer()
-    {
-        super(new NotificationsConfiguration());
-    }
+    public static final String NOTIFICATIONS_EXCHANGE = "abiquo.notifications.direct";
+
+    public static final String NOTIFICATIONS_ROUTING_KEY = "abiquo.notifications";
+
+    public static final String NOTIFICATIONS_QUEUE = NOTIFICATIONS_ROUTING_KEY;
 
     @Override
-    public void publish(DatacenterNotification message) throws IOException
+    public void declareBrokerConfiguration(Channel channel) throws IOException
     {
-        publishPersistentText(channel, NOTIFICATIONS_EXCHANGE, NOTIFICATIONS_ROUTING_KEY, message
-            .toByteArray());
+        channel.exchangeDeclare(NOTIFICATIONS_EXCHANGE, DirectExchange, Durable);
+
+        channel.queueDeclare(NOTIFICATIONS_QUEUE, Durable, NonExclusive, NonAutodelete, null);
+        channel.queueBind(NOTIFICATIONS_QUEUE, NOTIFICATIONS_EXCHANGE, NOTIFICATIONS_ROUTING_KEY);
     }
 }

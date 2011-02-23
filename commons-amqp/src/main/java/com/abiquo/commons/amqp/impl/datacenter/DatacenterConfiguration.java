@@ -30,18 +30,11 @@ public class DatacenterConfiguration extends DefaultConfiguration
 {
     private String datacenterId;
 
-    // Exchange configurations
-    private static final String DATACENTER_DIRECT_EXCHANGE = "abiquo.datacenter.direct";
+    private static final String DATACENTER_DIRECT_EXCHANGE = "abiquo.datacenters.direct";
 
-    // Jobs Configuration
     private static final String JOBS_ROUTING_KEY = "abiquo.datacenter.jobs";
 
     private static final String JOBS_QUEUE = JOBS_ROUTING_KEY;
-
-    // Notifications Configuration
-    private static final String NOTIFICATIONS_ROUTING_KEY = "abiquo.datacenter.notifications";
-
-    public static final String NOTIFICATIONS_QUEUE = NOTIFICATIONS_ROUTING_KEY;
 
     public static String getDatacenterDirectExchange()
     {
@@ -53,24 +46,9 @@ public class DatacenterConfiguration extends DefaultConfiguration
         return JOBS_ROUTING_KEY.concat(".").concat(datacenterId);
     }
 
-    public static String getNotificationsRoutingKey()
-    {
-        return NOTIFICATIONS_ROUTING_KEY;
-    }
-
     public static String getJobsQueue(final String datacenterId)
     {
         return JOBS_QUEUE.concat(".").concat(datacenterId);
-    }
-
-    public static String getNotificationsQueue()
-    {
-        return NOTIFICATIONS_QUEUE;
-    }
-
-    public DatacenterConfiguration()
-    {
-        this.datacenterId = null;
     }
 
     public DatacenterConfiguration(final String datacenterId)
@@ -83,18 +61,9 @@ public class DatacenterConfiguration extends DefaultConfiguration
     {
         channel.exchangeDeclare(getDatacenterDirectExchange(), DirectExchange, Durable);
 
-        // Declare configuration for datacenter job notifications
-        channel.queueDeclare(getNotificationsQueue(), Durable, NonExclusive, NonAutodelete, null);
-        channel.queueBind(getNotificationsQueue(), getDatacenterDirectExchange(),
-            getNotificationsRoutingKey());
-
-        if (datacenterId != null)
-        {
-            // Declare configuration for datacenter jobs
-            channel.queueDeclare(getJobsQueue(datacenterId), Durable, NonExclusive, NonAutodelete,
-                null);
-            channel.queueBind(getJobsQueue(datacenterId), getDatacenterDirectExchange(),
-                getJobsRoutingKey(datacenterId));
-        }
+        channel
+            .queueDeclare(getJobsQueue(datacenterId), Durable, NonExclusive, NonAutodelete, null);
+        channel.queueBind(getJobsQueue(datacenterId), getDatacenterDirectExchange(),
+            getJobsRoutingKey(datacenterId));
     }
 }

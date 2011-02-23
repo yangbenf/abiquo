@@ -21,7 +21,7 @@
 
 package com.abiquo.commons.amqp.impl.datacenter;
 
-import static com.abiquo.commons.amqp.impl.datacenter.DatacenterConfiguration.NOTIFICATIONS_QUEUE;
+import static com.abiquo.commons.amqp.impl.datacenter.NotificationsConfiguration.NOTIFICATIONS_QUEUE;
 import static com.abiquo.commons.amqp.util.ConsumerUtils.ackMessage;
 import static com.abiquo.commons.amqp.util.ConsumerUtils.rejectMessage;
 
@@ -35,7 +35,7 @@ public class NotificationsConsumer extends BasicConsumer<NotificationCallback>
 {
     public NotificationsConsumer()
     {
-        super(new DatacenterConfiguration(), NOTIFICATIONS_QUEUE);
+        super(new NotificationsConfiguration(), NOTIFICATIONS_QUEUE);
     }
 
     @Override
