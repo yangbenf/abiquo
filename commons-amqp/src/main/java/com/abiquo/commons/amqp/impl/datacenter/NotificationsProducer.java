@@ -19,27 +19,28 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.commons.amqp.impl.am;
+package com.abiquo.commons.amqp.impl.datacenter;
+
+import static com.abiquo.commons.amqp.impl.datacenter.NotificationsConfiguration.NOTIFICATIONS_EXCHANGE;
+import static com.abiquo.commons.amqp.impl.datacenter.NotificationsConfiguration.NOTIFICATIONS_ROUTING_KEY;
+import static com.abiquo.commons.amqp.util.ProducerUtils.publishPersistentText;
 
 import java.io.IOException;
 
-import com.abiquo.commons.amqp.config.DefaultConfiguration;
-import com.rabbitmq.client.Channel;
+import com.abiquo.commons.amqp.impl.datacenter.domain.DatacenterNotification;
+import com.abiquo.commons.amqp.producer.BasicProducer;
 
-public class AMConfiguration extends DefaultConfiguration
+public class NotificationsProducer extends BasicProducer<DatacenterNotification>
 {
-    public static final String AM_EXCHANGE = "abq.am";
-
-    public static final String AM_ROUTING_KEY = "abq.am.dowloads";
-
-    public static final String AM_QUEUE = AM_ROUTING_KEY;
+    public NotificationsProducer()
+    {
+        super(new NotificationsConfiguration());
+    }
 
     @Override
-    public void declareBrokerConfiguration(Channel channel) throws IOException
+    public void publish(DatacenterNotification message) throws IOException
     {
-        channel.exchangeDeclare(AM_EXCHANGE, DirectExchange, Durable);
-
-        channel.queueDeclare(AM_QUEUE, Durable, NonExclusive, NonAutodelete, null);
-        channel.queueBind(AM_QUEUE, AM_EXCHANGE, AM_ROUTING_KEY);
+        publishPersistentText(channel, NOTIFICATIONS_EXCHANGE, NOTIFICATIONS_ROUTING_KEY, message
+            .toByteArray());
     }
 }

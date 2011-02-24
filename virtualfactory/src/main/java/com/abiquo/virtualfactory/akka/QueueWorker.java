@@ -19,27 +19,18 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.commons.amqp.impl.am;
+package com.abiquo.virtualfactory.akka;
 
-import java.io.IOException;
+import akka.actor.UntypedActor;
+import akka.amqp.Delivery;
 
-import com.abiquo.commons.amqp.config.DefaultConfiguration;
-import com.rabbitmq.client.Channel;
+public class QueueWorker extends UntypedActor {
 
-public class AMConfiguration extends DefaultConfiguration
-{
-    public static final String AM_EXCHANGE = "abq.am";
-
-    public static final String AM_ROUTING_KEY = "abq.am.dowloads";
-
-    public static final String AM_QUEUE = AM_ROUTING_KEY;
-
-    @Override
-    public void declareBrokerConfiguration(Channel channel) throws IOException
-    {
-        channel.exchangeDeclare(AM_EXCHANGE, DirectExchange, Durable);
-
-        channel.queueDeclare(AM_QUEUE, Durable, NonExclusive, NonAutodelete, null);
-        channel.queueBind(AM_QUEUE, AM_EXCHANGE, AM_ROUTING_KEY);
-    }
+	@Override
+	public void onReceive(Object message) throws Exception {
+		if (Delivery.class.isAssignableFrom(message.getClass())) {
+            Delivery delivery = (Delivery) message;
+//            System.out.println("### >> Message received: " + new String(delivery.payload()));
+        } else throw new IllegalArgumentException("Unknown message: " + message);
+	}
 }

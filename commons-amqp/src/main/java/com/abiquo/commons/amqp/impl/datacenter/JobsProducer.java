@@ -19,39 +19,31 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.commons.amqp.impl.bpm;
+package com.abiquo.commons.amqp.impl.datacenter;
+
+import static com.abiquo.commons.amqp.impl.datacenter.DatacenterConfiguration.getDatacenterDirectExchange;
+import static com.abiquo.commons.amqp.impl.datacenter.DatacenterConfiguration.getJobsRoutingKey;
+import static com.abiquo.commons.amqp.util.ProducerUtils.publishPersistentText;
 
 import java.io.IOException;
 
-import com.abiquo.commons.amqp.config.DefaultConfiguration;
-import com.rabbitmq.client.Channel;
+import com.abiquo.commons.amqp.impl.datacenter.domain.DatacenterJob;
+import com.abiquo.commons.amqp.producer.BasicProducer;
 
-public class BPMConfiguration extends DefaultConfiguration
+public class JobsProducer extends BasicProducer<DatacenterJob>
 {
-    protected static String BPM_EXCHANGE = "abq.bpm";
+    private String datacenterId;
 
-    protected static String BPM_ROUTING_KEY = "abq.bpm.jobs";
-
-    protected static String BPM_QUEUE = BPM_ROUTING_KEY;
-
-    private static BPMConfiguration singleton = null;
-
-    public static BPMConfiguration getInstance()
+    public JobsProducer(final String datacenterId)
     {
-        if (singleton == null)
-        {
-            singleton = new BPMConfiguration();
-        }
-
-        return singleton;
+        super(new DatacenterConfiguration(datacenterId));
+        this.datacenterId = datacenterId;
     }
 
     @Override
-    public void declareBrokerConfiguration(Channel channel) throws IOException
+    public void publish(DatacenterJob message) throws IOException
     {
-        channel.exchangeDeclare(BPM_EXCHANGE, DirectExchange, Durable);
-
-        channel.queueDeclare(BPM_QUEUE, Durable, NonExclusive, NonAutodelete, null);
-        channel.queueBind(BPM_QUEUE, BPM_EXCHANGE, BPM_ROUTING_KEY);
+        publishPersistentText(channel, getDatacenterDirectExchange(),
+            getJobsRoutingKey(datacenterId), message.toByteArray());
     }
 }

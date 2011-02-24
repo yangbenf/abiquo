@@ -19,37 +19,25 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.commons.amqp.impl.bpm;
+package com.abiquo.commons.amqp.impl.datacenter.domain;
 
-import static com.abiquo.commons.amqp.impl.bpm.BPMConfiguration.BPM_QUEUE;
-import static com.abiquo.commons.amqp.util.ConsumerUtils.ackMessage;
+import java.util.UUID;
 
-import java.io.IOException;
+import com.abiquo.commons.amqp.domain.Queuable;
+import com.abiquo.commons.amqp.util.JSONUtils;
 
-import com.abiquo.commons.amqp.consumer.BasicConsumer;
-import com.rabbitmq.client.Envelope;
-
-public class BPMConsumer extends BasicConsumer<BPMConfiguration, BPMCallback>
+public class DatacenterNotification implements Queuable
 {
-    public BPMConsumer()
-    {
-        super(BPM_QUEUE);
-    }
+    public String dummy = UUID.randomUUID().toString();
 
     @Override
-    public BPMConfiguration configurationInstance()
+    public byte[] toByteArray()
     {
-        return BPMConfiguration.getInstance();
+        return JSONUtils.serialize(this);
     }
 
-    @Override
-    public void consume(Envelope envelope, byte[] body) throws IOException
+    public static DatacenterNotification fromByteArray(final byte[] bytes)
     {
-        for (BPMCallback callback : callbacks)
-        {
-            callback.onMessage(new String(body));
-        }
-
-        ackMessage(channel, envelope.getDeliveryTag());
+        return JSONUtils.deserialize(bytes, DatacenterNotification.class);
     }
 }

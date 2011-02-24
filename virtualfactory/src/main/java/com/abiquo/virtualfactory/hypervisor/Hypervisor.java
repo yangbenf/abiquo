@@ -19,28 +19,21 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.commons.amqp.impl.bpm;
+package com.abiquo.virtualfactory.hypervisor;
 
-import static com.abiquo.commons.amqp.impl.bpm.BPMConfiguration.BPM_EXCHANGE;
-import static com.abiquo.commons.amqp.impl.bpm.BPMConfiguration.BPM_ROUTING_KEY;
-import static com.abiquo.commons.amqp.util.ProducerUtils.publishPersistentText;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import java.io.IOException;
+import org.springframework.stereotype.Component;
 
-import com.abiquo.commons.amqp.domain.QueuableString;
-import com.abiquo.commons.amqp.producer.BasicProducer;
+import com.abiquo.server.core.enumerator.HypervisorType;
 
-public class BPMProducer extends BasicProducer<BPMConfiguration, QueuableString>
-{
-    @Override
-    public void publish(QueuableString message) throws IOException
-    {
-        publishPersistentText(channel, BPM_EXCHANGE, BPM_ROUTING_KEY, message.toByteArray());
-    }
-
-    @Override
-    public BPMConfiguration configurationInstance()
-    {
-        return BPMConfiguration.getInstance();
-    }
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Component
+public @interface Hypervisor {
+	HypervisorType type();
+	boolean overrides() default false;	
 }

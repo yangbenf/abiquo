@@ -19,34 +19,35 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.commons.amqp.impl.vsm;
+package com.abiquo.commons.amqp.impl.datacenter;
 
+import static com.abiquo.commons.amqp.impl.datacenter.NotificationsConfiguration.NOTIFICATIONS_QUEUE;
 import static com.abiquo.commons.amqp.util.ConsumerUtils.ackMessage;
 import static com.abiquo.commons.amqp.util.ConsumerUtils.rejectMessage;
 
 import java.io.IOException;
 
 import com.abiquo.commons.amqp.consumer.BasicConsumer;
-import com.abiquo.commons.amqp.impl.vsm.domain.VirtualSystemEvent;
+import com.abiquo.commons.amqp.impl.datacenter.domain.DatacenterNotification;
 import com.rabbitmq.client.Envelope;
 
-public class VSMConsumer extends BasicConsumer<VSMCallback>
+public class NotificationsConsumer extends BasicConsumer<NotificationCallback>
 {
-    public VSMConsumer(String queue)
+    public NotificationsConsumer()
     {
-        super(new VSMConfiguration(), queue);
+        super(new NotificationsConfiguration(), NOTIFICATIONS_QUEUE);
     }
 
     @Override
     public void consume(Envelope envelope, byte[] body) throws IOException
     {
-        VirtualSystemEvent event = VirtualSystemEvent.fromByteArray(body);
+        DatacenterNotification notification = DatacenterNotification.fromByteArray(body);
 
-        if (event != null)
+        if (notification != null)
         {
-            for (VSMCallback callback : callbacks)
+            for (NotificationCallback callback : callbacks)
             {
-                callback.onEvent(event);
+                callback.onMessage(notification);
             }
 
             ackMessage(channel, envelope.getDeliveryTag());

@@ -30,9 +30,11 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.virtualfactory.constants.MessageValues;
 import com.abiquo.virtualfactory.exception.HypervisorException;
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
+import com.abiquo.virtualfactory.hypervisor.Hypervisor;
 import com.abiquo.virtualfactory.machine.impl.XenServerMachine;
 import com.abiquo.virtualfactory.model.AbiCloudModel;
 import com.abiquo.virtualfactory.model.AbsVirtualMachine;
@@ -55,6 +57,7 @@ import com.xensource.xenapi.VM;
  * 
  * @author ibarrera
  */
+@Hypervisor(type = HypervisorType.XENSERVER)
 public class XenServerHypervisor implements IHypervisor
 {
     /** The logger */

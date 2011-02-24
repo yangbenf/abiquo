@@ -19,27 +19,11 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.commons.amqp.impl.am;
+package com.abiquo.commons.amqp.impl.datacenter;
 
-import java.io.IOException;
+import com.abiquo.commons.amqp.impl.datacenter.domain.DatacenterNotification;
 
-import com.abiquo.commons.amqp.config.DefaultConfiguration;
-import com.rabbitmq.client.Channel;
-
-public class AMConfiguration extends DefaultConfiguration
+public interface NotificationCallback
 {
-    public static final String AM_EXCHANGE = "abq.am";
-
-    public static final String AM_ROUTING_KEY = "abq.am.dowloads";
-
-    public static final String AM_QUEUE = AM_ROUTING_KEY;
-
-    @Override
-    public void declareBrokerConfiguration(Channel channel) throws IOException
-    {
-        channel.exchangeDeclare(AM_EXCHANGE, DirectExchange, Durable);
-
-        channel.queueDeclare(AM_QUEUE, Durable, NonExclusive, NonAutodelete, null);
-        channel.queueBind(AM_QUEUE, AM_EXCHANGE, AM_ROUTING_KEY);
-    }
+    public void onMessage(DatacenterNotification notification);
 }

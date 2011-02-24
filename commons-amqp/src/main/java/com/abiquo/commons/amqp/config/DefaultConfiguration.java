@@ -27,8 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
 
 /**
  * Generic broker configuration, each module configuration must extend this class and fill the
@@ -41,22 +39,7 @@ public abstract class DefaultConfiguration
     /** Logger **/
     private final static Logger logger = LoggerFactory.getLogger(DefaultConfiguration.class);
 
-    /** Properties constants **/
-
-    protected final String PropertiesFilename = "rabbitmq.properties";
-
-    protected final String HostProperty = "rabbitmq.host";
-
-    protected final String PortProperty = "rabbitmq.port";
-
-    protected final String UsernameProperty = "rabbitmq.username";
-
-    protected final String PasswordProperty = "rabbitmq.password";
-
-    protected final String VirtualHostProperty = "rabbitmq.virtualhost";
-
     /** Constants **/
-
     protected final String FanoutExchange = "fanout";
 
     protected final String DirectExchange = "direct";
@@ -75,69 +58,36 @@ public abstract class DefaultConfiguration
 
     protected final boolean NonAutodelete = false;
 
-    /** Class fields **/
-
-    private ConnectionFactory factory = null;
-
-    private Connection connection = null;
-
     public abstract void declareBrokerConfiguration(Channel channel) throws IOException;
+
+    public static String getHost()
+    {
+        return System.getProperty("abiquo.rabbitmq.host", "localhost");
+    }
+
+    public static int getPort()
+    {
+        return Integer.parseInt(System.getProperty("abiquo.rabbitmq.port", "5672"));
+    }
+
+    public static String getUserName()
+    {
+        return System.getProperty("abiquo.rabbitmq.username", "guest");
+    }
+
+    public static String getPassword()
+    {
+        return System.getProperty("abiquo.rabbitmq.password", "guest");
+    }
+
+    public static String getVirtualHost()
+    {
+        return System.getProperty("abiquo.rabbitmq.virtualHost", "/");
+    }
 
     protected DefaultConfiguration()
     {
-        String host = getProperty("abiquo.rabbitmq.host", "localhost");
-        int port = Integer.parseInt(getProperty("abiquo.rabbitmq.port", "5672"));
-        String username = getProperty("abiquo.rabbitmq.username", "guest");
-        String password = getProperty("abiquo.rabbitmq.password", "guest");
-
-        logger.info(String.format("RabbitMQ configuration. Host: %s, port: %d, username: %s", host,
-            port, username));
-
-        factory = new ConnectionFactory();
-
-        factory.setHost(host);
-        factory.setPort(port);
-        factory.setUsername(username);
-        factory.setPassword(password);
-        factory.setVirtualHost("/");
-
-        connection = null;
-    }
-
-    private String getProperty(String name, String defaultValue)
-    {
-        String value = System.getProperty(name);
-        return value == null ? defaultValue : value;
-    }
-
-    public String getRabbitMQHost()
-    {
-        return factory.getHost();
-    }
-
-    public int getRabbitMQPort()
-    {
-        return factory.getPort();
-    }
-
-    public Channel createChannel() throws IOException
-    {
-        if (connection == null)
-        {
-            connection = factory.newConnection();
-        }
-
-        return connection.createChannel();
-    }
-
-    public Channel closeChannel(Channel channel) throws IOException
-    {
-        // TODO Close connection when the last channel alive is closed.
-        if (channel != null && channel.isOpen())
-        {
-            channel.close();
-        }
-
-        return channel;
+        logger.info(String.format("RabbitMQ configuration. Host: %s, port: %d, username: %s",
+            getHost(), getPort(), getUserName()));
     }
 }

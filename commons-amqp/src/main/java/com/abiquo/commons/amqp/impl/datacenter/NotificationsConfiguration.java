@@ -19,32 +19,27 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.commons.amqp.impl.vsm;
+package com.abiquo.commons.amqp.impl.datacenter;
 
 import java.io.IOException;
 
 import com.abiquo.commons.amqp.config.DefaultConfiguration;
 import com.rabbitmq.client.Channel;
 
-/**
- * Common RabbitMQ Broker configuration for VSM consumer and producer.
- * 
- * @author eruiz@abiquo.com
- */
-public class VSMConfiguration extends DefaultConfiguration
+public class NotificationsConfiguration extends DefaultConfiguration
 {
-    public static final String VSM_EXCHANGE = "abq.vsm";
+    public static final String NOTIFICATIONS_EXCHANGE = "abiquo.notifications.direct";
 
-    public static final String EVENT_SYNK_QUEUE = "abq.event_synk";
+    public static final String NOTIFICATIONS_ROUTING_KEY = "abiquo.notifications";
 
-    public static final String VSM_ROUTING_KEY = "";
+    public static final String NOTIFICATIONS_QUEUE = NOTIFICATIONS_ROUTING_KEY;
 
     @Override
     public void declareBrokerConfiguration(Channel channel) throws IOException
     {
-        channel.exchangeDeclare(VSM_EXCHANGE, FanoutExchange, Durable);
+        channel.exchangeDeclare(NOTIFICATIONS_EXCHANGE, DirectExchange, Durable);
 
-        channel.queueDeclare(EVENT_SYNK_QUEUE, Durable, NonExclusive, NonAutodelete, null);
-        channel.queueBind(EVENT_SYNK_QUEUE, VSM_EXCHANGE, VSM_ROUTING_KEY);
+        channel.queueDeclare(NOTIFICATIONS_QUEUE, Durable, NonExclusive, NonAutodelete, null);
+        channel.queueBind(NOTIFICATIONS_QUEUE, NOTIFICATIONS_EXCHANGE, NOTIFICATIONS_ROUTING_KEY);
     }
 }

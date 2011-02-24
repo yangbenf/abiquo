@@ -28,11 +28,13 @@ import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.util.ExtendedAppUtil;
 import com.abiquo.util.ServiceUtil;
 import com.abiquo.virtualfactory.constants.MessageValues;
 import com.abiquo.virtualfactory.exception.HypervisorException;
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
+import com.abiquo.virtualfactory.hypervisor.Hypervisor;
 import com.abiquo.virtualfactory.machine.impl.VmwareMachine;
 import com.abiquo.virtualfactory.machine.impl.VmwareMachineUtils;
 import com.abiquo.virtualfactory.model.AbiCloudModel;
@@ -57,6 +59,7 @@ import com.vmware.vim25.mo.HostSystem;
 import com.vmware.vim25.mo.ServiceInstance;
 import com.vmware.vim25.mo.util.OptionSpec;
 
+@Hypervisor(type = HypervisorType.VMX_04)
 public class VmwareHypervisor implements IHypervisor
 {
 

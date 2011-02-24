@@ -32,6 +32,39 @@
 			<version>${version}</version>
 		</dependency>
 		<dependency>
+            <groupId>com.abiquo</groupId>
+            <artifactId>model</artifactId>
+            <classifier>transport</classifier>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.softwarementors.bzngine</groupId>
+                    <artifactId>bzngine</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.hibernate</groupId>
+                    <artifactId>hibernate-entitymanager</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.hibernate</groupId>
+                    <artifactId>hibernate-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.hibernate</groupId>
+                    <artifactId>hibernate-annotations</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.hibernate</groupId>
+                    <artifactId>hibernate-validator</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+		<dependency>
+		  <groupId>com.abiquo</groupId>
+		  <artifactId>commons-amqp</artifactId>
+		  <version>${version}</version>
+		</dependency>
+		<dependency>
 			<groupId>com.abiquo.abicloud</groupId>
 			<artifactId>tracer</artifactId>
 			<version>${pom.version}</version>
@@ -214,6 +247,19 @@
 			<version>4.6</version>
 			<scope>test</scope>
 		</dependency>
+		
+		<!-- akka -->
+		<dependency>
+            <groupId>se.scalablesolutions.akka</groupId>
+            <artifactId>akka-actor</artifactId>
+            <version>1.0</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>se.scalablesolutions.akka</groupId>
+            <artifactId>akka-amqp</artifactId>
+            <version>1.0</version>
+        </dependency>
 	</dependencies>
 
 	<!--                                      -->
@@ -273,21 +319,19 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<excludes>
-						<exclude>**/*Test.java
-                                </exclude>
-					</excludes>
+				    <excludes>
+						<exclude>**/machine/**/*Test.java</exclude>
+						<exclude>**/model/**/*Test.java</exclude>
+						<exclude>**/rimpstub/**/*Test.java</exclude>
+					</excludes>													
 				</configuration>
 			</plugin>
 		</plugins>
-		<filters>
-			<filter>../system-properties/src/main/filters/${env}-${env.family}.properties</filter>
-		</filters>
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
-			</resource>
+			</resource>			
 		</resources>
 	</build>
 </project>

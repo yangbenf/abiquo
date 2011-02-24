@@ -23,6 +23,10 @@ package com.abiquo.virtualfactory.hypervisor.impl;
 
 import java.net.URL;
 
+import com.abiquo.server.core.enumerator.HypervisorType;
+import com.abiquo.virtualfactory.hypervisor.Hypervisor;
+
+@Hypervisor(type = HypervisorType.KVM)
 public class KVMHypervisor extends AbsLibvirtHypervisor
 {
 
