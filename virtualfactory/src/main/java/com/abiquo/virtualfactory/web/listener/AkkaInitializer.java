@@ -43,7 +43,6 @@ import com.abiquo.virtualfactory.akka.QueueWorker;
 
 public class AkkaInitializer implements ServletContextListener
 {
-
     private ActorRef consumer;
 
     @Override
@@ -88,6 +87,7 @@ public class AkkaInitializer implements ServletContextListener
                 worker,
                 getJobsQueue(datacenterId),
                 exchangeParameters);
+
         consumer = AMQP.newConsumer(connection, consumerParameters);
     }
 }
