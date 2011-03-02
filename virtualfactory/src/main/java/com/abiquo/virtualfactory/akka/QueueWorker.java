@@ -24,13 +24,19 @@ package com.abiquo.virtualfactory.akka;
 import akka.actor.UntypedActor;
 import akka.amqp.Delivery;
 
-public class QueueWorker extends UntypedActor {
-
-	@Override
-	public void onReceive(Object message) throws Exception {
-		if (Delivery.class.isAssignableFrom(message.getClass())) {
+public class QueueWorker extends UntypedActor
+{
+    @Override
+    public void onReceive(Object message) throws Exception
+    {
+        if (Delivery.class.isAssignableFrom(message.getClass()))
+        {
             Delivery delivery = (Delivery) message;
-//            System.out.println("### >> Message received: " + new String(delivery.payload()));
-        } else throw new IllegalArgumentException("Unknown message: " + message);
-	}
+            // System.out.println("### >> Message received: " + new String(delivery.payload()));
+        }
+        else
+        {
+            throw new IllegalArgumentException("Unknown message: " + message);
+        }
+    }
 }

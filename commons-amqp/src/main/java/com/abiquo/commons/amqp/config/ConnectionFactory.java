@@ -19,39 +19,51 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.commons.amqp.impl.bpm;
+package com.abiquo.commons.amqp.config;
 
 import java.io.IOException;
 
-import com.abiquo.commons.amqp.config.DefaultConfiguration;
 import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
 
-public class BPMConfiguration extends DefaultConfiguration
+public class ConnectionFactory
 {
-    protected static String BPM_EXCHANGE = "abq.bpm";
+    private static ConnectionFactory singleton = null;
 
-    protected static String BPM_ROUTING_KEY = "abq.bpm.jobs";
+    private com.rabbitmq.client.ConnectionFactory factory;
 
-    protected static String BPM_QUEUE = BPM_ROUTING_KEY;
+    private Connection connection;
 
-    private static BPMConfiguration singleton = null;
-
-    public static BPMConfiguration getInstance()
+    public static ConnectionFactory getInstance()
     {
         if (singleton == null)
         {
-            singleton = new BPMConfiguration();
+            singleton = new ConnectionFactory();
         }
 
         return singleton;
     }
 
-    @Override
-    public void declareBrokerConfiguration(Channel channel) throws IOException
+    private ConnectionFactory()
     {
-        channel.exchangeDeclare(BPM_EXCHANGE, DirectExchange, Durable);
+        factory = new com.rabbitmq.client.ConnectionFactory();
 
-        channel.queueDeclare(BPM_QUEUE, Durable, NonExclusive, NonAutodelete, null);
-        channel.queueBind(BPM_QUEUE, BPM_EXCHANGE, BPM_ROUTING_KEY);
+        factory.setHost(DefaultConfiguration.getHost());
+        factory.setPort(DefaultConfiguration.getPort());
+        factory.setUsername(DefaultConfiguration.getUserName());
+        factory.setPassword(DefaultConfiguration.getPassword());
+        factory.setVirtualHost(DefaultConfiguration.getVirtualHost());
+
+        connection = null;
+    }
+
+    public Channel createChannel() throws IOException
+    {
+        if (connection == null)
+        {
+            connection = factory.newConnection();
+        }
+
+        return connection.createChannel();
     }
 }

@@ -30,17 +30,11 @@ import com.abiquo.commons.amqp.consumer.BasicConsumer;
 import com.abiquo.commons.amqp.impl.vsm.domain.VirtualSystemEvent;
 import com.rabbitmq.client.Envelope;
 
-public class VSMConsumer extends BasicConsumer<VSMConfiguration, VSMCallback>
+public class VSMConsumer extends BasicConsumer<VSMCallback>
 {
     public VSMConsumer(String queue)
     {
-        super(queue);
-    }
-
-    @Override
-    public VSMConfiguration configurationInstance()
-    {
-        return VSMConfiguration.getInstance();
+        super(new VSMConfiguration(), queue);
     }
 
     @Override

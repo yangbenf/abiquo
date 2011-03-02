@@ -25,24 +25,16 @@ import java.io.IOException;
 
 import com.abiquo.commons.amqp.domain.QueuableString;
 import com.abiquo.commons.amqp.producer.BasicProducer;
-import com.rabbitmq.client.ShutdownSignalException;
 
-public class PingProducer extends BasicProducer<PingConfiguration, QueuableString>
+public class PingProducer extends BasicProducer<QueuableString>
 {
-    @Override
-    public PingConfiguration configurationInstance()
+    public PingProducer()
     {
-        return PingConfiguration.getInstance();
+        super(new PingConfiguration());
     }
 
     @Override
     public void publish(QueuableString message) throws IOException
-    {
-        // Intentionally empty
-    }
-
-    @Override
-    public void shutdownCompleted(ShutdownSignalException cause)
     {
         // Intentionally empty
     }

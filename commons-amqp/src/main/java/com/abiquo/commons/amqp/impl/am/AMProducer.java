@@ -30,12 +30,11 @@ import java.io.IOException;
 import com.abiquo.commons.amqp.impl.am.domain.OVFPackageInstanceStatusEvent;
 import com.abiquo.commons.amqp.producer.BasicProducer;
 
-public class AMProducer extends BasicProducer<AMConfiguration, OVFPackageInstanceStatusEvent>
+public class AMProducer extends BasicProducer<OVFPackageInstanceStatusEvent>
 {
-    @Override
-    public AMConfiguration configurationInstance()
+    public AMProducer()
     {
-        return AMConfiguration.getInstance();
+        super(new AMConfiguration());
     }
 
     @Override

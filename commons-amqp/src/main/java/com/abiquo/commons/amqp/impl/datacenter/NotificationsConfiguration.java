@@ -19,37 +19,27 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.commons.amqp.impl.bpm;
-
-import static com.abiquo.commons.amqp.impl.bpm.BPMConfiguration.BPM_QUEUE;
-import static com.abiquo.commons.amqp.util.ConsumerUtils.ackMessage;
+package com.abiquo.commons.amqp.impl.datacenter;
 
 import java.io.IOException;
 
-import com.abiquo.commons.amqp.consumer.BasicConsumer;
-import com.rabbitmq.client.Envelope;
+import com.abiquo.commons.amqp.config.DefaultConfiguration;
+import com.rabbitmq.client.Channel;
 
-public class BPMConsumer extends BasicConsumer<BPMConfiguration, BPMCallback>
+public class NotificationsConfiguration extends DefaultConfiguration
 {
-    public BPMConsumer()
-    {
-        super(BPM_QUEUE);
-    }
+    public static final String NOTIFICATIONS_EXCHANGE = "abiquo.notifications.direct";
+
+    public static final String NOTIFICATIONS_ROUTING_KEY = "abiquo.notifications";
+
+    public static final String NOTIFICATIONS_QUEUE = NOTIFICATIONS_ROUTING_KEY;
 
     @Override
-    public BPMConfiguration configurationInstance()
+    public void declareBrokerConfiguration(Channel channel) throws IOException
     {
-        return BPMConfiguration.getInstance();
-    }
+        channel.exchangeDeclare(NOTIFICATIONS_EXCHANGE, DirectExchange, Durable);
 
-    @Override
-    public void consume(Envelope envelope, byte[] body) throws IOException
-    {
-        for (BPMCallback callback : callbacks)
-        {
-            callback.onMessage(new String(body));
-        }
-
-        ackMessage(channel, envelope.getDeliveryTag());
+        channel.queueDeclare(NOTIFICATIONS_QUEUE, Durable, NonExclusive, NonAutodelete, null);
+        channel.queueBind(NOTIFICATIONS_QUEUE, NOTIFICATIONS_EXCHANGE, NOTIFICATIONS_ROUTING_KEY);
     }
 }

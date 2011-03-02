@@ -21,7 +21,7 @@
 
 package com.abiquo.commons.amqp.impl.datacenter;
 
-import static com.abiquo.commons.amqp.impl.datacenter.DatacenterConfiguration.getNotificationsQueue;
+import static com.abiquo.commons.amqp.impl.datacenter.NotificationsConfiguration.NOTIFICATIONS_QUEUE;
 import static com.abiquo.commons.amqp.util.ConsumerUtils.ackMessage;
 import static com.abiquo.commons.amqp.util.ConsumerUtils.rejectMessage;
 
@@ -31,18 +31,11 @@ import com.abiquo.commons.amqp.consumer.BasicConsumer;
 import com.abiquo.commons.amqp.impl.datacenter.domain.DatacenterNotification;
 import com.rabbitmq.client.Envelope;
 
-public class NotificationsConsumer extends
-    BasicConsumer<DatacenterConfiguration, NotificationCallback>
+public class NotificationsConsumer extends BasicConsumer<NotificationCallback>
 {
     public NotificationsConsumer()
     {
-        super(getNotificationsQueue());
-    }
-
-    @Override
-    public DatacenterConfiguration configurationInstance()
-    {
-        return DatacenterConfiguration.getInstance();
+        super(new NotificationsConfiguration(), NOTIFICATIONS_QUEUE);
     }
 
     @Override

@@ -30,18 +30,20 @@ import java.io.IOException;
 import com.abiquo.commons.amqp.impl.datacenter.domain.DatacenterJob;
 import com.abiquo.commons.amqp.producer.BasicProducer;
 
-public class JobsProducer extends BasicProducer<DatacenterConfiguration, DatacenterJob>
+public class JobsProducer extends BasicProducer<DatacenterJob>
 {
-    @Override
-    public DatacenterConfiguration configurationInstance()
+    private String datacenterId;
+
+    public JobsProducer(final String datacenterId)
     {
-        return DatacenterConfiguration.getInstance();
+        super(new DatacenterConfiguration(datacenterId));
+        this.datacenterId = datacenterId;
     }
 
     @Override
     public void publish(DatacenterJob message) throws IOException
     {
-        publishPersistentText(channel, getDatacenterDirectExchange(), getJobsRoutingKey(), message
-            .toByteArray());
+        publishPersistentText(channel, getDatacenterDirectExchange(),
+            getJobsRoutingKey(datacenterId), message.toByteArray());
     }
 }

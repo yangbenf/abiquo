@@ -19,9 +19,24 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.commons.amqp.impl.bpm;
+package com.abiquo.tarantino.actors;
 
-public interface BPMCallback
+import akka.actor.UntypedActor;
+import akka.amqp.Delivery;
+
+public class Thurman extends UntypedActor
 {
-    public void onMessage(String message);
+    @Override
+    public void onReceive(Object message) throws Exception
+    {
+        if (Delivery.class.isAssignableFrom(message.getClass()))
+        {
+            Delivery delivery = (Delivery) message;
+            // System.out.println("### >> Message received: " + new String(delivery.payload()));
+        }
+        else
+        {
+            throw new IllegalArgumentException("Unknown message: " + message);
+        }
+    }
 }
