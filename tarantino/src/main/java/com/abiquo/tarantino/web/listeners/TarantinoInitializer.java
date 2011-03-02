@@ -37,6 +37,7 @@ import akka.actor.ActorRef;
 import akka.actor.Actors;
 import akka.amqp.AMQP;
 import akka.amqp.Direct;
+import akka.amqp.AMQP.ActiveDeclaration;
 import akka.dispatch.Dispatchers;
 
 import com.abiquo.tarantino.actors.Thurman;
@@ -82,14 +83,22 @@ public class TarantinoInitializer implements ServletContextListener
                 getVirtualHost());
 
         AMQP.ExchangeParameters exchangeParameters =
-            new AMQP.ExchangeParameters(getDatacenterDirectExchange(), Direct.getInstance());
+            new AMQP.ExchangeParameters(getDatacenterDirectExchange(),
+                Direct.getInstance(),
+                new ActiveDeclaration(true, false));
 
         AMQP.ConsumerParameters consumerParameters =
             new AMQP.ConsumerParameters(getJobsRoutingKey(datacenterId),
                 worker,
                 getJobsQueue(datacenterId),
-                exchangeParameters);
+                exchangeParameters,
+                new ActiveDeclaration(true, false));
 
+        // AMQP.ConsumerParameters consumerParameters =
+        // new AMQP.ConsumerParameters(getJobsRoutingKey(datacenterId),
+        // worker,
+        // getJobsQueue(datacenterId),
+        // exchangeParameters);
         ActorRef connection = AMQP.newConnection(connectionParameters);
         consumer = AMQP.newConsumer(connection, consumerParameters);
     }

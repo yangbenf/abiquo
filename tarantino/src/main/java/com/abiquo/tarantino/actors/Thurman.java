@@ -32,7 +32,7 @@ public class Thurman extends UntypedActor
         if (Delivery.class.isAssignableFrom(message.getClass()))
         {
             Delivery delivery = (Delivery) message;
-            // System.out.println("### >> Message received: " + new String(delivery.payload()));
+            System.out.println("### >> Message received: " + new String(delivery.payload()));
         }
         else
         {
