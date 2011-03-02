@@ -19,20 +19,27 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.tarantino.hypervisor;
+package com.abiquo.commons.amqp.impl.datacenter.domain.jobs.builder;
 
 import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.HypervisorConnection;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachine;
-import com.abiquo.tarantino.virtualmachine.IVirtualMachine;
 
-public interface IHypervisor
+public class VirtualFactoryJobBuilder
 {
-    /**
-     * Check the connection with the hypervisor (or start) and check the loggin.
-     */
-    public void connectAndLogin(HypervisorConnection connection);
 
-    public IVirtualMachine createMachine(VirtualMachine vmachine);
-    
-    public IVirtualMachine getMachine(String vmachineId);
+    protected HypervisorConnection connection;
+
+    public VirtualFactoryJobBuilder connection(String hypervisorID, String hypervisortype,
+        String ip, String port, String protocol, String loginUser, String loginPasswoed)
+    {
+        connection = new HypervisorConnection();
+        connection.setHypervisorID(hypervisorID);
+        connection.setHypervisortype(hypervisortype);
+        connection.setIp(ip);
+        connection.setPort(port);
+        connection.setLoginUser(loginUser);
+        connection.setLoginPassword(loginPasswoed);
+
+        return this;
+    }
+
 }

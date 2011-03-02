@@ -19,20 +19,39 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.tarantino.hypervisor;
+package com.abiquo.commons.amqp.impl.datacenter.domain.jobs;
 
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.HypervisorConnection;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachine;
-import com.abiquo.tarantino.virtualmachine.IVirtualMachine;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlType;
 
-public interface IHypervisor
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "AuxDisk")
+public class AuxDisk extends DiskStatefull
 {
-    /**
-     * Check the connection with the hypervisor (or start) and check the loggin.
-     */
-    public void connectAndLogin(HypervisorConnection connection);
 
-    public IVirtualMachine createMachine(VirtualMachine vmachine);
-    
-    public IVirtualMachine getMachine(String vmachineId);
+    @XmlAttribute(namespace = "http://abiquo.com/tarantino/model/jobs")
+    protected Integer sequence;
+
+    /**
+     * Gets the value of the sequence property.
+     * 
+     * @return possible object is {@link Integer }
+     */
+    public Integer getSequence()
+    {
+        return sequence;
+    }
+
+    /**
+     * Sets the value of the sequence property.
+     * 
+     * @param value allowed object is {@link Integer }
+     */
+    public void setSequence(Integer value)
+    {
+        this.sequence = value;
+    }
+
 }

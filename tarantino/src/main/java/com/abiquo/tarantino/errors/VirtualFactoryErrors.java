@@ -1,40 +1,62 @@
+/**
+ * Abiquo community edition
+ * cloud management application for hybrid clouds
+ * Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+ *
+ * This application is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU LESSER GENERAL PUBLIC
+ * LICENSE as published by the Free Software Foundation under
+ * version 3 of the License
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ */
+
 package com.abiquo.tarantino.errors;
 
+
+/***
+ * TODO
+ */
 public enum VirtualFactoryErrors
 {
 
-    /***
-     * TODO
+
+    HYPERVISOR_CONNECTION("HYP-00", "Invalid hypervisor (ip, port or protocol) location."),
+
+    ;
+
+    /**
+     * Internal error code
      */
+    String code;
 
-   HYPERVISOR_CONNECTION("# Invalid hypervisor (ip, port or protocol) location.");
-   
-   
-   
-   /**
-    * Internal error code
-    */
-   String code;
+    /**
+     * Description message
+     */
+    String message;
 
-   /**
-    * Description message
-    */
-   String message;
+    public String getCode()
+    {
+        return String.valueOf(this.code);
+    }
 
-   public String getCode()
-   {
-       return String.valueOf(this.code);
-   }
+    public String getMessage()
+    {
+        return this.message;
+    }
 
-   public String getMessage()
-   {
-       return this.message;
-   }
-
-   VirtualFactoryErrors(String code, String message)
-   {
-       this.code = code;
-       this.message = message;
-   }
+    VirtualFactoryErrors(String code, String message)
+    {
+        this.code = code;
+        this.message = message;
+    }
 
 }
