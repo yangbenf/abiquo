@@ -37,12 +37,19 @@ import akka.actor.ActorRef;
 import akka.actor.Actors;
 import akka.amqp.AMQP;
 import akka.amqp.Direct;
+import akka.amqp.AMQP.ActiveDeclaration;
 import akka.dispatch.Dispatchers;
 
 import com.abiquo.tarantino.actors.Thurman;
 
 public class TarantinoInitializer implements ServletContextListener
 {
+    private final String MIN_WORKERS = "abiquo.virtualfactory.min.workers";
+
+    private final String MAX_WORKERS = "abiquo.virtualfactory.max.workers";
+
+    private final String DATACENTER_ID = "abiquo.datacenter.id";
+
     private ActorRef consumer;
 
     @Override
@@ -57,15 +64,12 @@ public class TarantinoInitializer implements ServletContextListener
     @Override
     public void contextInitialized(ServletContextEvent sce)
     {
+        String datacenterId = System.getProperty(DATACENTER_ID);
+
+        int initPoolSize = Integer.parseInt(System.getProperty(MIN_WORKERS, "1"));
+        int maxPoolSize = Integer.parseInt(System.getProperty(MAX_WORKERS, "1"));
+
         ActorRef worker = Actors.actorOf(Thurman.class);
-
-        int initPoolSize =
-            Integer.parseInt(System.getProperty("abiquo.virtualfactory.min.workers", "1"));
-        int maxPoolSize =
-            Integer.parseInt(System.getProperty("abiquo.virtualfactory.max.workers", "1"));
-
-        // TODO check NULL property value
-        String datacenterId = System.getProperty("abiquo.datacenter.id");
 
         worker.setDispatcher(Dispatchers
             .newExecutorBasedEventDrivenDispatcher("workers dispatcher").setCorePoolSize(
@@ -77,17 +81,25 @@ public class TarantinoInitializer implements ServletContextListener
                 getUserName(),
                 getPassword(),
                 getVirtualHost());
-        ActorRef connection = AMQP.newConnection(connectionParameters);
 
         AMQP.ExchangeParameters exchangeParameters =
-            new AMQP.ExchangeParameters(getDatacenterDirectExchange(), Direct.getInstance());
+            new AMQP.ExchangeParameters(getDatacenterDirectExchange(),
+                Direct.getInstance(),
+                new ActiveDeclaration(true, false));
 
         AMQP.ConsumerParameters consumerParameters =
             new AMQP.ConsumerParameters(getJobsRoutingKey(datacenterId),
                 worker,
                 getJobsQueue(datacenterId),
-                exchangeParameters);
+                exchangeParameters,
+                new ActiveDeclaration(true, false));
 
+        // AMQP.ConsumerParameters consumerParameters =
+        // new AMQP.ConsumerParameters(getJobsRoutingKey(datacenterId),
+        // worker,
+        // getJobsQueue(datacenterId),
+        // exchangeParameters);
+        ActorRef connection = AMQP.newConnection(connectionParameters);
         consumer = AMQP.newConsumer(connection, consumerParameters);
     }
 }
