@@ -18,7 +18,7 @@
 
     <properties>
         <resource.uri>http://schemas.dmtf.org/ovf/envelope/1/</resource.uri>
-        <commons-amqp.version>1.7.5-SNAPSHOT</commons-amqp.version>
+        <commons-amqp.version>1.8.0-SNAPSHOT</commons-amqp.version>
     </properties>
 
     <dependencies>
