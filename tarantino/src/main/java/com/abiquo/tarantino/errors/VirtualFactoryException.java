@@ -30,4 +30,11 @@ public class VirtualFactoryException extends Exception
         super(error.getMessage());
     }
 
+    
+    public VirtualFactoryException(VirtualFactoryErrors error, String detail)
+    {
+        super(error.getMessage()+"\n"+ detail);
+    }
+
+    
 }

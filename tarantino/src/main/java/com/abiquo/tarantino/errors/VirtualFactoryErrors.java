@@ -21,16 +21,43 @@
 
 package com.abiquo.tarantino.errors;
 
+import com.abiquo.tarantino.plugins.esxi.utils.VirtualMachineException;
+
 
 /***
  * TODO
  */
 public enum VirtualFactoryErrors
 {
+    
+    NETWORK_DECONFIGURE("afsd","Can not deconfigure the network resources of virtual machine"),
+    
+    EXECUTING_ACTION("afasdf","asdfasd"),
+    
+    NETWORK_VSWITCH_PORT("adfa", "The port group attached to the virtual switch doesn't match the expected virtual switch"),
+
+    NETWORK_VSWITCH_NOT_FOUND("asdfas", "The Virtual Switch couln't be found in the hypervisor. The virtual machine networking resources can't be configured"),
+    
+    
+    
+    NETWORK_CONFIGURATION("ASDASDF","can not configure the virtual nic"),
+    DATASTORE_NOT_FOUND("AASDFD","ASDFASDF"),
+    DATASTORE_NOT_ACCESSIBLE("ASDFA","Specified Datastore is not accessible"),
+   NETWORK_NOT_FOUND("af","can not obtain the target network"),
+    
+    HYPERVISOR_LICENSE("hyp-00", "The hypervisor licese version is not compatible with abiquo."),
 
 
-    HYPERVISOR_CONNECTION("HYP-00", "Invalid hypervisor (ip, port or protocol) location."),
+    HYPERVISOR_CONNECTION("HYP-01", "Invalid hypervisor (ip, port or protocol) location."),
 
+    
+    REPOSITORY_CONFIGURATION("la la ", "Can not configure the repository datastore"),
+    
+    //
+    
+    VIRTUAL_MACHINE_NOT_FOUND("la la", "Virtual Machine not found on the hypervisor"),
+    
+    VIRTUAL_MACHINE_RETRIEVE_ERROR("la la", "Can't obtain the virtual machine");
     ;
 
     /**

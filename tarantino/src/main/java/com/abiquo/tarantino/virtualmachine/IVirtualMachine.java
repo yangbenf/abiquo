@@ -39,9 +39,9 @@ public interface IVirtualMachine
 
     // TODO powerObn ----
     void deploy(); // state
+    
     void delete(); // state
     
-
     public void reconfigure(VirtualMachine vmachine); // lo que deixem cambiar
 
     public boolean exist();
