@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.tarantino.plugins.esxi;
+package com.abiquo.tarantino.plugins.esxi.utils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -30,7 +30,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.abiquo.tarantino.plugins.esxi.utils.VmwareMachineUtils;
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
 import com.abiquo.virtualfactory.model.VirtualDisk;
 import com.abiquo.virtualfactory.model.VirtualDiskType;
@@ -66,45 +65,37 @@ public class VmwareMachineDisk
     /** Constant logger object. */
     private final static Logger logger = LoggerFactory.getLogger(VmwareMachineDisk.class);
 
-    /** Utilities to manage the main SDK API. */
-    protected final VmwareMachineUtils utils;
+//    /** Utilities to manage the main SDK API. */
+//    protected final VmwareMachineBasics utils;
+//
+//    /** VM configuration (from VmwareMachien). */
+//    protected VirtualMachineConfiguration vmConfig;
+//
+//    /** Hypervisor configuration (from VmwareMachien). */
+//    protected final VmwareHypervisorConfiguration vmwareConfig;
+//
+//    /** Current machine name. */
+//    protected final String machineName;
 
-    /** VM configuration (from VmwareMachien). */
-    protected VirtualMachineConfiguration vmConfig;
-
-    /** Hypervisor configuration (from VmwareMachien). */
-    protected final VmwareHypervisorConfiguration vmwareConfig;
-
-    /** Current machine name. */
-    protected final String machineName;
-
+    private EsxiUtils utils;
+    
+    
     /**
      * Default constructor with the configuration from the VmwareMachine
      */
-    public VmwareMachineDisk(VmwareMachineUtils utils, VirtualMachineConfiguration vmConfig,
-        VmwareHypervisorConfiguration vmwareConfig)
+    public VmwareMachineDisk(EsxiUtils utils)
+//    , VirtualMachineConfiguration vmConfig,
+//        VmwareHypervisorConfiguration vmwareConfig)
     {
         this.utils = utils;
-        this.vmConfig = vmConfig;
-        this.vmwareConfig = vmwareConfig;
+        
+//        this.vmConfig = vmConfig;
+//        this.vmwareConfig = vmwareConfig;
 
-        // The 4 last characters of the machine name are erased because are omitted by the ESXi
-        // machine name in ESXi only has 32 chars.
-        if (vmConfig.getMachineName().length() > 32)
-        {
-            machineName = vmConfig.getMachineName().substring(0, 32);
-        }
-        else
-        {
-            machineName = vmConfig.getMachineName();
-        }
     }
 
-    public void setVMConfig(VirtualMachineConfiguration vmConfig)
-    {
-        this.vmConfig = vmConfig;
-    }
 
+    
     /**
      * Gets the virtual disk path form the codified "[repository]diskPath" from the source datastore
      * (SAN) on configuration (on the OVF disk location)

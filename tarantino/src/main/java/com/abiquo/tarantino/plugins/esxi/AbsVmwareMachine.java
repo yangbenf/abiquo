@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.tarantino.plugins.esxi.utils.EsxiUtils;
-import com.abiquo.tarantino.plugins.esxi.utils.VmwareMachineUtils;
+import com.abiquo.tarantino.plugins.esxi.utils.VmwareMachineBasics;
 import com.abiquo.tarantino.virtualmachine.IVirtualMachine;
 import com.abiquo.util.ExtendedAppUtil;
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
@@ -393,8 +393,6 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
         return getStateInHypervisor().compareTo(stateToCheck) == 0;
     }
 
-    
-    
     @Override
     public void bundleVirtualMachine(final String sourcePath, final String destinationPath,
         final String snapshotName, final boolean isManaged) throws VirtualMachineException
@@ -409,7 +407,6 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
         {
             utils.logout();
         }
-
     }
 
     // /**
@@ -447,5 +444,19 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
     // throw new VirtualMachineException("Can not destroy the VM " + vmName, e);
     // }
     // }
+
+    private String getMachineName(String machineName)
+    {
+        // The 4 last characters of the machine name are erased because are omitted by the ESXi
+        // machine name in ESXi only has 32 chars.
+        if (machineName.length() > 32)
+        {
+            return machineName.substring(0, 32);
+        }
+        else
+        {
+            return machineName;
+        }
+    }
 
 }

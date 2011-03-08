@@ -38,7 +38,7 @@ import com.abiquo.tarantino.errors.VirtualFactoryErrors;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
 import com.abiquo.tarantino.hypervisor.IHypervisor;
 import com.abiquo.tarantino.plugins.esxi.utils.EsxiUtils;
-import com.abiquo.tarantino.plugins.esxi.utils.VmwareMachineUtils;
+import com.abiquo.tarantino.plugins.esxi.utils.VmwareMachineBasics;
 import com.abiquo.tarantino.virtualmachine.IVirtualMachine;
 import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.mo.ServiceInstance;
@@ -56,9 +56,9 @@ public class VmwareHypervisor implements IHypervisor
      */
     private EsxiUtils esxi;
 
-    private VmwareMachineUtils utils;
+    private VmwareMachineBasics utils;
 
-    public VmwareMachineUtils getUtilsVm()
+    public VmwareMachineBasics getUtilsVm()
     {
         return utils;
     }
@@ -78,7 +78,7 @@ public class VmwareHypervisor implements IHypervisor
 
             esxi = createConnection(hconn);
 
-            utils = new VmwareMachineUtils(esxi);
+            utils = new VmwareMachineBasics(esxi);
 
             utils.checkLicense();
             String datasoreRepositoryName =
