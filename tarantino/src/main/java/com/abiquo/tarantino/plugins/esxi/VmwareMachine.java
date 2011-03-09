@@ -21,15 +21,23 @@
 
 package com.abiquo.tarantino.plugins.esxi;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.DiskStandard;
+import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.SnapshootVirtualMachine.SourceDisk;
+import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.State;
+import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachine;
+import com.abiquo.tarantino.errors.VirtualFactoryErrors;
+import com.abiquo.tarantino.errors.VirtualFactoryException;
 import com.abiquo.tarantino.plugins.esxi.utils.EsxiUtils;
-import com.abiquo.util.AddressingUtils;
-import com.abiquo.virtualfactory.exception.VirtualMachineException;
-import com.abiquo.virtualfactory.model.config.VirtualMachineConfiguration;
+import com.abiquo.tarantino.utils.AddressingUtils;
 import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.OptionValue;
+import com.vmware.vim25.VirtualDeviceConfigSpec;
 import com.vmware.vim25.VirtualMachineConfigSpec;
 
 /**
@@ -40,8 +48,12 @@ import com.vmware.vim25.VirtualMachineConfigSpec;
  */
 public class VmwareMachine extends AbsVmwareMachine
 {
-    /** The logger */
-    private static final Logger logger = LoggerFactory.getLogger(VmwareMachine.class);
+
+    public VmwareMachine(com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachine vmdef,
+        VmwareHypervisor hypervisor)
+    {
+        super(vmdef, hypervisor);
+    }
 
     /**
      * Used during creation sets the additional configuration into the VM.
@@ -52,30 +64,50 @@ public class VmwareMachine extends AbsVmwareMachine
      */
     @Override
     public VirtualMachineConfigSpec configureVM(ManagedObjectReference computerResMOR,
-        ManagedObjectReference hostMOR) throws VirtualMachineException
+        ManagedObjectReference hostMOR) throws VirtualFactoryException
     {
         VirtualMachineConfigSpec vmConfigSpec;
-
-        EsxiUtils vmUtils = new EsxiUtils(utils.getAppUtil());
-
-        String rdmIQN = null;
 
         try
         {
 
             // TODO #createVMConfigSpec defines not convenient default data, change this
+            final String vmName = vmdef.getMachineID();
+
+            // TODO check is a standard disk
+            // TODO use the datastore name instead of mount point
+            final String datastoreName =
+                vmdef.getPrimaryDisk().getDiskStandardConf().getDestinationDatastore();
+            final long diskSize =
+                Long.parseLong(vmdef.getPrimaryDisk().getDiskStandardConf().getDiskStandard()
+                    .getCapacity());
+
             vmConfigSpec =
-                vmUtils.createVmConfigSpec(machineName, config.getVirtualDiskBase()
-                    .getTargetDatastore(), config.getVirtualDiskBase().getCapacity(),
-                    computerResMOR, hostMOR, config.getVnicList(), rdmIQN, disks);
+                hypervisor
+                    .getUtils()
+                    .getUtilBasics()
+                    .createVmConfigSpec(vmName, datastoreName, diskSize, computerResMOR, hostMOR,
+                        null);
 
-            vmConfigSpec.setName(machineName);
+            List<VirtualDeviceConfigSpec> nicSpecList =
+                hypervisor.getUtils().getUtilNetwork()
+                    .configureNetworkInterfaces(vmdef.getNetworkConf().getVirtualNIC());
+            vmConfigSpec = addDeviceSpecs(vmConfigSpec, nicSpecList);
+
+            final long rammb = vmdef.getHardwareConf().getRamInMb();
+            final int cpu = vmdef.getHardwareConf().getVirtualCpu();
+
+            String guestId = hypervisor.getUtils().getSessionOption("guestosid");
+
+            vmConfigSpec.setName(vmdef.getMachineID());
             vmConfigSpec.setAnnotation("VirtualMachine Annotation");
-            vmConfigSpec.setMemoryMB(config.getMemoryRAM() / 1048576);
-            vmConfigSpec.setNumCPUs(config.getCpuNumber());
-            vmConfigSpec.setGuestId(utils.getOption("guestosid"));
+            vmConfigSpec.setMemoryMB(rammb);// config.getMemoryRAM() / 1048576);
+            vmConfigSpec.setNumCPUs(cpu);// config.getCpuNumber());
+            vmConfigSpec.setGuestId(guestId);
 
-            if (AddressingUtils.isValidPort(String.valueOf(config.getRdPort())))
+            final int rdport = vmdef.getNetworkConf().getRdPort();
+
+            if (AddressingUtils.isValidPort(String.valueOf(rdport)))
             {
                 OptionValue vncEnabled = new OptionValue();
                 vncEnabled.setKey("RemoteDisplay.vnc.enabled");
@@ -83,7 +115,7 @@ public class VmwareMachine extends AbsVmwareMachine
 
                 OptionValue vncPort = new OptionValue();
                 vncPort.setKey("RemoteDisplay.vnc.port");
-                vncPort.setValue(config.getRdPort());
+                vncPort.setValue(rdport);
 
                 OptionValue[] values = new OptionValue[] {vncEnabled, vncPort};
 
@@ -91,13 +123,80 @@ public class VmwareMachine extends AbsVmwareMachine
             }
 
         }
+        catch (VirtualFactoryException e)
+        {
+            throw e;
+        }
         catch (Exception e)
         {
-            final String msg = "Can not create the Virtual machine configuration specification";
-            throw new VirtualMachineException(msg, e);
+            throw new VirtualFactoryException(VirtualFactoryErrors.CONFIG, String.format(
+                "Virtual Machine : %s\nCaused by:%s", vmdef.getMachineID(), e.toString()));
         }
 
         return vmConfigSpec;
+    }
+
+    private VirtualMachineConfigSpec addDeviceSpecs(VirtualMachineConfigSpec vmConfigSpec,
+        List<VirtualDeviceConfigSpec> nicSpecList)
+    {
+        List<VirtualDeviceConfigSpec> allspecs = new LinkedList<VirtualDeviceConfigSpec>();
+        for (VirtualDeviceConfigSpec spec : vmConfigSpec.getDeviceChange())
+        {
+            allspecs.add(spec);
+        }
+        allspecs.addAll(nicSpecList);
+        vmConfigSpec.setDeviceChange(allspecs.toArray(new VirtualDeviceConfigSpec[] {}));
+
+        return vmConfigSpec;
+    }
+
+    @Override
+    public void applyState(State newState)
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void deploy()
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void delete()
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void reconfigure(VirtualMachine vmachine)
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public boolean exist()
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public void snapshoot(SourceDisk sourceDisk, DiskStandard destinationDisk)
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public VirtualMachine getVirtualMachine()
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

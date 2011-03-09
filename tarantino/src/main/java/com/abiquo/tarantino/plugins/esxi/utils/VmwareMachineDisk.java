@@ -21,28 +21,16 @@
 
 package com.abiquo.tarantino.plugins.esxi.utils;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.abiquo.virtualfactory.exception.VirtualMachineException;
-import com.abiquo.virtualfactory.model.VirtualDisk;
-import com.abiquo.virtualfactory.model.VirtualDiskType;
-import com.abiquo.virtualfactory.model.config.VirtualMachineConfiguration;
-import com.abiquo.virtualfactory.model.config.VmwareHypervisorConfiguration;
-import com.vmware.vim25.Description;
+import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.DiskStandard;
+import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.SnapshootVirtualMachine;
+import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachine.PrimaryDisk.DiskStandardConf;
+import com.abiquo.tarantino.errors.VirtualFactoryErrors;
+import com.abiquo.tarantino.errors.VirtualFactoryException;
 import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.VirtualDevice;
-import com.vmware.vim25.VirtualDeviceConfigSpec;
-import com.vmware.vim25.VirtualDeviceConfigSpecFileOperation;
-import com.vmware.vim25.VirtualDeviceConfigSpecOperation;
-import com.vmware.vim25.VirtualDiskFlatVer2BackingInfo;
-import com.vmware.vim25.VirtualDiskMode;
 import com.vmware.vim25.VirtualMachineConfigInfo;
 import com.vmware.vim25.VirtualSCSIController;
 
@@ -65,59 +53,37 @@ public class VmwareMachineDisk
     /** Constant logger object. */
     private final static Logger logger = LoggerFactory.getLogger(VmwareMachineDisk.class);
 
-//    /** Utilities to manage the main SDK API. */
-//    protected final VmwareMachineBasics utils;
-//
-//    /** VM configuration (from VmwareMachien). */
-//    protected VirtualMachineConfiguration vmConfig;
-//
-//    /** Hypervisor configuration (from VmwareMachien). */
-//    protected final VmwareHypervisorConfiguration vmwareConfig;
-//
-//    /** Current machine name. */
-//    protected final String machineName;
-
+    /** Utilities to manage the main SDK API. */
     private EsxiUtils utils;
-    
-    
-    /**
-     * Default constructor with the configuration from the VmwareMachine
-     */
+
     public VmwareMachineDisk(EsxiUtils utils)
-//    , VirtualMachineConfiguration vmConfig,
-//        VmwareHypervisorConfiguration vmwareConfig)
     {
         this.utils = utils;
-        
-//        this.vmConfig = vmConfig;
-//        this.vmwareConfig = vmwareConfig;
-
     }
 
-
-    
     /**
      * Gets the virtual disk path form the codified "[repository]diskPath" from the source datastore
      * (SAN) on configuration (on the OVF disk location)
      */
-    private String getSourceDiskPath()
+    private String getSourceDiskPath(DiskStandardConf diskConf)
     {
-        // TODO get only disk imagePath (repository from WS configuration )
-        String virtualDiskPath = vmConfig.getVirtualDiskBase().getLocation();
+        final DiskStandard disk = diskConf.getDiskStandard();
 
-        int pos = virtualDiskPath.lastIndexOf("]");
-        String fileName = virtualDiskPath.substring(pos + 1);
+        // TODO DATASTORE -- obtain the [datastorename] based on the datastore location
 
-        return "[" + vmwareConfig.getDatastoreSanName() + "] " + fileName;
+        return String.format("[%s] %s", disk.getDatastore(), disk.getPath());
     }
 
     /**
      * Codify the disk destination path on the target datastore (VMFS).
      */
-    private String getDestinationDiskPath()
+    private String getDestinationDiskPath(DiskStandardConf diskConf, final String machineUuid)
     {
-        return "[" + vmConfig.getVirtualDiskBase().getTargetDatastore() + "] " + machineName + "/"
-            + machineName + "-flat.vmdk";
+
+        // TODO DATASTORE -- obtain the [datastorename] based on the datastore location
+
+        return String.format("[%s] %s/%s-flat.vmdk", diskConf.getDestinationDatastore(),
+            machineUuid, machineUuid);
     }
 
     /**
@@ -126,7 +92,8 @@ public class VmwareMachineDisk
      * 
      * @throws Exception
      */
-    public void moveVirtualDiskToDataStore() throws VirtualMachineException
+    public void moveVirtualDiskToDataStore(DiskStandardConf diskConf, final String machineUuid)
+        throws VirtualFactoryException
     {
 
         ManagedObjectReference dcmor;
@@ -135,43 +102,103 @@ public class VmwareMachineDisk
         String destPath;
         ManagedObjectReference taskCopyMor;
 
-        try
-        {
-            String dcName = vmwareConfig.getDatacenterName();
-            dcmor = utils.getServiceUtils().getDecendentMoRef(null, "Datacenter", dcName);
-            if (dcmor == null)
-            {
-                throw new Exception("No such Datacenter : " + dcName);
-            }
-        }
-        catch (Exception e)
-        {
-            final String msg = "VMWare [" + machineName + "] can not get 'Datacenter' MoRef";
-            throw new VirtualMachineException(msg);
-        }
+        dcmor = utils.getDatacenterMor();
 
-        fileManager = utils.getServiceContent().getFileManager();
+        fileManager = utils.getServiceInstance().getServiceContent().getFileManager();
 
-        sourcePath = getSourceDiskPath();
-        destPath = getDestinationDiskPath();
+        sourcePath = getSourceDiskPath(diskConf);
+        destPath = getDestinationDiskPath(diskConf, machineUuid);
 
         logger.info(
             "Moving image from source repository path [{}] into destination datastore [{}] ",
             sourcePath, destPath);
+
         try
         {
             taskCopyMor =
-                utils.getService().copyDatastoreFile_Task(fileManager, sourcePath, dcmor, destPath,
+                utils.getVimStub().copyDatastoreFile_Task(fileManager, sourcePath, dcmor, destPath,
                     dcmor, true);
         }
         catch (Exception e)
         {
-            throw new VirtualMachineException("Virtual Machine could not be cloned.");
+            final String detail =
+                String.format(
+                    "Virtual Machine %s using source disk at : %s and destintatino %s\nCaused By:",
+                    machineUuid, sourcePath, destPath, e.toString());
+
+            throw new VirtualFactoryException(VirtualFactoryErrors.CLONING_DISK, detail);
         }
 
         utils.checkTaskState(taskCopyMor);
 
-        logger.info("Virtual Machine cloned Sucessfully");
+        logger.info("Virtual Machine [{}] cloned Sucessfully", machineUuid);
+    }
+
+ 
+    /**
+     * Gets the destination path of the bundle virtual disk
+     * 
+     * @param destinationDatastoreName
+     * @param snapShotName
+     * @return
+     */
+    private String getDestinationPathToBundle(DiskStandard destination)
+    // (String destinationDatastoreName,
+    // String destinationPath, String snapShotName)
+    {
+
+        //
+        //
+        // String finalPath = destinationPath;
+        //
+        // if (finalPath == null)
+        // {
+        // String virtualDiskPath = vmConfig.getVirtualDiskBase().getLocation();
+        //
+        // int pos = virtualDiskPath.lastIndexOf("]");
+        // String fileName = virtualDiskPath.substring(pos + 1);
+        //
+        // int pos2 = fileName.lastIndexOf(File.separatorChar);
+        // finalPath = fileName.substring(0, pos2);
+        // }
+        //
+        // String destinationFile =
+        // "[" + destinationDatastoreName + "] " + finalPath + "/" + snapShotName;
+        //
+        //
+        // return destinationFile;
+
+        // TODO DATASTORE -- obtain the [datastorename] based on the datastore location
+        return String.format("[%s] %s", destination.getDatastore(), destination.getPath());
+    }
+
+    /**
+     * Gets the source disk path of the virtual disk to bundle
+     * 
+     * @param sourceDatastoreName
+     * @param sourcePath the source path
+     * @param isManaged
+     * @return
+     */
+    private String getSourceDiskPathToBundle(DiskStandard disk)
+
+    // (String sourceDatastoreName, String sourcePath,
+    // boolean isManaged)
+    {
+        //
+        //
+        // if (isManaged)
+        // {
+        // return "[" + sourceDatastoreName + "] " + machineName + "/" + machineName
+        // + "-flat.vmdk";
+        // }
+        // else
+        // {
+        // return "[" + sourceDatastoreName + "] " + sourcePath;
+        // }
+
+        // TODO DATASTORE -- obtain the [datastorename] based on the datastore location
+        return String.format("[%s] %s", disk.getDatastore(), disk.getPath());
     }
 
     /**
@@ -181,12 +208,12 @@ public class VmwareMachineDisk
      * @param isManaged
      * @throws VirtualMachineException
      */
-    public void bundleVirtualDisk(String sourcePath, String destinationPath, String snapShotName,
-        boolean isManaged) throws VirtualMachineException
-    {
-        bundleVirtualDisk(sourcePath, vmConfig.getVirtualDiskBase().getTargetDatastore(),
-            vmwareConfig.getDatastoreSanName(), destinationPath, snapShotName, isManaged);
-    }
+    // public void bundleVirtualDisk(String sourcePath, String destinationPath, String snapShotName,
+    // boolean isManaged) throws VirtualMachineException
+    // {
+    // bundleVirtualDisk(sourcePath, vmConfig.getVirtualDiskBase().getTargetDatastore(),
+    // vmwareConfig.getDatastoreSanName(), destinationPath, snapShotName, isManaged);
+    // }
 
     /**
      * Private helper to bundle the virtual disk
@@ -198,9 +225,11 @@ public class VmwareMachineDisk
      * @param isManaged
      * @throws VirtualMachineException
      */
-    private void bundleVirtualDisk(String sourcePath, String sourceDatastoreName,
-        String destinationDatastoreName, String destinationPath, String snapShotName,
-        boolean isManaged) throws VirtualMachineException
+    public void bundleVirtualDisk(SnapshootVirtualMachine snpahot) throws VirtualFactoryException
+    // (String sourcePath, String sourceDatastoreName,
+    // String destinationDatastoreName, String destinationPath, String snapShotName,
+    //
+    // boolean isManaged) throws VirtualFactoryException
     {
         ManagedObjectReference dcmor;
         ManagedObjectReference fileManager;
@@ -208,27 +237,19 @@ public class VmwareMachineDisk
         String destPath;
         ManagedObjectReference taskCopyMor;
 
-        try
-        {
-            String dcName = vmwareConfig.getDatacenterName();
-            dcmor = utils.getServiceUtils().getDecendentMoRef(null, "Datacenter", dcName);
-            if (dcmor == null)
-            {
-                throw new Exception("No such Datacenter : " + dcName);
-            }
-        }
-        catch (Exception e)
-        {
-            final String msg = "VMWare [" + machineName + "] can not get 'Datacenter' MoRef";
-            throw new VirtualMachineException(msg);
-        }
+        dcmor = utils.getDatacenterMor();
 
-        fileManager = utils.getServiceContent().getFileManager();
+        fileManager = utils.getServiceInstance().getServiceContent().getFileManager();
 
-        sourcePathComposed = getSourceDiskPathToBundle(sourceDatastoreName, sourcePath, isManaged);
+        // TODO not for statefull images !!!
 
-        destPath =
-            getDestinationPathToBundle(destinationDatastoreName, destinationPath, snapShotName);
+        sourcePathComposed = getSourceDiskPathToBundle(snpahot.getSourceDisk().getDiskStandard());// (sourceDatastoreName,
+                                                                                                  // sourcePath,
+                                                                                                  // isManaged);
+
+        destPath = getDestinationPathToBundle(snpahot.getDestinationDisk());// (destinationDatastoreName,
+                                                                            // destinationPath,
+                                                                            // snapShotName);
 
         logger.info(
             "Moving image from source repository path [{}] into destination datastore [{}] ",
@@ -236,12 +257,13 @@ public class VmwareMachineDisk
         try
         {
             taskCopyMor =
-                utils.getService().copyDatastoreFile_Task(fileManager, sourcePathComposed, dcmor,
+                utils.getVimStub().copyDatastoreFile_Task(fileManager, sourcePathComposed, dcmor,
                     destPath, dcmor, true);
         }
         catch (Exception e)
         {
-            throw new VirtualMachineException("Virtual Machine could not be cloned.");
+            final String detail = String.format("from %s to %s", sourcePathComposed, destPath);
+            throw new VirtualFactoryException(VirtualFactoryErrors.SNAPSHOT, detail);
         }
 
         utils.checkTaskState(taskCopyMor);
@@ -249,75 +271,26 @@ public class VmwareMachineDisk
         logger.info("Virtual Machine cloned Sucessfully");
     }
 
-    /**
-     * Gets the destination path of the bundle virtual disk
-     * 
-     * @param destinationDatastoreName
-     * @param snapShotName
-     * @return
-     */
-    private String getDestinationPathToBundle(String destinationDatastoreName,
-        String destinationPath, String snapShotName)
-    {
-        String finalPath = destinationPath;
-
-        if (finalPath == null)
-        {
-            String virtualDiskPath = vmConfig.getVirtualDiskBase().getLocation();
-
-            int pos = virtualDiskPath.lastIndexOf("]");
-            String fileName = virtualDiskPath.substring(pos + 1);
-
-            int pos2 = fileName.lastIndexOf(File.separatorChar);
-            finalPath = fileName.substring(0, pos2);
-        }
-
-        String destinationFile =
-            "[" + destinationDatastoreName + "] " + finalPath + "/" + snapShotName;
-        return destinationFile;
-    }
-
-    /**
-     * Gets the source disk path of the virtual disk to bundle
-     * 
-     * @param sourceDatastoreName
-     * @param sourcePath the source path
-     * @param isManaged
-     * @return
-     */
-    private String getSourceDiskPathToBundle(String sourceDatastoreName, String sourcePath,
-        boolean isManaged)
-    {
-        if (isManaged)
-        {
-            return "[" + sourceDatastoreName + "] " + machineName + "/" + machineName
-                + "-flat.vmdk";
-        }
-        else
-        {
-            return "[" + sourceDatastoreName + "] " + sourcePath;
-        }
-    }
-
+    
     /**
      * Configure extended virtual disk on during VM creation.
      */
-    public VirtualDeviceConfigSpec[] initialDiskDeviceConfigSpec() throws Exception
-    {
-        ArrayList<VirtualDeviceConfigSpec> deviceConfig = new ArrayList<VirtualDeviceConfigSpec>();
-
-        List<VirtualDisk> extendedDiskList = vmConfig.getExtendedVirtualDiskList();
-
-        // added disks
-        for (VirtualDisk vDisk : extendedDiskList)
-        {
-            // adds the new disk
-            deviceConfig.add(addVirtualDiskFromConfiguration(vDisk));
-            // TODO newVirtualDisk.setLocation(location);
-        }
-
-        return deviceConfig.toArray(new VirtualDeviceConfigSpec[] {});
-    }
+    // public VirtualDeviceConfigSpec[] initialDiskDeviceConfigSpec() throws Exception
+    // {
+    // ArrayList<VirtualDeviceConfigSpec> deviceConfig = new ArrayList<VirtualDeviceConfigSpec>();
+    //
+    // List<VirtualDisk> extendedDiskList = vmConfig.getExtendedVirtualDiskList();
+    //
+    // // added disks
+    // for (VirtualDisk vDisk : extendedDiskList)
+    // {
+    // // adds the new disk
+    // deviceConfig.add(addVirtualDiskFromConfiguration(vDisk));
+    // // TODO newVirtualDisk.setLocation(location);
+    // }
+    //
+    // return deviceConfig.toArray(new VirtualDeviceConfigSpec[] {});
+    // }
 
     /**
      * Only during reconfiguration, check which disk change its configuration, or new added/removed.
@@ -326,198 +299,199 @@ public class VmwareMachineDisk
      * @return a device configuration to add/remove the provided disk requirements.
      * @throws Exception
      */
-    public VirtualDeviceConfigSpec[] getDiskDeviceConfigSpec(
-        VirtualMachineConfiguration newConfiguration) throws Exception
-    {
-        ArrayList<VirtualDeviceConfigSpec> deviceConfig = new ArrayList<VirtualDeviceConfigSpec>();
-
-        // Compares the two lists and adds or remove the disks
-        List<VirtualDisk> newExtendedDiskList = newConfiguration.getExtendedVirtualDiskList();
-        List<VirtualDisk> oldExtendedDiskList = vmConfig.getExtendedVirtualDiskList();
-
-        /*
-         * // If there are no more extended disks, I remove the existent ones if
-         * ((newExtendedDiskList.size() == 0) && (oldExtendedDiskList.size() == 0)) { return null; }
-         */
-
-        // all the previously added disk id.
-        Map<String, VirtualDisk> htOldDiskId = new Hashtable<String, VirtualDisk>();
-        for (VirtualDisk ovd : oldExtendedDiskList)
-        {
-            logger.debug("old disk [{}]", ovd.getId());
-            htOldDiskId.put(ovd.getId(), ovd);
-        }
-
-        // all the new added disk id.
-        Map<String, VirtualDisk> htNewDiskId = new Hashtable<String, VirtualDisk>();
-        for (VirtualDisk nvd : newExtendedDiskList)
-        {
-            logger.debug("new disk [{}]", nvd.getId());
-            htNewDiskId.put(nvd.getId(), nvd);
-        }
-
-        // check removed disks
-        for (String oldId : htOldDiskId.keySet())
-        {
-            if (!htNewDiskId.keySet().contains(oldId))
-            {
-                // removes the disk
-                deviceConfig.add(removeVirtualDiskFromConfig(htOldDiskId.get(oldId)));
-            }
-            // TODO checking disk resize
-        }
-
-        // check added disks
-        for (String newId : htNewDiskId.keySet())
-        {
-            if (!htOldDiskId.keySet().contains(newId))
-            {
-                // adds the new disk
-                deviceConfig.add(addVirtualDiskFromConfiguration(htNewDiskId.get(newId)));
-                // TODO newVirtualDisk.setLocation(location);
-            }
-
-        }
-
-        /*
-         * TODO resize else if ((newExtendedDiskList.get(0).getCapacity() >
-         * oldExtendedDiskList.get(0) .getCapacity())) { long diffSize =
-         * newExtendedDiskList.get(0).getCapacity(); String diskLocation =
-         * oldExtendedDiskList.get(0).getLocation();
-         * newExtendedDiskList.get(0).setLocation(diskLocation);
-         * logger.info("Extending to {} bytes in the disk location: {}", diffSize, diskLocation); //
-         * The new extended disk capacity is larger than the old one extendVirtualDisk(diskLocation,
-         * diffSize); return null; } else if ((newExtendedDiskList.get(0).getCapacity() <
-         * oldExtendedDiskList.get(0) .getCapacity())) { // EXPERIMENTAL ! long diffSize =
-         * newExtendedDiskList.get(0).getCapacity(); String diskLocation =
-         * oldExtendedDiskList.get(0).getLocation();
-         * newExtendedDiskList.get(0).setLocation(diskLocation);
-         * logger.info("Shrinking the disk location: {}", diffSize, diskLocation);
-         * shrinkVirtualDisk(diskLocation, diffSize); //
-         * reduceVirtualDisk(newExtendedDiskList.get(0),diskSpec); return null; } else if
-         * ((newExtendedDiskList.get(0).getCapacity() == oldExtendedDiskList.get(0) .getCapacity()))
-         * { return null; }
-         */
-
-        // List<VirtualDisk> disksToAdd = new ArrayList<VirtualDisk>(newExtendedDiskList);
-        // List<VirtualDisk> disksToDelete = new ArrayList<VirtualDisk>(oldExtendedDiskList);
-        /*
-         * // Adding the new virtual disk lists if ((disksToAdd.removeAll(oldExtendedDiskList)) ||
-         * (oldExtendedDiskList.size() == 0)) { for (VirtualDisk newVirtualDisk : disksToAdd) {
-         * addVirtualDiskToConfig(newVirtualDisk, diskSpec); } } //Removing disks if
-         * (disksToDelete.removeAll(newExtendedDiskList)) { for (VirtualDisk oldVirtualDisk :
-         * disksToDelete) { removeVirtualDiskFromConfig(oldVirtualDisk, diskSpec); } }
-         */
-
-        return deviceConfig.toArray(new VirtualDeviceConfigSpec[] {});
-    }
+    // public VirtualDeviceConfigSpec[] getDiskDeviceConfigSpec(
+    // VirtualMachineConfiguration newConfiguration) throws Exception
+    // {
+    // ArrayList<VirtualDeviceConfigSpec> deviceConfig = new ArrayList<VirtualDeviceConfigSpec>();
+    //
+    // // Compares the two lists and adds or remove the disks
+    // List<VirtualDisk> newExtendedDiskList = newConfiguration.getExtendedVirtualDiskList();
+    // List<VirtualDisk> oldExtendedDiskList = vmConfig.getExtendedVirtualDiskList();
+    //
+    // /*
+    // * // If there are no more extended disks, I remove the existent ones if
+    // * ((newExtendedDiskList.size() == 0) && (oldExtendedDiskList.size() == 0)) { return null; }
+    // */
+    //
+    // // all the previously added disk id.
+    // Map<String, VirtualDisk> htOldDiskId = new Hashtable<String, VirtualDisk>();
+    // for (VirtualDisk ovd : oldExtendedDiskList)
+    // {
+    // logger.debug("old disk [{}]", ovd.getId());
+    // htOldDiskId.put(ovd.getId(), ovd);
+    // }
+    //
+    // // all the new added disk id.
+    // Map<String, VirtualDisk> htNewDiskId = new Hashtable<String, VirtualDisk>();
+    // for (VirtualDisk nvd : newExtendedDiskList)
+    // {
+    // logger.debug("new disk [{}]", nvd.getId());
+    // htNewDiskId.put(nvd.getId(), nvd);
+    // }
+    //
+    // // check removed disks
+    // for (String oldId : htOldDiskId.keySet())
+    // {
+    // if (!htNewDiskId.keySet().contains(oldId))
+    // {
+    // // removes the disk
+    // deviceConfig.add(removeVirtualDiskFromConfig(htOldDiskId.get(oldId)));
+    // }
+    // // TODO checking disk resize
+    // }
+    //
+    // // check added disks
+    // for (String newId : htNewDiskId.keySet())
+    // {
+    // if (!htOldDiskId.keySet().contains(newId))
+    // {
+    // // adds the new disk
+    // deviceConfig.add(addVirtualDiskFromConfiguration(htNewDiskId.get(newId)));
+    // // TODO newVirtualDisk.setLocation(location);
+    // }
+    //
+    // }
+    //
+    // /*
+    // * TODO resize else if ((newExtendedDiskList.get(0).getCapacity() >
+    // * oldExtendedDiskList.get(0) .getCapacity())) { long diffSize =
+    // * newExtendedDiskList.get(0).getCapacity(); String diskLocation =
+    // * oldExtendedDiskList.get(0).getLocation();
+    // * newExtendedDiskList.get(0).setLocation(diskLocation);
+    // * logger.info("Extending to {} bytes in the disk location: {}", diffSize, diskLocation); //
+    // * The new extended disk capacity is larger than the old one extendVirtualDisk(diskLocation,
+    // * diffSize); return null; } else if ((newExtendedDiskList.get(0).getCapacity() <
+    // * oldExtendedDiskList.get(0) .getCapacity())) { // EXPERIMENTAL ! long diffSize =
+    // * newExtendedDiskList.get(0).getCapacity(); String diskLocation =
+    // * oldExtendedDiskList.get(0).getLocation();
+    // * newExtendedDiskList.get(0).setLocation(diskLocation);
+    // * logger.info("Shrinking the disk location: {}", diffSize, diskLocation);
+    // * shrinkVirtualDisk(diskLocation, diffSize); //
+    // * reduceVirtualDisk(newExtendedDiskList.get(0),diskSpec); return null; } else if
+    // * ((newExtendedDiskList.get(0).getCapacity() == oldExtendedDiskList.get(0) .getCapacity()))
+    // * { return null; }
+    // */
+    //
+    // // List<VirtualDisk> disksToAdd = new ArrayList<VirtualDisk>(newExtendedDiskList);
+    // // List<VirtualDisk> disksToDelete = new ArrayList<VirtualDisk>(oldExtendedDiskList);
+    // /*
+    // * // Adding the new virtual disk lists if ((disksToAdd.removeAll(oldExtendedDiskList)) ||
+    // * (oldExtendedDiskList.size() == 0)) { for (VirtualDisk newVirtualDisk : disksToAdd) {
+    // * addVirtualDiskToConfig(newVirtualDisk, diskSpec); } } //Removing disks if
+    // * (disksToDelete.removeAll(newExtendedDiskList)) { for (VirtualDisk oldVirtualDisk :
+    // * disksToDelete) { removeVirtualDiskFromConfig(oldVirtualDisk, diskSpec); } }
+    // */
+    //
+    // return deviceConfig.toArray(new VirtualDeviceConfigSpec[] {});
+    // }
 
     /**
      * Create the representation to add the virtual disk on the device configuration.
      * 
      * @throws Exception
      */
-    public VirtualDeviceConfigSpec addVirtualDiskFromConfiguration(VirtualDisk vd) throws Exception
-    {
-        com.vmware.vim25.VirtualDisk virtualDisk;
-        VirtualDeviceConfigSpec diskSpec = new VirtualDeviceConfigSpec();
-
-        logger.debug("Adding disk Id[{}] location [{}] type[" + vd.getDiskType().name() + "]", vd
-            .getId(), vd.getLocation());
-
-        if (vd.getDiskType() == VirtualDiskType.STANDARD)
-        {
-            virtualDisk = createStandardDisk(vd);
-        }
-        else
-        {
-            throw new VirtualMachineException("Invalid virtual disk type " + vd.getDiskType());
-        }
-
-        diskSpec.setDevice(virtualDisk);
-
-        diskSpec.setOperation(VirtualDeviceConfigSpecOperation.add);
-        diskSpec.setFileOperation(VirtualDeviceConfigSpecFileOperation.create);
-
-        return diskSpec;
-    }
+    // public VirtualDeviceConfigSpec addVirtualDiskFromConfiguration(DiskStandard vd)
+    // throws Exception
+    // {
+    // com.vmware.vim25.VirtualDisk virtualDisk;
+    // VirtualDeviceConfigSpec diskSpec = new VirtualDeviceConfigSpec();
+    //
+    // logger.debug("Adding disk Id[{}] location [{}] type[" + vd.getDiskType().name() + "]",
+    // vd.getId(), vd.getLocation());
+    //
+    // if (vd.getDiskType() == VirtualDiskType.STANDARD)
+    // {
+    // virtualDisk = createStandardDisk(vd);
+    // }
+    // else
+    // {
+    // throw new VirtualMachineException("Invalid virtual disk type " + vd.getDiskType());
+    // }
+    //
+    // diskSpec.setDevice(virtualDisk);
+    //
+    // diskSpec.setOperation(VirtualDeviceConfigSpecOperation.add);
+    // diskSpec.setFileOperation(VirtualDeviceConfigSpecFileOperation.create);
+    //
+    // return diskSpec;
+    // }
 
     /**
      * Create the representation to delete the virtual disk on the device configuration.
      * 
      * @throws Exception
      */
-    public VirtualDeviceConfigSpec removeVirtualDiskFromConfig(VirtualDisk vd) throws Exception
-    {
-        com.vmware.vim25.VirtualDisk virtualDisk;
-        VirtualDeviceConfigSpec diskSpec = new VirtualDeviceConfigSpec();
+    // public VirtualDeviceConfigSpec removeVirtualDiskFromConfig(VirtualDisk vd) throws Exception
+    // {
+    // com.vmware.vim25.VirtualDisk virtualDisk;
+    // VirtualDeviceConfigSpec diskSpec = new VirtualDeviceConfigSpec();
+    //
+    // logger.debug("Remove disk Id[{}] location [{}] type [" + vd.getDiskType().name() + "]",
+    // vd.getId(), vd.getLocation());
+    //
+    // if (vd.getDiskType() == VirtualDiskType.STANDARD)
+    // {
+    // logger.warn("Removind flat disk not activated");
+    // return null;
+    // }
+    // return null;
+    // }
 
-        logger.debug("Remove disk Id[{}] location [{}] type [" + vd.getDiskType().name() + "]", vd
-            .getId(), vd.getLocation());
-
-        if (vd.getDiskType() == VirtualDiskType.STANDARD)
-        {
-            logger.warn("Removind flat disk not activated");
-            return null;
-        }
-        return null;
-    }
-
-    /**
-     * @deprecated only iSCSI disk to be added. Adds the virtual Disk to the virtual device
-     *             configuration
-     * @param newVirtualDisk the new virtual disk to add
-     * @param diskSpec the virtual disk device configuration
-     * @throws Exception
-     */
-    @Deprecated
-    public com.vmware.vim25.VirtualDisk createStandardDisk(VirtualDisk newVirtualDisk)
-        throws Exception
-    {
-        ManagedObjectReference _virtualMachine = utils.getVmMor(vmConfig.getMachineName());
-        VirtualMachineConfigInfo vmConfigInfo =
-            (VirtualMachineConfigInfo) utils.getServiceUtils().getDynamicProperty(_virtualMachine,
-                "config");
-        com.vmware.vim25.VirtualDisk disk = new com.vmware.vim25.VirtualDisk();
-        VirtualDiskFlatVer2BackingInfo diskfileBacking = new VirtualDiskFlatVer2BackingInfo();
-        String dsName = vmConfig.getVirtualDiskBase().getTargetDatastore();
-
-        int unitNumber;
-        VirtualDevice[] devices = vmConfigInfo.getHardware().getDevice();
-        int ckey = getSCSIControllerKey();// getControllerKey("SCSI Controller 0");
-
-        unitNumber = devices.length + 1;
-        String fileName =
-            "[" + dsName + "] " + machineName + "/" + newVirtualDisk.getId() + ".vmdk";
-
-        diskfileBacking.setFileName(fileName);
-        // Provisioning with thin provisioning
-        diskfileBacking.setThinProvisioned(true);
-        diskfileBacking.setDiskMode(VirtualDiskMode.persistent.name());
-
-        disk.setControllerKey(ckey);
-        disk.setUnitNumber(unitNumber);
-        disk.setBacking(diskfileBacking);
-
-        Description des = new Description();
-        des.setLabel(newVirtualDisk.getId());
-        des.setSummary(newVirtualDisk.getId());
-        disk.setDeviceInfo(des);
-
-        int size = (int) (newVirtualDisk.getCapacity() / 1024);
-        disk.setCapacityInKB(size);
-        disk.setKey(-1);
-
-        /*
-         * //disk.setDynamicType(newVirtualDisk.getId()); DynamicProperty dp = new
-         * DynamicProperty(); dp.setName("UUID"); dp.setVal(newVirtualDisk.getId());
-         * disk.setDynamicProperty(new DynamicProperty[]{dp});
-         */
-
-        newVirtualDisk.setLocation(fileName); // XXX
-
-        return disk;
-    }
+    // /**
+    // * @deprecated only iSCSI disk to be added. Adds the virtual Disk to the virtual device
+    // * configuration
+    // * @param newVirtualDisk the new virtual disk to add
+    // * @param diskSpec the virtual disk device configuration
+    // * @throws Exception
+    // */
+    // @Deprecated
+    // public com.vmware.vim25.VirtualDisk createStandardDisk(VirtualDisk newVirtualDisk)
+    // throws Exception
+    // {
+    // ManagedObjectReference _virtualMachine = utils.getVmMor(vmConfig.getMachineName());
+    // VirtualMachineConfigInfo vmConfigInfo =
+    // (VirtualMachineConfigInfo) utils.getServiceUtils().getDynamicProperty(_virtualMachine,
+    // "config");
+    // com.vmware.vim25.VirtualDisk disk = new com.vmware.vim25.VirtualDisk();
+    // VirtualDiskFlatVer2BackingInfo diskfileBacking = new VirtualDiskFlatVer2BackingInfo();
+    // String dsName = vmConfig.getVirtualDiskBase().getTargetDatastore();
+    //
+    // int unitNumber;
+    // VirtualDevice[] devices = vmConfigInfo.getHardware().getDevice();
+    // int ckey = getSCSIControllerKey();// getControllerKey("SCSI Controller 0");
+    //
+    // unitNumber = devices.length + 1;
+    // String fileName =
+    // "[" + dsName + "] " + machineName + "/" + newVirtualDisk.getId() + ".vmdk";
+    //
+    // diskfileBacking.setFileName(fileName);
+    // // Provisioning with thin provisioning
+    // diskfileBacking.setThinProvisioned(true);
+    // diskfileBacking.setDiskMode(VirtualDiskMode.persistent.name());
+    //
+    // disk.setControllerKey(ckey);
+    // disk.setUnitNumber(unitNumber);
+    // disk.setBacking(diskfileBacking);
+    //
+    // Description des = new Description();
+    // des.setLabel(newVirtualDisk.getId());
+    // des.setSummary(newVirtualDisk.getId());
+    // disk.setDeviceInfo(des);
+    //
+    // int size = (int) (newVirtualDisk.getCapacity() / 1024);
+    // disk.setCapacityInKB(size);
+    // disk.setKey(-1);
+    //
+    // /*
+    // * //disk.setDynamicType(newVirtualDisk.getId()); DynamicProperty dp = new
+    // * DynamicProperty(); dp.setName("UUID"); dp.setVal(newVirtualDisk.getId());
+    // * disk.setDynamicProperty(new DynamicProperty[]{dp});
+    // */
+    //
+    // newVirtualDisk.setLocation(fileName); // XXX
+    //
+    // return disk;
+    // }
 
     /*
      * private int getSCSIControlerKey(VirtualDevice[] devices) { int ckey = 0; for (int k = 0; k <
@@ -526,17 +500,17 @@ public class VmwareMachineDisk
      * devices[k].getKey(); } } return ckey; }
      */
 
-    protected int getSCSIControllerKey() // throws Exception
+    protected int getSCSIControllerKey(final String machineUuid) // throws Exception
     {
         int ckey = 0;
 
         try
         {
 
-            ManagedObjectReference _virtualMachine = utils.getVmMor(vmConfig.getMachineName());
+            ManagedObjectReference virtualMachine = utils.getVmMor(machineUuid);
             VirtualMachineConfigInfo vmConfigInfo =
-                (VirtualMachineConfigInfo) utils.getServiceUtils().getDynamicProperty(
-                    _virtualMachine, "config");
+
+            (VirtualMachineConfigInfo) utils.getDynamicProperty(virtualMachine, "config");
 
             VirtualDevice[] devices = vmConfigInfo.getHardware().getDevice();
 
@@ -558,84 +532,87 @@ public class VmwareMachineDisk
         return ckey;
     }
 
-    /**
-     * @deprecated resize not considered Adds the virtual Disk to the virtual device configuration
-     * @param newVirtualDisk the new virtual disk to add
-     * @param diskSpec the virtual disk device configuration
-     * @throws Exception
-     */
-    @Deprecated
-    protected String reduceVirtualDisk(VirtualDisk newVirtualDisk, VirtualDeviceConfigSpec diskSpec)
-        throws Exception
-    {
-        ManagedObjectReference _virtualMachine = utils.getVmMor(vmConfig.getMachineName());
-        VirtualMachineConfigInfo vmConfigInfo =
-            (VirtualMachineConfigInfo) utils.getServiceUtils().getDynamicProperty(_virtualMachine,
-                "config");
-        com.vmware.vim25.VirtualDisk disk = new com.vmware.vim25.VirtualDisk();
-        VirtualDiskFlatVer2BackingInfo diskfileBacking = new VirtualDiskFlatVer2BackingInfo();
-        String dsName = vmConfig.getVirtualDiskBase().getTargetDatastore();
-        int ckey = 0;
-        int unitNumber = 0;
+    // /**
+    // * @deprecated resize not considered Adds the virtual Disk to the virtual device configuration
+    // * @param newVirtualDisk the new virtual disk to add
+    // * @param diskSpec the virtual disk device configuration
+    // * @throws Exception
+    // */
+    // @Deprecated
+    // protected String reduceVirtualDisk(VirtualDisk newVirtualDisk, VirtualDeviceConfigSpec
+    // diskSpec)
+    // throws Exception
+    // {
+    // ManagedObjectReference _virtualMachine = utils.getVmMor(vmConfig.getMachineName());
+    // VirtualMachineConfigInfo vmConfigInfo =
+    // (VirtualMachineConfigInfo) utils.getServiceUtils().getDynamicProperty(_virtualMachine,
+    // "config");
+    // com.vmware.vim25.VirtualDisk disk = new com.vmware.vim25.VirtualDisk();
+    // VirtualDiskFlatVer2BackingInfo diskfileBacking = new VirtualDiskFlatVer2BackingInfo();
+    // String dsName = vmConfig.getVirtualDiskBase().getTargetDatastore();
+    // int ckey = 0;
+    // int unitNumber = 0;
+    //
+    // VirtualDevice[] test = vmConfigInfo.getHardware().getDevice();
+    // for (int k = 0; k < test.length; k++)
+    // {
+    // if (test[k].getDeviceInfo().getLabel().equalsIgnoreCase("SCSI Controller 0"))
+    // {
+    // ckey = test[k].getKey();
+    // }
+    // }
+    //
+    // unitNumber = test.length + 1;
+    // String fileName =
+    // "[" + dsName + "] " + machineName + "/" + newVirtualDisk.getId() + ".vmdk";
+    //
+    // // virtualDiskId = newVirtualDisk.getId();
+    //
+    // diskfileBacking.setFileName(fileName);
+    // // Provisioning with thin provisioning
+    // diskfileBacking.setThinProvisioned(true);
+    // diskfileBacking.setDiskMode("persistent");
+    //
+    // disk.setControllerKey(ckey);
+    // disk.setUnitNumber(unitNumber);
+    // disk.setBacking(diskfileBacking);
+    // int size = (int) (newVirtualDisk.getCapacity() / 1024);
+    // disk.setCapacityInKB(size);
+    // disk.setKey(-1);
+    //
+    // diskSpec.setOperation(VirtualDeviceConfigSpecOperation.edit);
+    // diskSpec.setDevice(disk);
+    //
+    // return fileName;
+    //
+    // }
+    //
+    // /**
+    // * @deprecated resize not considered
+    // */
+    // @Deprecated
+    // protected void shrinkVirtualDisk(String virtualDiskLocation, long diffSize) throws Exception
+    // {
+    // ManagedObjectReference virtualDiskManager =
+    // utils.getServiceContent().getVirtualDiskManager();
+    //
+    // String dcName = utils.getOption("datacentername");
+    // ManagedObjectReference dcmor =
+    // utils.getServiceUtils().getDecendentMoRef(null, "Datacenter", dcName);
+    //
+    // if (dcmor == null)
+    // {
+    // String message = "Datacenter " + dcName + " not found.";
+    // logger.error(message);
+    // throw new VirtualMachineException(message);
+    // }
+    // // TODO Defragment the disk
+    // ManagedObjectReference tmor =
+    // utils.getService().shrinkVirtualDisk_Task(virtualDiskManager, virtualDiskLocation,
+    // dcmor, false);
+    // utils.monitorTask(tmor);
+    //
+    // }
+    //
 
-        VirtualDevice[] test = vmConfigInfo.getHardware().getDevice();
-        for (int k = 0; k < test.length; k++)
-        {
-            if (test[k].getDeviceInfo().getLabel().equalsIgnoreCase("SCSI Controller 0"))
-            {
-                ckey = test[k].getKey();
-            }
-        }
-
-        unitNumber = test.length + 1;
-        String fileName =
-            "[" + dsName + "] " + machineName + "/" + newVirtualDisk.getId() + ".vmdk";
-
-        // virtualDiskId = newVirtualDisk.getId();
-
-        diskfileBacking.setFileName(fileName);
-        // Provisioning with thin provisioning
-        diskfileBacking.setThinProvisioned(true);
-        diskfileBacking.setDiskMode("persistent");
-
-        disk.setControllerKey(ckey);
-        disk.setUnitNumber(unitNumber);
-        disk.setBacking(diskfileBacking);
-        int size = (int) (newVirtualDisk.getCapacity() / 1024);
-        disk.setCapacityInKB(size);
-        disk.setKey(-1);
-
-        diskSpec.setOperation(VirtualDeviceConfigSpecOperation.edit);
-        diskSpec.setDevice(disk);
-
-        return fileName;
-
-    }
-
-    /**
-     * @deprecated resize not considered
-     */
-    @Deprecated
-    protected void shrinkVirtualDisk(String virtualDiskLocation, long diffSize) throws Exception
-    {
-        ManagedObjectReference virtualDiskManager =
-            utils.getServiceContent().getVirtualDiskManager();
-
-        String dcName = utils.getOption("datacentername");
-        ManagedObjectReference dcmor =
-            utils.getServiceUtils().getDecendentMoRef(null, "Datacenter", dcName);
-
-        if (dcmor == null)
-        {
-            String message = "Datacenter " + dcName + " not found.";
-            logger.error(message);
-            throw new VirtualMachineException(message);
-        }
-        // TODO Defragment the disk
-        ManagedObjectReference tmor =
-            utils.getService().shrinkVirtualDisk_Task(virtualDiskManager, virtualDiskLocation,
-                dcmor, false);
-        utils.monitorTask(tmor);
-
-    }
 }

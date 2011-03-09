@@ -270,6 +270,19 @@ public class VirtualMachine {
     })
     public static class NetworkConf {
 
+        
+        protected int rdport;
+        
+        public void setRdPort(int rdport)
+        {
+            this.rdport = rdport;
+        }
+        
+        public int getRdPort()
+        {
+            return rdport;
+        }
+        
         protected List<VirtualNIC> virtualNIC;
 
         /**

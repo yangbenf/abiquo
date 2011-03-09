@@ -21,7 +21,6 @@
 
 package com.abiquo.tarantino.errors;
 
-import com.abiquo.tarantino.plugins.esxi.utils.VirtualMachineException;
 
 
 /***
@@ -29,6 +28,14 @@ import com.abiquo.tarantino.plugins.esxi.utils.VirtualMachineException;
  */
 public enum VirtualFactoryErrors
 {
+    CONFIG("asdf","asdfasdfasdfs"),
+    RECONFIG("asdf","adsf"),
+    DEPLOY("adfas","asdfasd"),
+    CREATE_VM("afasdf","asdfasdf"),
+    
+    SNAPSHOT("adfadf","asdfadsf"),
+    
+    CLONING_DISK("afasdf","affqsdfr"),
     
     NETWORK_DECONFIGURE("afsd","Can not deconfigure the network resources of virtual machine"),
     

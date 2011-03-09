@@ -27,18 +27,15 @@ import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.axis.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.HypervisorConnection;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.State;
 import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachine;
 import com.abiquo.tarantino.errors.VirtualFactoryErrors;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
 import com.abiquo.tarantino.hypervisor.IHypervisor;
 import com.abiquo.tarantino.plugins.esxi.utils.EsxiUtils;
-import com.abiquo.tarantino.plugins.esxi.utils.VmwareMachineBasics;
 import com.abiquo.tarantino.virtualmachine.IVirtualMachine;
 import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.mo.ServiceInstance;
@@ -56,17 +53,22 @@ public class VmwareHypervisor implements IHypervisor
      */
     private EsxiUtils esxi;
 
-    private VmwareMachineBasics utils;
-
-    public VmwareMachineBasics getUtilsVm()
-    {
-        return utils;
-    }
-
-    public EsxiUtils getUtilsEsxi()
+    public EsxiUtils getUtils()
     {
         return esxi;
     }
+
+    // private VmwareMachineBasics utils;
+    //
+    // public VmwareMachineBasics getUtilsVm()
+    // {
+    // return utils;
+    // }
+    //
+    // public EsxiUtils getUtilsEsxi()
+    // {
+    // return esxi;
+    // }
 
     @Override
     public void connectAndLogin(HypervisorConnection hconn) throws VirtualFactoryException
@@ -78,11 +80,10 @@ public class VmwareHypervisor implements IHypervisor
 
             esxi = createConnection(hconn);
 
-            utils = new VmwareMachineBasics(esxi);
-
-            utils.checkLicense();
+            esxi.getUtilBasics().checkLicense();
             String datasoreRepositoryName =
-                utils.getAndCheckRepositoryDatastore(globalConfig.getRepositoryLocation());
+                esxi.getUtilBasics().getAndCheckRepositoryDatastore(
+                    globalConfig.getRepositoryLocation());
             // TODO WTF set set set
             globalConfig.setRepositoryDatastore(datasoreRepositoryName);
 
@@ -145,7 +146,7 @@ public class VmwareHypervisor implements IHypervisor
     }
 
     @Override
-    public IVirtualMachine getMachine(String vmachineId)
+    public IVirtualMachine getMachine(String vmachineId) throws VirtualFactoryException
     {
         // // Gets the VMWare API main interface
         // init(this.url, this.user, this.password);
@@ -162,10 +163,17 @@ public class VmwareHypervisor implements IHypervisor
 
             if (machinemoruuid != null)
             {
-                virtualMachineConfig.setHypervisor(this);
-                AbsVirtualMachine vm = createMachine(virtualMachineConfig);
-                vm.setState(State.DEPLOYED);
-                return vm;
+                // TODO TODO TODO TODO TODO TODO
+                // virtualMachineConfig.setHypervisor(this);
+                // AbsVirtualMachine vm = createMachine(virtualMachineConfig);
+                //
+                // AbsVmwareMachine vm = new VmwareMachine(vmdef, hypervisor);
+                // vm.setState(State.DEPLOYED);
+                //
+                //
+                // return vm;
+                return null;
+
             }
             else
             {

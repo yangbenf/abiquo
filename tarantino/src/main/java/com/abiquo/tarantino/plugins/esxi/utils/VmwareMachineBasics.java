@@ -331,14 +331,14 @@ public class VmwareMachineBasics
      */
     public VirtualMachineConfigSpec createVmConfigSpec(String vmName, String datastoreName,
         long diskSize, ManagedObjectReference computeResMor, ManagedObjectReference hostMor,
-        List<VirtualNIC> vnicList, String rdmIQN, VmwareMachineDisk disks)
+        String rdmIQN)// , VmwareMachineDisk disks)
         throws VirtualFactoryException
     {
         int diskCtlrKey = 1; // TODO ????
 
         ConfigTarget configTarget = utils.getConfigTargetForHost(computeResMor, hostMor);
 
-        String networkName = getNetworkName(configTarget);
+        // String networkName = getNetworkName(configTarget);
 
         ManagedObjectReference datastoreRef = getDatastore(configTarget, datastoreName);
         String datastoreVolume = getVolumeName(datastoreName);
@@ -362,7 +362,6 @@ public class VmwareMachineBasics
         }
 
         // Add a NIC. the network Name must be set as the device name to create the NIC.//AQUI!!!
-        List<VirtualDeviceConfigSpec> nicSpecList = configureNetworkInterfaces(vnicList);
 
         List<VirtualDeviceConfigSpec> configSpecList = new LinkedList<VirtualDeviceConfigSpec>();
         configSpecList.add(scsiSpec);
@@ -376,7 +375,8 @@ public class VmwareMachineBasics
             configSpecList.add(cdSpec);
         }
 
-        configSpecList.addAll(nicSpecList);
+        // List<VirtualDeviceConfigSpec> nicSpecList = configureNetworkInterfaces(vnicList);
+        // configSpecList.addAll(nicSpecList);
 
         VirtualMachineConfigSpec configSpec = new VirtualMachineConfigSpec();
         configSpec.setFiles(vmfi);
@@ -572,8 +572,6 @@ public class VmwareMachineBasics
     // floppy.setKey(3);
     // floppySpec.setDevice(floppy);
 
-  
-
     /**
      * // * Open a session to the VMWare ESXi // * // * @throws VirtualMachineException // * @throws
      * HypervisorException //
@@ -599,7 +597,7 @@ public class VmwareMachineBasics
     // }
 
     /** Tasks to be required for a VM to change its state. */
-    enum VMTasks
+    public enum VMTasks
     {
         PAUSE, POWER_OFF, POWER_ON, RESET, RESUME, DELETE
     };
@@ -607,7 +605,7 @@ public class VmwareMachineBasics
     /**
      * Call the API service to achieve the desired Task on the current VM.
      */
-    private void executeTask(final VMTasks task, VirtualMachine vm) throws VirtualFactoryException
+    public void executeTask(final VMTasks task, VirtualMachine vm) throws VirtualFactoryException
     {
         // TODO utils.reconnect();
 

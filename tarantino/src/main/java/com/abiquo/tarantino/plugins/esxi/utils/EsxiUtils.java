@@ -34,11 +34,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import com.abiquo.tarantino.plugins.esxi.VirtualMachineException;
-import com.abiquo.tarantino.plugins.esxi.AbsVmwareMachine.VMTasks;
 import com.vmware.vim25.ConfigTarget;
 import com.vmware.vim25.DynamicProperty;
-import com.vmware.vim25.GenericVmConfigFault;
 import com.vmware.vim25.HostConfigInfo;
 import com.vmware.vim25.HostNetworkInfo;
 import com.vmware.vim25.HostVirtualSwitch;
@@ -80,13 +77,34 @@ import com.vmware.vim25.mo.HostSystem;
 import com.vmware.vim25.mo.InventoryNavigator;
 import com.vmware.vim25.mo.ManagedEntity;
 import com.vmware.vim25.mo.ServiceInstance;
-import com.vmware.vim25.mo.Task;
 import com.vmware.vim25.mo.VirtualMachine;
 import com.vmware.vim25.mo.util.OptionSpec;
 import com.vmware.vim25.mo.util.PropertyCollectorUtil;
+import com.vmware.vim25.ws.VimStub;
 
 public class EsxiUtils extends EsxiVim25Util
 {
+
+    private VmwareMachineNetwork netUtils;
+
+    private VmwareMachineDisk diskUtils;
+
+    private VmwareMachineBasics basicUtils;
+
+    public VmwareMachineNetwork getUtilNetwork()
+    {
+        return netUtils;
+    }
+
+    public VmwareMachineDisk getUtilDisks()
+    {
+        return diskUtils;
+    }
+
+    public VmwareMachineBasics getUtilBasics()
+    {
+        return basicUtils;
+    }
 
     class EsxiUtilsException extends RuntimeException
     {
@@ -122,6 +140,10 @@ public class EsxiUtils extends EsxiVim25Util
         Map<String, String> optsEntered)
     {
         super(serviceInstance, options, optsEntered);
+
+        netUtils = new VmwareMachineNetwork(this);
+        basicUtils = new VmwareMachineBasics(this);
+        diskUtils = new VmwareMachineDisk(this);
     }
 
     /**
@@ -261,6 +283,14 @@ public class EsxiUtils extends EsxiVim25Util
         ManagedObjectReference hfmor = getMoRefProp(dcmor, "hostFolder");
         return hfmor;
     }
+    
+    
+    public ManagedObjectReference getHostFolder()
+    {
+        return getHostFolder(getDatacenterMor());
+    }
+    
+    
 
     /**
      * This method returns a MoRef to the HostSystem with the supplied name under the supplied
@@ -1463,6 +1493,36 @@ public class EsxiUtils extends EsxiVim25Util
         return getHostSystemMor(dcmor, hfmor);
     }
 
+    public ManagedObjectReference getDatacenterMor() throws EsxiUtilsException
+    {
+        ManagedObjectReference dcmor;
+
+        String dcName = getSessionOption("datacentername");
+
+        if (dcName == null)
+        {
+            throw new EsxiUtilsException("''datacentername'' option is not set");
+        }
+
+        try
+        {
+            dcmor = getDecendentMoRef(null, "Datacenter", dcName);
+
+            if (dcmor == null)
+            {
+                throw new EsxiUtilsException(String.format("Datacenter [%s] not found.", dcName));
+            }
+        }
+        catch (Exception e)
+        {
+            String msg = String.format("Datacenter [%s] not found.", dcName);
+            logger.error(msg);
+            throw new EsxiUtilsException(msg);
+        }
+
+        return dcmor;
+    }
+
     /**
      * Gets the host system from a given datacenter and host folder. If not specified the
      * ''hostname'' option use the first decendent on the datacenter.
@@ -1813,7 +1873,7 @@ public class EsxiUtils extends EsxiVim25Util
 
     public VirtualMachinePowerState getVmState(String vmName) throws EsxiUtilsException
     {
-        getVm(vmName).getRuntime().getPowerState();
+        return getVm(vmName).getRuntime().getPowerState();
     }
 
     public boolean isVMAlreadyCreated(String vmUuid)
@@ -1963,6 +2023,11 @@ public class EsxiUtils extends EsxiVim25Util
         }
         raInfo.setShares(sharesInfo);
         return raInfo;
+    }
+
+    public VimStub getVimStub()
+    {
+        return getServiceInstance().getServerConnection().getVimService();
     }
 
 }
