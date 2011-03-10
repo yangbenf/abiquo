@@ -403,7 +403,7 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
          * TODO state switch
          */
 
-        return com.abiquo.commons.amqp.impl.datacenter.domain.jobs.State.DEPLOYED;
+        return com.abiquo.commons.amqp.impl.datacenter.domain.jobs.State.CONFIGURED;
 
     }
 
