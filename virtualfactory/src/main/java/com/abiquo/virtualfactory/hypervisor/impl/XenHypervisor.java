@@ -23,8 +23,11 @@ package com.abiquo.virtualfactory.hypervisor.impl;
 
 import java.net.URL;
 
+import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.virtualfactory.exception.HypervisorException;
+import com.abiquo.virtualfactory.hypervisor.Hypervisor;
 
+@Hypervisor(type = HypervisorType.XEN_3)
 public class XenHypervisor extends AbsLibvirtHypervisor
 {
     /**

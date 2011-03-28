@@ -31,7 +31,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.abiquo.commons.amqp.impl.vsm.VSMConfiguration;
+import com.abiquo.commons.amqp.config.DefaultConfiguration;
 import com.abiquo.commons.amqp.util.RabbitMQUtils;
 import com.abiquo.vsm.VSMManager;
 import com.abiquo.vsm.redis.dao.RedisDao;
@@ -63,8 +63,8 @@ public class ConsoleServlet extends HttpServlet
         config.put("Redis host", vsmManager.getRedisHost());
         config.put("Redis port", vsmManager.getRedisPort());
 
-        config.put("RabbitMQ host", VSMConfiguration.getInstance().getRabbitMQHost());
-        config.put("RabbitMQ port", VSMConfiguration.getInstance().getRabbitMQPort());
+        config.put("RabbitMQ host", DefaultConfiguration.getHost());
+        config.put("RabbitMQ port", DefaultConfiguration.getPort());
 
         request.setAttribute("checks", checks);
         request.setAttribute("config", config);

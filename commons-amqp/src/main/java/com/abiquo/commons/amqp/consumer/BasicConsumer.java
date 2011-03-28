@@ -25,44 +25,45 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.abiquo.commons.amqp.config.ConnectionFactory;
 import com.abiquo.commons.amqp.config.DefaultConfiguration;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.ShutdownListener;
 import com.rabbitmq.client.ShutdownSignalException;
 
-public abstract class BasicConsumer<C extends DefaultConfiguration, T> implements ShutdownListener
+public abstract class BasicConsumer<T> implements ShutdownListener
 {
+    protected QueueSubscriber<BasicConsumer<T>> consumer;
+
     protected Set<T> callbacks;
 
-    protected C config;
+    protected DefaultConfiguration configuration;
 
     protected Channel channel;
 
-    protected QueueSubscriber<BasicConsumer<C, T>> consumer;
-
     protected String queueName;
 
-    public BasicConsumer(String queue)
+    public BasicConsumer(DefaultConfiguration configuration, String queue)
     {
-        callbacks = new HashSet<T>();
-        config = configurationInstance();
-        queueName = queue;
-        channel = null;
-        consumer = null;
+        this.callbacks = new HashSet<T>();
+        this.configuration = configuration;
+        this.queueName = queue;
+        this.channel = null;
+        this.consumer = null;
     }
 
     public void start() throws IOException
     {
         if (channel == null || !channel.isOpen())
         {
-            channel = config.createChannel();
+            channel = ConnectionFactory.getInstance().createChannel();
             channel.addShutdownListener(this);
             channel.basicQos(getPrefetchCount());
 
-            config.declareBrokerConfiguration(channel);
+            configuration.declareBrokerConfiguration(channel);
 
-            consumer = new QueueSubscriber<BasicConsumer<C, T>>(channel, this);
+            consumer = new QueueSubscriber<BasicConsumer<T>>(channel, this);
             channel.basicConsume(queueName, false, consumer);
         }
     }
@@ -73,7 +74,7 @@ public abstract class BasicConsumer<C extends DefaultConfiguration, T> implement
         {
             channel.basicCancel(consumer.getConsumerTag());
             channel.removeShutdownListener(this);
-            channel = config.closeChannel(channel);
+            channel.close();
         }
     }
 
@@ -90,10 +91,7 @@ public abstract class BasicConsumer<C extends DefaultConfiguration, T> implement
     @Override
     public void shutdownCompleted(ShutdownSignalException cause)
     {
-
     }
 
     public abstract void consume(Envelope envelope, byte[] body) throws IOException;
-
-    public abstract C configurationInstance();
 }

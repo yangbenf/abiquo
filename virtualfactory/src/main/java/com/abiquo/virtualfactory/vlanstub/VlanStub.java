@@ -23,22 +23,13 @@ package com.abiquo.virtualfactory.vlanstub;
 
 import java.net.URL;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.abiquo.aimstub.Aim.Iface;
 import com.abiquo.aimstub.TTransportProxy;
 import com.abiquo.aimstub.VLanException;
-import com.abiquo.aimstub.Aim.Iface;
-import com.abiquo.virtualfactory.model.AbiCloudModel;
-import com.abiquo.virtualfactory.model.config.Configuration;
-import com.abiquo.virtualfactory.vlan.VLANCreate;
-import com.abiquo.virtualfactory.vlan.VLANDelete;
-import com.abiquo.virtualfactory.vlan.VLANGet;
-import com.abiquo.virtualfactory.vlan.VLANPut;
 
 public class VlanStub
 {

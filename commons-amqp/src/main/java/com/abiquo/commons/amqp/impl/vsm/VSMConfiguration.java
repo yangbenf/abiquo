@@ -39,18 +39,6 @@ public class VSMConfiguration extends DefaultConfiguration
 
     public static final String VSM_ROUTING_KEY = "";
 
-    private static VSMConfiguration singleton = null;
-
-    public static VSMConfiguration getInstance()
-    {
-        if (singleton == null)
-        {
-            singleton = new VSMConfiguration();
-        }
-
-        return singleton;
-    }
-
     @Override
     public void declareBrokerConfiguration(Channel channel) throws IOException
     {

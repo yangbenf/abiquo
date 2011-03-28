@@ -31,17 +31,11 @@ import com.abiquo.commons.amqp.consumer.BasicConsumer;
 import com.abiquo.commons.amqp.impl.am.domain.OVFPackageInstanceStatusEvent;
 import com.rabbitmq.client.Envelope;
 
-public class AMConsumer extends BasicConsumer<AMConfiguration, AMCallback>
+public class AMConsumer extends BasicConsumer<AMCallback>
 {
     public AMConsumer()
     {
-        super(AM_QUEUE);
-    }
-
-    @Override
-    public AMConfiguration configurationInstance()
-    {
-        return AMConfiguration.getInstance();
+        super(new AMConfiguration(), AM_QUEUE);
     }
 
     @Override

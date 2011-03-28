@@ -35,9 +35,11 @@ import org.virtualbox_4_0.IVirtualBox;
 import org.virtualbox_4_0.VirtualBoxManager;
 import org.virtualbox_4_0.jaxws.VboxPortType;
 
+import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.virtualfactory.constants.MessageValues;
 import com.abiquo.virtualfactory.exception.HypervisorException;
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
+import com.abiquo.virtualfactory.hypervisor.Hypervisor;
 import com.abiquo.virtualfactory.machine.impl.VirtualBoxMachine;
 import com.abiquo.virtualfactory.model.AbsVirtualMachine;
 import com.abiquo.virtualfactory.model.IHypervisor;
@@ -48,6 +50,7 @@ import com.sun.xml.ws.developer.JAXWSProperties;
 /**
  * The Class VirtualBoxHypervisor represents the VirtualBox hypervisor.
  */
+@Hypervisor(type = HypervisorType.VBOX)
 public class VirtualBoxHypervisor implements IHypervisor
 {
 
