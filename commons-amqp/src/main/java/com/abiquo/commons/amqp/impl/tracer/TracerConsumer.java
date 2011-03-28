@@ -31,17 +31,11 @@ import com.abiquo.commons.amqp.consumer.BasicConsumer;
 import com.abiquo.commons.amqp.impl.tracer.domain.Trace;
 import com.rabbitmq.client.Envelope;
 
-public class TracerConsumer extends BasicConsumer<TracerConfiguration, TracerCallback>
+public class TracerConsumer extends BasicConsumer<TracerCallback>
 {
     public TracerConsumer()
     {
-        super(TRACER_QUEUE);
-    }
-
-    @Override
-    public TracerConfiguration configurationInstance()
-    {
-        return TracerConfiguration.getInstance();
+        super(new TracerConfiguration(), TRACER_QUEUE);
     }
 
     @Override

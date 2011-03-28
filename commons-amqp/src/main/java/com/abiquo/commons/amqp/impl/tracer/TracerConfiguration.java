@@ -39,18 +39,6 @@ public class TracerConfiguration extends DefaultConfiguration
 
     public static final String TRACER_QUEUE = TRACER_ROUTING_KEY;
 
-    private static TracerConfiguration singleton = null;
-
-    public static TracerConfiguration getInstance()
-    {
-        if (singleton == null)
-        {
-            singleton = new TracerConfiguration();
-        }
-
-        return singleton;
-    }
-
     @Override
     public void declareBrokerConfiguration(Channel channel) throws IOException
     {

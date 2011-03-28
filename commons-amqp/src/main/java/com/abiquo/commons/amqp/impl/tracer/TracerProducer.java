@@ -30,12 +30,11 @@ import java.io.IOException;
 import com.abiquo.commons.amqp.impl.tracer.domain.Trace;
 import com.abiquo.commons.amqp.producer.BasicProducer;
 
-public class TracerProducer extends BasicProducer<TracerConfiguration, Trace>
+public class TracerProducer extends BasicProducer<Trace>
 {
-    @Override
-    public TracerConfiguration configurationInstance()
+    public TracerProducer()
     {
-        return TracerConfiguration.getInstance();
+        super(new TracerConfiguration());
     }
 
     @Override

@@ -62,7 +62,7 @@
 		<dependency>
 		  <groupId>com.abiquo</groupId>
 		  <artifactId>commons-amqp</artifactId>
-		  <version>${version}</version>
+		  <version>1.8.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.abiquo.abicloud</groupId>
@@ -201,6 +201,12 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
 			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>${spring.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<!--  JAXWS dependencies por VirtualBox -->
 		<dependency>
