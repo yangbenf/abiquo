@@ -21,17 +21,17 @@
 
 package com.abiquo.commons.amqp.impl.datacenter.domain.jobs.builder;
 
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.HypervisorConnection;
+import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.HypervisorConnectionDto;
 
 public class VirtualFactoryJobBuilder
 {
 
-    protected HypervisorConnection connection;
+    protected HypervisorConnectionDto connection;
 
     public VirtualFactoryJobBuilder connection(String hypervisorID, String hypervisortype,
         String ip, String port, String protocol, String loginUser, String loginPasswoed)
     {
-        connection = new HypervisorConnection();
+        connection = new HypervisorConnectionDto();
         connection.setHypervisorID(hypervisorID);
         connection.setHypervisortype(hypervisortype);
         connection.setIp(ip);

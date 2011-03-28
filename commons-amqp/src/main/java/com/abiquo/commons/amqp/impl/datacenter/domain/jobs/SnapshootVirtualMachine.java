@@ -76,7 +76,7 @@ import javax.xml.bind.annotation.XmlType;
 public class SnapshootVirtualMachine {
 
     @XmlElement(required = true)
-    protected HypervisorConnection hypervisorConnection;
+    protected HypervisorConnectionDto hypervisorConnection;
     @XmlElement(required = true)
     protected SnapshootVirtualMachine.SourceDisk sourceDisk;
     @XmlElement(required = true)
@@ -87,10 +87,10 @@ public class SnapshootVirtualMachine {
      * 
      * @return
      *     possible object is
-     *     {@link HypervisorConnection }
+     *     {@link HypervisorConnectionDto }
      *     
      */
-    public HypervisorConnection getHypervisorConnection() {
+    public HypervisorConnectionDto getHypervisorConnection() {
         return hypervisorConnection;
     }
 
@@ -99,10 +99,10 @@ public class SnapshootVirtualMachine {
      * 
      * @param value
      *     allowed object is
-     *     {@link HypervisorConnection }
+     *     {@link HypervisorConnectionDto }
      *     
      */
-    public void setHypervisorConnection(HypervisorConnection value) {
+    public void setHypervisorConnection(HypervisorConnectionDto value) {
         this.hypervisorConnection = value;
     }
 

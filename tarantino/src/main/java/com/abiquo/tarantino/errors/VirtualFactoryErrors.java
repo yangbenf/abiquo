@@ -28,6 +28,8 @@ package com.abiquo.tarantino.errors;
  */
 public enum VirtualFactoryErrors
 {
+	
+	VIRTUAL_MACHINE_NOT_EXIST("ASDFASF","ASDF"),
     CONFIG("asdf","asdfasdfasdfs"),
     RECONFIG("asdf","adsf"),
     DEPLOY("adfas","asdfasd"),

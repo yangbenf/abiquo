@@ -21,21 +21,22 @@
 
 package com.abiquo.tarantino.hypervisor;
 
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.HypervisorConnection;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachine;
+import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.HypervisorConnectionDto;
+import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
 import com.abiquo.tarantino.virtualmachine.IVirtualMachine;
 
-public interface IHypervisor
+public interface IHypervisorConnection
 {
+
     /**
-     * Check the connection with the hypervisor (or start) and check the loggin.
+     * Start a new connection to the hypervisor and login.
      */
-    public void connectAndLogin(HypervisorConnection connection) throws VirtualFactoryException;
+    public void login(HypervisorConnectionDto connection) throws VirtualFactoryException;
 
-    public void logout() throws VirtualFactoryException;
-
-    public IVirtualMachine createMachine(VirtualMachine vmachine) throws VirtualFactoryException;
-
-    public IVirtualMachine getMachine(String vmachineId) throws VirtualFactoryException;
+    /**
+     * Logout the user and close the connection to the hypervisor.
+     */
+    public void logout(HypervisorConnectionDto connection) throws VirtualFactoryException;
+    
 }

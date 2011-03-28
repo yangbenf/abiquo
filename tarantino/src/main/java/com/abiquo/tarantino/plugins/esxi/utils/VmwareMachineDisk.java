@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.DiskStandard;
 import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.SnapshootVirtualMachine;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachine.PrimaryDisk.DiskStandardConf;
+import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto.PrimaryDisk.DiskStandardConf;
 import com.abiquo.tarantino.errors.VirtualFactoryErrors;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
 import com.vmware.vim25.ManagedObjectReference;

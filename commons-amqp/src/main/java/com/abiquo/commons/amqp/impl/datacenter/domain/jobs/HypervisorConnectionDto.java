@@ -70,7 +70,7 @@ import javax.xml.bind.annotation.XmlType;
     "loginUser",
     "loginPassword"
 })
-public class HypervisorConnection {
+public class HypervisorConnectionDto {
 
     @XmlElement(required = true)
     protected String hypervisorID;

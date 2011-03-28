@@ -24,31 +24,43 @@ package com.abiquo.tarantino.virtualmachine;
 import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.DiskStandard;
 import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.SnapshootVirtualMachine;
 import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.State;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachine;
+import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto;
+import com.abiquo.tarantino.hypervisor.IHypervisorConnection;
 
 public interface IVirtualMachine
 {
-    
-    
-    
-    // String getName();
-    
-    void applyState(State newState);
+	boolean exist(IHypervisorConnection connection, VirtualMachineDefinitionDto vmdefinition);
+	
+    State getState(IHypervisorConnection connection, VirtualMachineDefinitionDto vmdefinition);
 
-    State getState();
-
-    // TODO powerObn ----
-    void deploy(); // state
+    /**
+     * Creates a new virtual machine instance
+     */
+    void doConfigure(IHypervisorConnection connection, VirtualMachineDefinitionDto vmdefinition);
     
-    void delete(); // state
+    /**
+     * Destroy the virtual machine
+     */
+    void doDeconfigure(IHypervisorConnection connection, VirtualMachineDefinitionDto vmdefinition);  
     
-    public void reconfigure(VirtualMachine vmachine); // lo que deixem cambiar
+    void doPowerOn(IHypervisorConnection connection, VirtualMachineDefinitionDto vmdefinition);
+    
+    void doPowerOff(IHypervisorConnection connection, VirtualMachineDefinitionDto vmdefinition);
+    
+    void doReset(IHypervisorConnection connection, VirtualMachineDefinitionDto vmdefinition);
+    
+    void doPause(IHypervisorConnection connection, VirtualMachineDefinitionDto vmdefinition);
+    
+    void doResume(IHypervisorConnection connection, VirtualMachineDefinitionDto vmdefinition);
+    
+    /**
+     * Copy disk 
+     */
+    void doSnapshot(IHypervisorConnection connection, VirtualMachineDefinitionDto vmdefinition, DiskStandard destinationDisk);
+ 
+    
+    void reconfigure(IHypervisorConnection connection, VirtualMachineDefinitionDto currentvmachine,VirtualMachineDefinitionDto newvmachine); // lo que deixem cambiar
 
-    public boolean exist();
-
-    public void snapshoot(SnapshootVirtualMachine.SourceDisk sourceDisk,
-        DiskStandard destinationDisk);
-
-    // TODO virtual machine to vmconfig descriptor
-    public VirtualMachine getVirtualMachine();
+    
+    // public VirtualMachineDefinitionDto getVirtualMachine();
 }

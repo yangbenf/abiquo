@@ -40,6 +40,9 @@ public enum StateTransaction
     // Configure transaction
     CONFIGURE(singleton(UNDEPLOYED), CONFIGURED),
 
+    // Reconfigure transaction
+    RECONFIGURE(singleton(OFF), CONFIGURED),
+    
     // Deconfigure transaction
     DECONFIGURE(singleton(CONFIGURED), UNDEPLOYED),
 

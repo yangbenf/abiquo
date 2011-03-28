@@ -30,11 +30,11 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.HypervisorConnection;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachine;
+import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.HypervisorConnectionDto;
+import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto;
 import com.abiquo.tarantino.errors.VirtualFactoryErrors;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
-import com.abiquo.tarantino.hypervisor.IHypervisor;
+import com.abiquo.tarantino.hypervisor.IHypervisorConnection;
 import com.abiquo.tarantino.plugins.esxi.utils.EsxiUtils;
 import com.abiquo.tarantino.virtualmachine.IVirtualMachine;
 import com.vmware.vim25.ManagedObjectReference;
@@ -42,7 +42,7 @@ import com.vmware.vim25.mo.ServiceInstance;
 import com.vmware.vim25.mo.util.OptionSpec;
 
 // TODO @Hypervisor(type = HypervisorType.VMX_04)
-public class VmwareHypervisor implements IHypervisor
+public class VmwareHypervisor implements IHypervisorConnection
 {
 
     /** The Constant logger. */
@@ -71,7 +71,7 @@ public class VmwareHypervisor implements IHypervisor
     // }
 
     @Override
-    public void connectAndLogin(HypervisorConnection hconn) throws VirtualFactoryException
+    public void connectAndLogin(HypervisorConnectionDto hconn) throws VirtualFactoryException
     {
 
         try
@@ -98,7 +98,7 @@ public class VmwareHypervisor implements IHypervisor
         }
     }
 
-    private EsxiUtils createConnection(HypervisorConnection hconn) throws VirtualFactoryException
+    private EsxiUtils createConnection(HypervisorConnectionDto hconn) throws VirtualFactoryException
     {
 
         ServiceInstance serviceInstance;
@@ -139,7 +139,7 @@ public class VmwareHypervisor implements IHypervisor
     }
 
     @Override
-    public IVirtualMachine createMachine(VirtualMachine vmachine)
+    public IVirtualMachine createMachine(VirtualMachineDefinitionDto vmachine)
     {
         // TODO Auto-generated method stub
         return null;
@@ -196,7 +196,7 @@ public class VmwareHypervisor implements IHypervisor
 
     private VmwareHypervisorConfig globalConfig = new VmwareHypervisorConfig();
 
-    private Map<String, String> builtinOptionsEntered(HypervisorConnection hconn,
+    private Map<String, String> builtinOptionsEntered(HypervisorConnectionDto hconn,
         String urlConnection)
     {
         HashMap<String, String> optsEntered = new HashMap<String, String>();

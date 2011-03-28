@@ -65,27 +65,27 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link VirtualMachine.SecondaryDisks }
+     * Create an instance of {@link VirtualMachineDefinitionDto.SecondaryDisks }
      * 
      */
-    public VirtualMachine.SecondaryDisks createVirtualMachineSecondaryDisks() {
-        return new VirtualMachine.SecondaryDisks();
+    public VirtualMachineDefinitionDto.SecondaryDisks createVirtualMachineSecondaryDisks() {
+        return new VirtualMachineDefinitionDto.SecondaryDisks();
     }
 
     /**
-     * Create an instance of {@link VirtualMachine.PrimaryDisk }
+     * Create an instance of {@link VirtualMachineDefinitionDto.PrimaryDisk }
      * 
      */
-    public VirtualMachine.PrimaryDisk createVirtualMachinePrimaryDisk() {
-        return new VirtualMachine.PrimaryDisk();
+    public VirtualMachineDefinitionDto.PrimaryDisk createVirtualMachinePrimaryDisk() {
+        return new VirtualMachineDefinitionDto.PrimaryDisk();
     }
 
     /**
-     * Create an instance of {@link VirtualMachine.PrimaryDisk.DiskStandardConf }
+     * Create an instance of {@link VirtualMachineDefinitionDto.PrimaryDisk.DiskStandardConf }
      * 
      */
-    public VirtualMachine.PrimaryDisk.DiskStandardConf createVirtualMachinePrimaryDiskDiskStandardConf() {
-        return new VirtualMachine.PrimaryDisk.DiskStandardConf();
+    public VirtualMachineDefinitionDto.PrimaryDisk.DiskStandardConf createVirtualMachinePrimaryDiskDiskStandardConf() {
+        return new VirtualMachineDefinitionDto.PrimaryDisk.DiskStandardConf();
     }
 
     /**
@@ -97,11 +97,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link HypervisorConnection }
+     * Create an instance of {@link HypervisorConnectionDto }
      * 
      */
-    public HypervisorConnection createHypervisorConnection() {
-        return new HypervisorConnection();
+    public HypervisorConnectionDto createHypervisorConnection() {
+        return new HypervisorConnectionDto();
     }
 
     /**
@@ -137,11 +137,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link VirtualMachine }
+     * Create an instance of {@link VirtualMachineDefinitionDto }
      * 
      */
-    public VirtualMachine createVirtualMachine() {
-        return new VirtualMachine();
+    public VirtualMachineDefinitionDto createVirtualMachine() {
+        return new VirtualMachineDefinitionDto();
     }
 
     /**
@@ -177,11 +177,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link VirtualMachine.NetworkConf }
+     * Create an instance of {@link VirtualMachineDefinitionDto.NetworkConf }
      * 
      */
-    public VirtualMachine.NetworkConf createVirtualMachineNetworkConf() {
-        return new VirtualMachine.NetworkConf();
+    public VirtualMachineDefinitionDto.NetworkConf createVirtualMachineNetworkConf() {
+        return new VirtualMachineDefinitionDto.NetworkConf();
     }
 
     /**
@@ -202,12 +202,12 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link HypervisorConnection }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link HypervisorConnectionDto }{@code >}}
      * 
      */
     @XmlElementDecl(namespace = "http://abiquo.com/tarantino/model/jobs", name = "HypervisorConnection")
-    public JAXBElement<HypervisorConnection> createHypervisorConnection(HypervisorConnection value) {
-        return new JAXBElement<HypervisorConnection>(_HypervisorConnection_QNAME, HypervisorConnection.class, null, value);
+    public JAXBElement<HypervisorConnectionDto> createHypervisorConnection(HypervisorConnectionDto value) {
+        return new JAXBElement<HypervisorConnectionDto>(_HypervisorConnection_QNAME, HypervisorConnectionDto.class, null, value);
     }
 
     /**

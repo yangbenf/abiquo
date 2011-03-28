@@ -27,11 +27,11 @@ import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.DiskDesc;
 import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.DiskStandard;
 import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.DiskStatefull;
 import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.HardwareConf;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachine;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachine.NetworkConf;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachine.PrimaryDisk;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachine.PrimaryDisk.DiskStandardConf;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachine.SecondaryDisks;
+import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto;
+import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto.NetworkConf;
+import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto.PrimaryDisk;
+import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto.PrimaryDisk.DiskStandardConf;
+import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto.SecondaryDisks;
 import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualNIC;
 
 public class CreateVirtualMachineJobBuilder extends VirtualFactoryJobBuilder
@@ -91,7 +91,7 @@ public class CreateVirtualMachineJobBuilder extends VirtualFactoryJobBuilder
         disk.setDatastore(sourceDatastore);
         disk.setPath(sourcePath);
 
-        VirtualMachine.PrimaryDisk.DiskStandardConf standard = new DiskStandardConf();
+        VirtualMachineDefinitionDto.PrimaryDisk.DiskStandardConf standard = new DiskStandardConf();
         standard.setDiskStandard(disk);
         standard.setDestinationDatastore(destinationDatastore);
 
@@ -133,7 +133,7 @@ public class CreateVirtualMachineJobBuilder extends VirtualFactoryJobBuilder
 
     public CreateVirtualMachine build(String virtualMachineId)
     {
-        VirtualMachine virtualMachine = new VirtualMachine();
+        VirtualMachineDefinitionDto virtualMachine = new VirtualMachineDefinitionDto();
         // TODO check not null
         virtualMachine.setMachineID(virtualMachineId);
         virtualMachine.setHardwareConf(hardConf);

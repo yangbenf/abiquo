@@ -28,8 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.SnapshootVirtualMachine;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachine.PrimaryDisk.DiskStandardConf;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachine.SecondaryDisks;
+import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto.PrimaryDisk.DiskStandardConf;
+import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto.SecondaryDisks;
 import com.abiquo.tarantino.errors.VirtualFactoryErrors;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
 import com.abiquo.tarantino.plugins.esxi.utils.VmwareMachineBasics.VMTasks;
@@ -56,7 +56,7 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
 
     protected VmwareHypervisor hypervisor;
 
-    protected com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachine vmdef;
+    protected com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto vmdef;
 
     /**
      * The standard constructor
@@ -65,7 +65,7 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
      * @throws VirtualMachineException
      */
     public AbsVmwareMachine(
-        com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachine vmdef,
+        com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto vmdef,
         VmwareHypervisor hypervisor)
     {
         // super(configuration);
@@ -249,7 +249,7 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
 
     // @Override
     public void reconfigVM(
-        com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachine newVmDesc)
+        com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto newVmDesc)
         throws VirtualFactoryException
     {
         ResourceAllocationInfo raRAM;
@@ -326,13 +326,13 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
     }
 
     private boolean isRamSet(
-        com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachine newVmDef)
+        com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto newVmDef)
     {
         return newVmDef.getHardwareConf().getRamInMb() != vmdef.getHardwareConf().getRamInMb();
     }
 
     private boolean isCpuSet(
-        com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachine newVmDef)
+        com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto newVmDef)
     {
         return newVmDef.getHardwareConf().getVirtualCpu() != vmdef.getHardwareConf()
             .getVirtualCpu();

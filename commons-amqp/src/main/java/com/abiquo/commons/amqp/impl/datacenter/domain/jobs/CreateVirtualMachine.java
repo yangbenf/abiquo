@@ -63,19 +63,19 @@ import javax.xml.bind.annotation.XmlType;
 public class CreateVirtualMachine {
 
     @XmlElement(required = true)
-    protected HypervisorConnection hypervisorConnection;
+    protected HypervisorConnectionDto hypervisorConnection;
     @XmlElement(required = true)
-    protected VirtualMachine virtualMahine;
+    protected VirtualMachineDefinitionDto virtualMahine;
 
     /**
      * Gets the value of the hypervisorConnection property.
      * 
      * @return
      *     possible object is
-     *     {@link HypervisorConnection }
+     *     {@link HypervisorConnectionDto }
      *     
      */
-    public HypervisorConnection getHypervisorConnection() {
+    public HypervisorConnectionDto getHypervisorConnection() {
         return hypervisorConnection;
     }
 
@@ -84,10 +84,10 @@ public class CreateVirtualMachine {
      * 
      * @param value
      *     allowed object is
-     *     {@link HypervisorConnection }
+     *     {@link HypervisorConnectionDto }
      *     
      */
-    public void setHypervisorConnection(HypervisorConnection value) {
+    public void setHypervisorConnection(HypervisorConnectionDto value) {
         this.hypervisorConnection = value;
     }
 
@@ -96,10 +96,10 @@ public class CreateVirtualMachine {
      * 
      * @return
      *     possible object is
-     *     {@link VirtualMachine }
+     *     {@link VirtualMachineDefinitionDto }
      *     
      */
-    public VirtualMachine getVirtualMahine() {
+    public VirtualMachineDefinitionDto getVirtualMahine() {
         return virtualMahine;
     }
 
@@ -108,10 +108,10 @@ public class CreateVirtualMachine {
      * 
      * @param value
      *     allowed object is
-     *     {@link VirtualMachine }
+     *     {@link VirtualMachineDefinitionDto }
      *     
      */
-    public void setVirtualMahine(VirtualMachine value) {
+    public void setVirtualMahine(VirtualMachineDefinitionDto value) {
         this.virtualMahine = value;
     }
 

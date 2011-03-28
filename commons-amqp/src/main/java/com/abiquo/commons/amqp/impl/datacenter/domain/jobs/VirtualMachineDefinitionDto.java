@@ -111,18 +111,18 @@ import javax.xml.bind.annotation.XmlType;
     "primaryDisk",
     "secondaryDisks"
 })
-public class VirtualMachine {
+public class VirtualMachineDefinitionDto {
 
     @XmlElement(required = true)
     protected String machineID;
     @XmlElement(required = true)
     protected HardwareConf hardwareConf;
     @XmlElement(required = true)
-    protected VirtualMachine.NetworkConf networkConf;
+    protected VirtualMachineDefinitionDto.NetworkConf networkConf;
     @XmlElement(required = true)
-    protected VirtualMachine.PrimaryDisk primaryDisk;
+    protected VirtualMachineDefinitionDto.PrimaryDisk primaryDisk;
     @XmlElement(required = true)
-    protected VirtualMachine.SecondaryDisks secondaryDisks;
+    protected VirtualMachineDefinitionDto.SecondaryDisks secondaryDisks;
 
     /**
      * Gets the value of the machineID property.
@@ -177,10 +177,10 @@ public class VirtualMachine {
      * 
      * @return
      *     possible object is
-     *     {@link VirtualMachine.NetworkConf }
+     *     {@link VirtualMachineDefinitionDto.NetworkConf }
      *     
      */
-    public VirtualMachine.NetworkConf getNetworkConf() {
+    public VirtualMachineDefinitionDto.NetworkConf getNetworkConf() {
         return networkConf;
     }
 
@@ -189,10 +189,10 @@ public class VirtualMachine {
      * 
      * @param value
      *     allowed object is
-     *     {@link VirtualMachine.NetworkConf }
+     *     {@link VirtualMachineDefinitionDto.NetworkConf }
      *     
      */
-    public void setNetworkConf(VirtualMachine.NetworkConf value) {
+    public void setNetworkConf(VirtualMachineDefinitionDto.NetworkConf value) {
         this.networkConf = value;
     }
 
@@ -201,10 +201,10 @@ public class VirtualMachine {
      * 
      * @return
      *     possible object is
-     *     {@link VirtualMachine.PrimaryDisk }
+     *     {@link VirtualMachineDefinitionDto.PrimaryDisk }
      *     
      */
-    public VirtualMachine.PrimaryDisk getPrimaryDisk() {
+    public VirtualMachineDefinitionDto.PrimaryDisk getPrimaryDisk() {
         return primaryDisk;
     }
 
@@ -213,10 +213,10 @@ public class VirtualMachine {
      * 
      * @param value
      *     allowed object is
-     *     {@link VirtualMachine.PrimaryDisk }
+     *     {@link VirtualMachineDefinitionDto.PrimaryDisk }
      *     
      */
-    public void setPrimaryDisk(VirtualMachine.PrimaryDisk value) {
+    public void setPrimaryDisk(VirtualMachineDefinitionDto.PrimaryDisk value) {
         this.primaryDisk = value;
     }
 
@@ -225,10 +225,10 @@ public class VirtualMachine {
      * 
      * @return
      *     possible object is
-     *     {@link VirtualMachine.SecondaryDisks }
+     *     {@link VirtualMachineDefinitionDto.SecondaryDisks }
      *     
      */
-    public VirtualMachine.SecondaryDisks getSecondaryDisks() {
+    public VirtualMachineDefinitionDto.SecondaryDisks getSecondaryDisks() {
         return secondaryDisks;
     }
 
@@ -237,10 +237,10 @@ public class VirtualMachine {
      * 
      * @param value
      *     allowed object is
-     *     {@link VirtualMachine.SecondaryDisks }
+     *     {@link VirtualMachineDefinitionDto.SecondaryDisks }
      *     
      */
-    public void setSecondaryDisks(VirtualMachine.SecondaryDisks value) {
+    public void setSecondaryDisks(VirtualMachineDefinitionDto.SecondaryDisks value) {
         this.secondaryDisks = value;
     }
 
@@ -356,7 +356,7 @@ public class VirtualMachine {
     public static class PrimaryDisk {
 
         @XmlElement(name = "DiskStandardConf")
-        protected VirtualMachine.PrimaryDisk.DiskStandardConf diskStandardConf;
+        protected VirtualMachineDefinitionDto.PrimaryDisk.DiskStandardConf diskStandardConf;
         protected DiskStatefull diskStatefull;
 
         /**
@@ -364,10 +364,10 @@ public class VirtualMachine {
          * 
          * @return
          *     possible object is
-         *     {@link VirtualMachine.PrimaryDisk.DiskStandardConf }
+         *     {@link VirtualMachineDefinitionDto.PrimaryDisk.DiskStandardConf }
          *     
          */
-        public VirtualMachine.PrimaryDisk.DiskStandardConf getDiskStandardConf() {
+        public VirtualMachineDefinitionDto.PrimaryDisk.DiskStandardConf getDiskStandardConf() {
             return diskStandardConf;
         }
 
@@ -376,10 +376,10 @@ public class VirtualMachine {
          * 
          * @param value
          *     allowed object is
-         *     {@link VirtualMachine.PrimaryDisk.DiskStandardConf }
+         *     {@link VirtualMachineDefinitionDto.PrimaryDisk.DiskStandardConf }
          *     
          */
-        public void setDiskStandardConf(VirtualMachine.PrimaryDisk.DiskStandardConf value) {
+        public void setDiskStandardConf(VirtualMachineDefinitionDto.PrimaryDisk.DiskStandardConf value) {
             this.diskStandardConf = value;
         }
 
