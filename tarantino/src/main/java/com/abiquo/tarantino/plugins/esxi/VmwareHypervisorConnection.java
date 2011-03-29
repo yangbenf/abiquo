@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.commons.amqp.impl.datacenter.domain.HypervisorConnection;
-import com.abiquo.tarantino.errors.VirtualFactoryErrors;
+import com.abiquo.tarantino.errors.VirtualFactoryError;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
 import com.abiquo.tarantino.hypervisor.IHypervisorConnection;
 import com.abiquo.tarantino.plugins.esxi.utils.EsxiUtils;
@@ -104,12 +104,12 @@ public class VmwareHypervisorConnection implements IHypervisorConnection
         }
         catch (RemoteException e)
         {
-            throw new VirtualFactoryException(VirtualFactoryErrors.HYPERVISOR_CONNECTION,
+            throw new VirtualFactoryException(VirtualFactoryError.HYPERVISOR_CONNECTION,
                 e.getMessage());
         }
         catch (MalformedURLException e)
         {
-            throw new VirtualFactoryException(VirtualFactoryErrors.HYPERVISOR_CONNECTION,
+            throw new VirtualFactoryException(VirtualFactoryError.HYPERVISOR_CONNECTION,
                 e.getMessage());
         }
     }

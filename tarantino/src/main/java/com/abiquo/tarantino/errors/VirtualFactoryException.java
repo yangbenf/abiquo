@@ -25,12 +25,12 @@ public class VirtualFactoryException extends Exception
 {
     private static final long serialVersionUID = -8193478568635170646L;
 
-    public VirtualFactoryException(VirtualFactoryErrors error)
+    public VirtualFactoryException(VirtualFactoryError error)
     {
         super(error.getMessage());
     }
 
-    public VirtualFactoryException(VirtualFactoryErrors error, String detail)
+    public VirtualFactoryException(VirtualFactoryError error, String detail)
     {
         super(error.getMessage() + "\n" + detail);
     }

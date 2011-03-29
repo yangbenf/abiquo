@@ -25,7 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition;
-import com.abiquo.tarantino.errors.VirtualFactoryErrors;
+import com.abiquo.tarantino.errors.VirtualFactoryError;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
 import com.abiquo.tarantino.utils.AddressingUtils;
 import com.vmware.vim25.ManagedObjectReference;
@@ -67,7 +67,7 @@ public class VmwareMachine extends AbsVmwareMachine
 
         if (vmdefinition.getPrimaryDisk().getDiskStandardConf() == null)
         {
-            throw new VirtualFactoryException(VirtualFactoryErrors.COMMUNITY_ONLY_STATELESS_DISKS);
+            throw new VirtualFactoryException(VirtualFactoryError.COMMUNITY_ONLY_STATELESS_DISKS);
         }
 
         final long diskSize =
@@ -132,7 +132,7 @@ public class VmwareMachine extends AbsVmwareMachine
         }
         catch (Exception e)
         {
-            throw new VirtualFactoryException(VirtualFactoryErrors.CONFIG, String.format(
+            throw new VirtualFactoryException(VirtualFactoryError.CONFIG, String.format(
                 "Virtual Machine : %s\nCaused by:%s", vmUuid, e.toString()));
         }
 
