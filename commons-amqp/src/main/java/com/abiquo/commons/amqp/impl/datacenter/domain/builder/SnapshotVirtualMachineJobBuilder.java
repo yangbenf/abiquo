@@ -24,11 +24,10 @@ package com.abiquo.commons.amqp.impl.datacenter.domain.builder;
 import com.abiquo.commons.amqp.impl.datacenter.domain.DiskDescription.DiskFormatType;
 import com.abiquo.commons.amqp.impl.datacenter.domain.DiskStandard;
 import com.abiquo.commons.amqp.impl.datacenter.domain.HypervisorConnection.HypervisorType;
-import com.abiquo.commons.amqp.impl.datacenter.domain.dto.SnapshotVirtualMachineDto;
+import com.abiquo.commons.amqp.impl.datacenter.domain.operations.SnapshotVirtualMachineOp;
 
 public class SnapshotVirtualMachineJobBuilder extends ConfigureVirtualMachineJobBuilder
 {
-
     private DiskStandard destination;
 
     public SnapshotVirtualMachineJobBuilder connection(HypervisorType hypervisortype, String ip,
@@ -37,7 +36,7 @@ public class SnapshotVirtualMachineJobBuilder extends ConfigureVirtualMachineJob
         super.connection(hypervisortype, ip, loginUser, loginPasswoed);
         return this;
     }
-    
+
     public SnapshotVirtualMachineJobBuilder setVirtualMachineDefinition(
         VirtualMachineDescriptionBuilder vmBuilder, String virtualMachineId)
     {
@@ -60,14 +59,13 @@ public class SnapshotVirtualMachineJobBuilder extends ConfigureVirtualMachineJob
         return this;
     }
 
-    public SnapshotVirtualMachineDto buildSnapshotVirtualMachineDto()
+    public SnapshotVirtualMachineOp buildSnapshotVirtualMachineDto()
     {
-        SnapshotVirtualMachineDto sn = new SnapshotVirtualMachineDto();
-        sn.hypervisorConnection = connection;
-        sn.virtualMachine = vmachineDefinition;
-        sn.destinationDisk = destination;
+        SnapshotVirtualMachineOp sn = new SnapshotVirtualMachineOp();
+        sn.setHypervisorConnection(connection);
+        sn.setVirtualMachine(vmachineDefinition);
+        sn.setDestinationDisk(destination);
 
         return sn;
     }
-
 }

@@ -19,19 +19,26 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.tarantino.errors;
+package com.abiquo.commons.amqp.impl.datacenter.domain.operations;
 
-public class VirtualFactoryException extends Exception
+import org.codehaus.jackson.annotate.JsonTypeInfo;
+import org.codehaus.jackson.annotate.JsonTypeInfo.As;
+import org.codehaus.jackson.annotate.JsonTypeInfo.Id;
+
+import com.abiquo.commons.amqp.impl.datacenter.domain.HypervisorConnection;
+
+@JsonTypeInfo(use = Id.CLASS, include = As.PROPERTY, property = "@class")
+public class BasicDatacenterOp
 {
-    private static final long serialVersionUID = -8193478568635170646L;
+    protected HypervisorConnection hypervisorConnection;
 
-    public VirtualFactoryException(VirtualFactoryErrors error)
+    public HypervisorConnection getHypervisorConnection()
     {
-        super(error.getMessage());
+        return hypervisorConnection;
     }
 
-    public VirtualFactoryException(VirtualFactoryErrors error, String detail)
+    public void setHypervisorConnection(HypervisorConnection hypervisorConnection)
     {
-        super(error.getMessage() + "\n" + detail);
+        this.hypervisorConnection = hypervisorConnection;
     }
 }

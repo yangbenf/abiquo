@@ -154,5 +154,4 @@ public class VirtualNIC extends DHCPRule
     {
         this.sequence = value;
     }
-
 }

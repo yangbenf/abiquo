@@ -19,24 +19,22 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.commons.amqp.impl.datacenter.domain.dto;
+package com.abiquo.commons.amqp.impl.datacenter.domain.operations;
 
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition;
-import com.abiquo.commons.amqp.util.JSONUtils;
 
-public class ReconfigureVirtualMachineDto extends ConfigureVirtualMachineDto
+// Used by exist operation
+public class ConfigureVirtualMachineOp extends BasicDatacenterOp
 {
+    protected VirtualMachineDefinition virtualMachine;
 
-    public VirtualMachineDefinition newVirtualMachine;
-
-    @Override
-    public byte[] toByteArray()
+    public VirtualMachineDefinition getVirtualMachine()
     {
-        return JSONUtils.serialize(this);
+        return virtualMachine;
     }
 
-    public static ReconfigureVirtualMachineDto fromByteArray(final byte[] bytes)
+    public void setVirtualMachine(VirtualMachineDefinition virtualMachine)
     {
-        return JSONUtils.deserialize(bytes, ReconfigureVirtualMachineDto.class);
+        this.virtualMachine = virtualMachine;
     }
 }

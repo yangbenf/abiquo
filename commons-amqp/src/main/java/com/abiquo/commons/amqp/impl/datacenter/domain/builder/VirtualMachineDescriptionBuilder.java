@@ -32,7 +32,7 @@ import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.N
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.PrimaryDisk;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.PrimaryDisk.DiskStandardConfiguration;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.SecondaryDisks;
-import com.abiquo.commons.amqp.impl.datacenter.domain.dto.ConfigureVirtualMachineDto;
+import com.abiquo.commons.amqp.impl.datacenter.domain.operations.ConfigureVirtualMachineOp;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualNIC;
 
 public class VirtualMachineDescriptionBuilder
