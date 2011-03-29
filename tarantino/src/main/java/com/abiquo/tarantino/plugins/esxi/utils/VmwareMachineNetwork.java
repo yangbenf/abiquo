@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualNIC;
-import com.abiquo.tarantino.errors.VirtualFactoryErrors;
+import com.abiquo.tarantino.errors.VirtualFactoryError;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
 import com.abiquo.tarantino.plugins.esxi.utils.EsxiUtils.EsxiUtilsException;
 import com.vmware.vim25.ConfigTarget;
@@ -48,10 +48,13 @@ import com.vmware.vim25.VirtualEthernetCardNetworkBackingInfo;
 import com.vmware.vim25.VirtualMachineConfigSpec;
 import com.vmware.vim25.VirtualMachineNetworkInfo;
 
+/**
+ * @author apuig (based on the great work of Pedro Navarro)
+ * */
 public class VmwareMachineNetwork
 {
 
-    private final static Logger logger = LoggerFactory.getLogger(VmwareMachineNetwork.class);
+//    private final static Logger logger = LoggerFactory.getLogger(VmwareMachineNetwork.class);
 
     private EsxiUtils utils;
 
@@ -59,18 +62,6 @@ public class VmwareMachineNetwork
     {
         this.utils = utils;
     }
-
-    // /////////////////////////////////////////////////////////////////////////
-    // /////////////////////////////////////////////////////////////////////////
-    // /////////////////////////////////////////////////////////////////////////
-    // /////////////////////////////////////////////////////////////////////////
-
-    // networking
-
-    // /////////////////////////////////////////////////////////////////////////
-    // /////////////////////////////////////////////////////////////////////////
-    // /////////////////////////////////////////////////////////////////////////
-    // /////////////////////////////////////////////////////////////////////////
 
     private String getNetworkName(ConfigTarget configTarget) throws VirtualFactoryException
     {
@@ -93,7 +84,7 @@ public class VmwareMachineNetwork
 
         if (networkName == null)
         {
-            throw new VirtualFactoryException(VirtualFactoryErrors.NETWORK_NOT_FOUND);
+            throw new VirtualFactoryException(VirtualFactoryError.NETWORK_NOT_FOUND);
         }
 
         return networkName;
@@ -144,7 +135,7 @@ public class VmwareMachineNetwork
         }
         catch (Exception e)
         {
-            throw new VirtualFactoryException(VirtualFactoryErrors.NETWORK_CONFIGURATION);
+            throw new VirtualFactoryException(VirtualFactoryError.NETWORK_CONFIGURATION);
         }
     }
 
@@ -180,14 +171,14 @@ public class VmwareMachineNetwork
                 }
                 else
                 {
-                    throw new VirtualFactoryException(VirtualFactoryErrors.NETWORK_VSWITCH_NOT_FOUND,
+                    throw new VirtualFactoryException(VirtualFactoryError.NETWORK_VSWITCH_NOT_FOUND,
                         vnic.getVSwitchName());
                 }
 
                 portgrp.setPolicy(new HostNetworkPolicy());
                 portgrp.setVlanId(Integer.valueOf(vnic.getVlanTag()));
 
-                logger.debug("Adding port group: " + portGroupName + " tagged with VLAN: "
+                utils.logger.debug("Adding port group: " + portGroupName + " tagged with VLAN: "
                     + vnic.getVlanTag() + " to Virtual Switch " + vnic.getVSwitchName());
 
                 try
@@ -203,7 +194,7 @@ public class VmwareMachineNetwork
                             "Adding port group: %s  tagged with VLAN: %s to Virtual Switch %s",
                             portGroupName, vnic.getVlanTag(), vnic.getVSwitchName());
 
-                    throw new VirtualFactoryException(VirtualFactoryErrors.NETWORK_CONFIGURATION,
+                    throw new VirtualFactoryException(VirtualFactoryError.NETWORK_CONFIGURATION,
                         detail);
                 }
             }
@@ -228,7 +219,7 @@ public class VmwareMachineNetwork
                             // FAIL!
                             if (portGroup.endsWith("-" + portGroupName) == true)
                             {
-                                throw new VirtualFactoryException(VirtualFactoryErrors.NETWORK_VSWITCH_PORT,
+                                throw new VirtualFactoryException(VirtualFactoryError.NETWORK_VSWITCH_PORT,
                                     String.format(
                                         "portGroupName:%s \n vswitch:%s \n vnicswitch:%s",
                                         portGroupName, vswitch.getName(), vnic.getVSwitchName()));
@@ -261,7 +252,7 @@ public class VmwareMachineNetwork
 
                 if (vmsUsedByNetwork.length == 0)
                 {
-                    logger.debug("There is no virtual machine using network: " + portGroup
+                    utils.logger.debug("There is no virtual machine using network: " + portGroup
                         + " proceeding to delete");
 
                     ManagedObjectReference hostmor = utils.getHostSystemMOR();
@@ -271,14 +262,14 @@ public class VmwareMachineNetwork
 
                     utils.getServiceInstance().getServerConnection().getVimService()
                         .removePortGroup(nwSystem, portGroup);
-                    logger.debug("Removing port group: " + portGroup);
+                    utils.logger.debug("Removing port group: " + portGroup);
                 }
 
             }
         }
         catch (Exception e)
         {
-            throw new VirtualFactoryException(VirtualFactoryErrors.NETWORK_DECONFIGURE,
+            throw new VirtualFactoryException(VirtualFactoryError.NETWORK_DECONFIGURE,
                 e.toString());
         }
     }

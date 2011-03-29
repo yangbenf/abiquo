@@ -24,12 +24,9 @@ package com.abiquo.tarantino.plugins.esxi;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.abiquo.commons.amqp.impl.datacenter.domain.DiskStandard;
-import com.abiquo.commons.amqp.impl.datacenter.domain.State;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition;
-import com.abiquo.tarantino.errors.VirtualFactoryErrors;
+import com.abiquo.tarantino.errors.VirtualFactoryError;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
-import com.abiquo.tarantino.hypervisor.IHypervisorConnection;
 import com.abiquo.tarantino.utils.AddressingUtils;
 import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.OptionValue;
@@ -40,67 +37,78 @@ import com.vmware.vim25.VirtualMachineConfigSpec;
  * Achieve communications to ESXi 3.5 VMWare bare metal hypervisor using the Java/Axis SDK bindings.
  * TODO: check getVms, no multiple VM for a single VmwareMachine instance
  * 
- * @author pnavarro, apuig
+ * @author apuig (based on the great work of Pedro Navarro)
  */
 public class VmwareMachine extends AbsVmwareMachine
 {
 
-    public VmwareMachine(com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition vmdef,
-        VmwareHypervisorConnection hypervisor)
-    {
-        super(vmdef, hypervisor);
-    }
-
     /**
      * Used during creation sets the additional configuration into the VM.
+     * <ul>
+     * <li>Hardware requirements
+     * <li>Primary disk configuration
+     * <li>RdPort
+     * <li>NetworkInterfaces
+     * </ul>
      * 
      * @param computerResMOR, the computer resource related to the current VM.
      * @param hostMOR, the host related to the current VM.
      * @return a configuration containing the specified resources
      */
     @Override
-    public VirtualMachineConfigSpec configureVM(ManagedObjectReference computerResMOR,
+    public VirtualMachineConfigSpec configureVM(VmwareHypervisorConnection hypervisor,
+        VirtualMachineDefinition vmdefinition, ManagedObjectReference computerResMOR,
         ManagedObjectReference hostMOR) throws VirtualFactoryException
     {
+        final String vmUuid = vmdefinition.getMachineID();
+
+        // TODO
+        String guestId = hypervisor.getUtils().getSessionOption("guestosid");
+
+        if (vmdefinition.getPrimaryDisk().getDiskStandardConf() == null)
+        {
+            throw new VirtualFactoryException(VirtualFactoryError.COMMUNITY_ONLY_STATELESS_DISKS);
+        }
+
+        final long diskSize =
+            vmdefinition.getPrimaryDisk().getDiskStandardConf().getDiskStandard()
+                .getCapacityInBytes();
+
+        final String datastoreName =
+            vmdefinition.getPrimaryDisk().getDiskStandardConf().getDestinationDatastore();
+
         VirtualMachineConfigSpec vmConfigSpec;
 
         try
         {
-
-            // TODO #createVMConfigSpec defines not convenient default data, change this
-            final String vmName = vmdef.getMachineID();
-
-            // TODO check is a standard disk
-            // TODO use the datastore name instead of mount point
-            final String datastoreName =
-                vmdef.getPrimaryDisk().getDiskStandardConf().getDestinationDatastore();
-            final long diskSize = vmdef.getPrimaryDisk().getDiskStandardConf().getDiskStandard()
-                    .getCapacityInBytes();
-
+            // Name, disk (datastore)
             vmConfigSpec =
                 hypervisor
                     .getUtils()
                     .getUtilBasics()
-                    .createVmConfigSpec(vmName, datastoreName, diskSize, computerResMOR, hostMOR,
+                    .createVmConfigSpec(vmUuid, datastoreName, diskSize, computerResMOR, hostMOR,
                         null);
 
+            // Network interfaces
             List<VirtualDeviceConfigSpec> nicSpecList =
-                hypervisor.getUtils().getUtilNetwork()
-                    .configureNetworkInterfaces(vmdef.getNetworkConfiguration().getVirtualNIC());
+                hypervisor
+                    .getUtils()
+                    .getUtilNetwork()
+                    .configureNetworkInterfaces(
+                        vmdefinition.getNetworkConfiguration().getVirtualNIC());
+
             vmConfigSpec = addDeviceSpecs(vmConfigSpec, nicSpecList);
 
-            final long rammb = vmdef.getHardwareConfiguration().getRamInMb();
-            final int cpu = vmdef.getHardwareConfiguration().getNumVirtualCpus();
+            final int cpu = vmdefinition.getHardwareConfiguration().getNumVirtualCpus();
+            final long rammb = vmdefinition.getHardwareConfiguration().getRamInMb();
 
-            String guestId = hypervisor.getUtils().getSessionOption("guestosid");
-
-            vmConfigSpec.setName(vmdef.getMachineID());
+            vmConfigSpec.setName(vmUuid);
             vmConfigSpec.setAnnotation("VirtualMachine Annotation");
-            vmConfigSpec.setMemoryMB(rammb);// config.getMemoryRAM() / 1048576);
-            vmConfigSpec.setNumCPUs(cpu);// config.getCpuNumber());
+            vmConfigSpec.setMemoryMB(rammb);
+            vmConfigSpec.setNumCPUs(cpu);
             vmConfigSpec.setGuestId(guestId);
 
-            final int rdport = vmdef.getNetworkConfiguration().getRdPort();
+            final int rdport = vmdefinition.getNetworkConfiguration().getRdPort();
 
             if (AddressingUtils.isValidPort(String.valueOf(rdport)))
             {
@@ -124,8 +132,8 @@ public class VmwareMachine extends AbsVmwareMachine
         }
         catch (Exception e)
         {
-            throw new VirtualFactoryException(VirtualFactoryErrors.CONFIG, String.format(
-                "Virtual Machine : %s\nCaused by:%s", vmdef.getMachineID(), e.toString()));
+            throw new VirtualFactoryException(VirtualFactoryError.CONFIG, String.format(
+                "Virtual Machine : %s\nCaused by:%s", vmUuid, e.toString()));
         }
 
         return vmConfigSpec;
@@ -144,8 +152,5 @@ public class VmwareMachine extends AbsVmwareMachine
 
         return vmConfigSpec;
     }
-
-   
- 
 
 }

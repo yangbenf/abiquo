@@ -27,26 +27,22 @@ import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.abiquo.commons.amqp.impl.datacenter.domain.HypervisorConnection;
-import com.abiquo.tarantino.errors.VirtualFactoryErrors;
+import com.abiquo.tarantino.errors.VirtualFactoryError;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
 import com.abiquo.tarantino.hypervisor.IHypervisorConnection;
 import com.abiquo.tarantino.plugins.esxi.utils.EsxiUtils;
 import com.vmware.vim25.mo.ServiceInstance;
 import com.vmware.vim25.mo.util.OptionSpec;
 
+/**
+ * @author apuig (based on the great work of Pedro Navarro)
+ */
 // TODO @Hypervisor(type = HypervisorType.VMX_04)
 public class VmwareHypervisorConnection implements IHypervisorConnection
 {
-    /** The Constant logger. */
-    private final static Logger logger = LoggerFactory.getLogger(VmwareHypervisorConnection.class);
 
-    /**
-     * ESXi session
-     */
+    /** Aggregate internal ESXi functionalities. */
     private EsxiUtils esxi;
 
     public EsxiUtils getUtils()
@@ -65,19 +61,10 @@ public class VmwareHypervisorConnection implements IHypervisorConnection
             esxi = createConnection(connection);
 
             esxi.getUtilBasics().checkLicense();
-            String datasoreRepositoryName =
-                esxi.getUtilBasics().getAndCheckRepositoryDatastore(
-                    globalConfig.getRepositoryLocation());
-            // TODO WTF set set set
-            globalConfig.setRepositoryDatastore(datasoreRepositoryName);
-
         }
         catch (VirtualFactoryException vfe)
         {
-            logger.debug("An error was occurred when connecting to the hypervisor", vfe);
-
             logout();
-
             throw vfe;
         }
     }
@@ -98,8 +85,7 @@ public class VmwareHypervisorConnection implements IHypervisorConnection
         ServiceInstance serviceInstance;
         try
         {
-            final String urlstr =
-                connection.getHypervisorType().getConnectionURI(connection.getIp());
+            final String urlstr = connection.getConnectionURI();
 
             final URL hUrl = new URL(urlstr);
 
@@ -109,21 +95,20 @@ public class VmwareHypervisorConnection implements IHypervisorConnection
                     connection.getLoginPassword(),
                     globalConfig.ignoreCert());
 
-            return new EsxiUtils(serviceInstance, constructOptions(), builtinOptionsEntered(connection,
-                hUrl.toString()));
+            return new EsxiUtils(serviceInstance, constructOptions(), builtinOptionsEntered(
+                connection, hUrl.toString()));
         }
         catch (RemoteException e)
         {
-            throw new VirtualFactoryException(VirtualFactoryErrors.HYPERVISOR_CONNECTION,
+            throw new VirtualFactoryException(VirtualFactoryError.HYPERVISOR_CONNECTION,
                 e.getMessage());
         }
         catch (MalformedURLException e)
         {
-            throw new VirtualFactoryException(VirtualFactoryErrors.HYPERVISOR_CONNECTION,
+            throw new VirtualFactoryException(VirtualFactoryError.HYPERVISOR_CONNECTION,
                 e.getMessage());
         }
     }
-
 
     private VmwareHypervisorConfig globalConfig = new VmwareHypervisorConfig();
 
@@ -233,43 +218,4 @@ public class VmwareHypervisorConnection implements IHypervisorConnection
 
     }
 
-    // // //
-    // private void copyDataStorefile() throws Exception
-    // {
-    // Configuration mainConfig =
-    // AbiCloudModel.getInstance().getConfigManager().getConfiguration();
-    // VmwareHypervisorConfiguration config = mainConfig.getVmwareHyperConfig();
-    // // String dcName = apputil.get_option("datacentername");
-    // String dcName = config.getDatacenterName();
-    // ManagedObjectReference dcmor = serviceUtil.getDecendentMoRef(null, "Datacenter", dcName);
-    // ManagedObjectReference fileManager =
-    // apputil.getServiceInstance().getServiceContent().getFileManager();
-    // ManagedObjectReference taskCopyMor =
-    // serviceUtil.getVimService().copyDatastoreFile_Task(fileManager,
-    // "[nfsrepository] ubuntu810desktop/ubuntu810desktop-flat.vmdk", dcmor,
-    // "[datastore1] test/test-flat.vmdk", dcmor, true);
-    // /*
-    // * ManagedObjectReference taskCopyMor =
-    // * serviceUtil.getService().copyDatastoreFile_Task(fileManager,
-    // * "[datastore1] testubuntu/testubuntu.vmdk", dcmor,
-    // *
-    // "[datastore1] 11b0b35e-4810-4aed-95c5-12b4dc06e80a/11b0b35e-4810-4aed-95c5-12b4dc06e80a.vmdk"
-    // * , dcmor, true);
-    // */
-    // // ManagedObjectReference taskCopyMor =
-    // // serviceUtil.getService().copyVirtualDisk_Task(virtualDiskManager,
-    // // "[nfsrepository] ubuntu/Ubuntu.8.10.Server.vmdk", dcmor,
-    // // "[datastore1] test/Nostalgia.vmdk", dcmor, null, true);
-    // String res = serviceUtil.waitForTask(taskCopyMor);
-    // if (res.equalsIgnoreCase("success"))
-    // {
-    // logger.info("Virtual Machine Created Sucessfully");
-    // }
-    // else
-    // {
-    // String message = "Virtual Machine could not be created. " + res;
-    // logger.error(message);
-    // throw new VirtualMachineException(message);
-    // }
-    // }
 }

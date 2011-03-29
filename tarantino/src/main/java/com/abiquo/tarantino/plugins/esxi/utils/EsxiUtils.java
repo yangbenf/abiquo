@@ -84,7 +84,6 @@ import com.vmware.vim25.ws.VimStub;
 
 public class EsxiUtils extends EsxiVim25Util
 {
-
     private VmwareMachineNetwork netUtils;
 
     private VmwareMachineDisk diskUtils;

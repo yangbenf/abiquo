@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualNIC;
-import com.abiquo.tarantino.errors.VirtualFactoryErrors;
+import com.abiquo.tarantino.errors.VirtualFactoryError;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
 import com.abiquo.tarantino.plugins.esxi.utils.EsxiUtils.EsxiUtilsException;
 import com.vmware.vim25.AlreadyExists;
@@ -111,7 +111,7 @@ public class VmwareMachineBasics
             {
                 if (licenseManagerLicenseInfo.getEditionKey().equals("esxBasic"))
                 {
-                    throw new VirtualFactoryException(VirtualFactoryErrors.HYPERVISOR_LICENSE,
+                    throw new VirtualFactoryException(VirtualFactoryError.HYPERVISOR_LICENSE,
                         "EsxBasic licese not supported");
                 }
 
@@ -141,7 +141,7 @@ public class VmwareMachineBasics
                 {
                     if ((expirationHours.intValue() == 0) || (expirationMinutes.intValue() == 0))
                     {
-                        throw new VirtualFactoryException(VirtualFactoryErrors.HYPERVISOR_LICENSE,
+                        throw new VirtualFactoryException(VirtualFactoryError.HYPERVISOR_LICENSE,
                             "Expired licese");
                     }
                 }
@@ -149,7 +149,7 @@ public class VmwareMachineBasics
         }
         catch (Exception e)
         {
-            throw new VirtualFactoryException(VirtualFactoryErrors.HYPERVISOR_LICENSE,
+            throw new VirtualFactoryException(VirtualFactoryError.HYPERVISOR_LICENSE,
                 "ESXi version not supported");
         }
     }
@@ -191,13 +191,13 @@ public class VmwareMachineBasics
                 (ev.getFaultMessage() != null && ev.getFaultMessage().length > 0) ? ev
                     .getFaultMessage()[0].message : ev.getMessage();
 
-            throw new VirtualFactoryException(VirtualFactoryErrors.REPOSITORY_CONFIGURATION,
+            throw new VirtualFactoryException(VirtualFactoryError.REPOSITORY_CONFIGURATION,
                 errorMessage + "\n" + errorDetail);
 
         }
         catch (Exception e)
         {
-            throw new VirtualFactoryException(VirtualFactoryErrors.REPOSITORY_CONFIGURATION,
+            throw new VirtualFactoryException(VirtualFactoryError.REPOSITORY_CONFIGURATION,
                 errorMessage);
         }
     }
@@ -225,7 +225,7 @@ public class VmwareMachineBasics
         }
         catch (Exception e)
         {
-            throw new VirtualFactoryException(VirtualFactoryErrors.HYPERVISOR_CONNECTION,
+            throw new VirtualFactoryException(VirtualFactoryError.HYPERVISOR_CONNECTION,
                 e.getMessage());
         }
 
@@ -269,7 +269,7 @@ public class VmwareMachineBasics
         }
         catch (Exception e)
         {
-            throw new VirtualFactoryException(VirtualFactoryErrors.HYPERVISOR_CONNECTION,
+            throw new VirtualFactoryException(VirtualFactoryError.HYPERVISOR_CONNECTION,
                 e.getMessage());
         }
         Datastore newDs;
@@ -291,7 +291,7 @@ public class VmwareMachineBasics
         }
         catch (Exception e)
         {
-            throw new VirtualFactoryException(VirtualFactoryErrors.HYPERVISOR_CONNECTION,
+            throw new VirtualFactoryException(VirtualFactoryError.HYPERVISOR_CONNECTION,
                 e.getMessage());
         }
 
@@ -434,13 +434,13 @@ public class VmwareMachineBasics
                     }
                     else
                     {
-                        throw new VirtualFactoryException(VirtualFactoryErrors.DATASTORE_NOT_ACCESSIBLE,
+                        throw new VirtualFactoryException(VirtualFactoryError.DATASTORE_NOT_ACCESSIBLE,
                             datastoreName);
                     }
                 }
             }
 
-            throw new VirtualFactoryException(VirtualFactoryErrors.DATASTORE_NOT_FOUND,
+            throw new VirtualFactoryException(VirtualFactoryError.DATASTORE_NOT_FOUND,
                 datastoreName);
         }
         else
@@ -460,7 +460,7 @@ public class VmwareMachineBasics
                 }
             }
 
-            throw new VirtualFactoryException(VirtualFactoryErrors.DATASTORE_NOT_FOUND,
+            throw new VirtualFactoryException(VirtualFactoryError.DATASTORE_NOT_FOUND,
                 "Any datastore is accessible");
         }
     }
@@ -532,7 +532,7 @@ public class VmwareMachineBasics
 
         if (ideCtlr == null)
         {
-            throw new VirtualFactoryException(VirtualFactoryErrors.VIRTUAL_MACHINE_RETRIEVE_ERROR,
+            throw new VirtualFactoryException(VirtualFactoryError.VIRTUAL_MACHINE_RETRIEVE_ERROR,
                 "Can't get the IDE controller"); // TODO vf
         }
 
@@ -661,7 +661,7 @@ public class VmwareMachineBasics
                  * TODO progress and reason
                  */
 
-                throw new VirtualFactoryException(VirtualFactoryErrors.EXECUTING_ACTION, descr);
+                throw new VirtualFactoryException(VirtualFactoryError.EXECUTING_ACTION, descr);
             }
         }
         catch (Exception e)
@@ -679,7 +679,7 @@ public class VmwareMachineBasics
                 descr = descr + e.toString();
             }
 
-            throw new VirtualFactoryException(VirtualFactoryErrors.EXECUTING_ACTION, descr);
+            throw new VirtualFactoryException(VirtualFactoryError.EXECUTING_ACTION, descr);
         }
 
         // TODO finally
