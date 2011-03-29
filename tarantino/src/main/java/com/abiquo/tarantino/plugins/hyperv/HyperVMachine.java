@@ -49,7 +49,7 @@ import com.hyper9.jwbem.SWbemServices;
 import com.hyper9.jwbem.msvm.virtualsystem.MsvmComputerSystem;
 
 /**
- * @author destevez
+ * @author destevez (based on the great work of Pedro Navarro)
  */
 public class HyperVMachine implements IVirtualMachine
 {
