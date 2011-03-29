@@ -21,109 +21,71 @@
 
 package com.abiquo.commons.amqp.impl.datacenter.domain.builder;
 
-import java.io.StringWriter;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-
-import com.abiquo.commons.amqp.impl.datacenter.domain.State;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.CreateVirtualMachine;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.ObjectFactory;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.SnapshotVirtualMachine;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineAction;
+import com.abiquo.commons.amqp.impl.datacenter.domain.DiskDescription.DiskFormatType;
+import com.abiquo.commons.amqp.impl.datacenter.domain.HypervisorConnection.HypervisorType;
+import com.abiquo.commons.amqp.impl.datacenter.domain.StateTransaction;
+import com.abiquo.commons.amqp.impl.datacenter.domain.dto.ApplyVirtualMachineStateDto;
+import com.abiquo.commons.amqp.impl.datacenter.domain.dto.ConfigureVirtualMachineDto;
+import com.abiquo.commons.amqp.impl.datacenter.domain.dto.ReconfigureVirtualMachineDto;
+import com.abiquo.commons.amqp.impl.datacenter.domain.dto.SnapshotVirtualMachineDto;
 
 public class VirtualFactoryTestJobs
 {
 
-    public CreateVirtualMachine testCreateVirtualMachine()
+    public VirtualMachineDescriptionBuilder testVirtualMachine()
     {
-
-        return new CreateVirtualMachineJobBuilder()
-            .connection("hypervisorID", "XEN", "10.60.1.15", "78889", "https", "root", "root")
-            .hardware(1, 256)
-            .addNetwork("vSwitchName", "macAddress", "networkName", "vlanTag", "1")
+        return new VirtualMachineDescriptionBuilder() //
+            .hardware(1, 256) //
+            .addNetwork("mac:mac:mac", "127.0.0.1", "vSwitchName", "networkName", 1, "leaseName",
+                "forwardMode", "netAddress", "gateway", "mask", "primaryDNS", "secondaryDNS",
+                "sufixDNS", 0) //
             // .primaryDisk("RAW", "1024", "iqn.bla.bla-lun-0")
-            .primaryDisk("RAW", "1024", "nfs-devel:/opt/vm_repo", "1/rs.bcn/m0n0/m0n0.iso",
-                "datastore1")
-
-            .addAuxDisk("RAW", "1024", "iqn....", 1).build("virtualMachineID");
+            .primaryDisk(DiskFormatType.RAW, 1024l, "nfs-devel:/opt/vm_repo",
+                "1/rs.bcn/m0n0/m0n0.iso", "datastore1") //
+            .addAuxDisk(DiskFormatType.RAW, 1024l, "iqn....", 1);
 
     }
 
-    public VirtualMachineAction testVirtualMachineAction()
+    public ConfigureVirtualMachineDto testConfigureVirtualMachine(
+        VirtualMachineDescriptionBuilder vmbuilder)
     {
-        return new VirtualMachineActionJobBuilder()
-            .connection("hypervisorID", "XEN", "10.60.1.15", "78889", "https", "root", "root")
-            .virtualMachineId("virtualMachineId").state(State.PAUSED).build();
+
+        return new ConfigureVirtualMachineJobBuilder() //
+            .connection(HypervisorType.XEN_3, "10.60.1.15", "root", "root") //
+            .setVirtualMachineDefinition(vmbuilder, "virtualMachineID") //
+            .buildConfigureVirtualMachineDto();
+
     }
 
-    public SnapshotVirtualMachine testSnapshoo()
+    public ApplyVirtualMachineStateDto testApplyVirtualMachineState(
+        VirtualMachineDescriptionBuilder vmbuilder)
+    {
+        return new ApplyVirtualMachineStateJobBuilder() //
+            .connection(HypervisorType.XEN_3, "10.60.1.15", "root", "root") //
+            .setVirtualMachineDefinition(vmbuilder, "virtualMachineID") //
+            .state(StateTransaction.PAUSE)//
+            .buildApplyVirtualMachineStateDto();
+    }
+
+    public SnapshotVirtualMachineDto testSnapshotVirtualMachine(
+        VirtualMachineDescriptionBuilder vmbuilder)
     {
         return new SnapshotVirtualMachineJobBuilder()
-            .connection("hypervisorID", "XEN", "10.60.1.15", "78889", "https", "root", "root")
-            .source("virtualMachineId", "RAW", "1024", "datastore1", "virtualMachineId")
-            .destination("RAW", "1024", "nfs-devel:/opt/vm_repository", "1/some/bundle/m0n0.iso")
-            .build();
+            .connection(HypervisorType.XEN_3, "10.60.1.15", "root", "root") //
+            .setVirtualMachineDefinition(vmbuilder, "virtualMachineID") //
+            .destinationDisk(DiskFormatType.RAW, 1024l, "nfs-devel:/opt/vm_repository",
+                "1/some/bundle/m0n0.iso")//
+            .buildSnapshotVirtualMachineDto();
     }
 
-    /**
-     * Serialization issues
-     */
-    private ObjectFactory jobsObjectF;
-
-    private JAXBContext context;
-
-    public VirtualFactoryTestJobs() throws JAXBException
+    public ReconfigureVirtualMachineDto testReconfigureVirtualMachine(
+        VirtualMachineDescriptionBuilder vmbuilder)
     {
-        jobsObjectF = new ObjectFactory();
-        context =
-            JAXBContext.newInstance(CreateVirtualMachine.class, SnapshotVirtualMachine.class,
-                VirtualMachineAction.class);
-    }
-
-    public String serialize(Object any) throws JAXBException
-    {
-
-        Marshaller marshall;
-        // XMLStreamWriter writer =
-        // Stax2Factory.getStreamWriterFactory().createXMLStreamWriter(os);
-        StringWriter swriter = new StringWriter();
-
-        marshall = context.createMarshaller();
-        // marshall.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, new Boolean(true));
-
-        marshall.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
-        marshall.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-        // marshall.setProperty(Marshaller.JAXB_NO_NAMESPACE_SCHEMA_LOCATION, Boolean.TRUE);
-
-        if (any instanceof CreateVirtualMachine)
-        {
-            marshall.marshal(jobsObjectF.createCreateVirtualMachine((CreateVirtualMachine) any),
-                swriter);
-        }
-        else if (any instanceof SnapshotVirtualMachine)
-        {
-            marshall.marshal(
-                jobsObjectF.createSnapshootVirtualMachine((SnapshotVirtualMachine) any), swriter);
-        }
-        else if (any instanceof VirtualMachineAction)
-        {
-            marshall.marshal(jobsObjectF.createVirtualMachineAction((VirtualMachineAction) any),
-                swriter);
-        }
-
-        return swriter.toString();
-
-    }
-
-    public static void main(String[] args) throws Exception
-    {
-        VirtualFactoryTestJobs testBuidler = new VirtualFactoryTestJobs();
-
-        System.err.println(testBuidler.serialize(testBuidler.testVirtualMachineAction()));
-        // System.err.println(testBuidler.serialize(testBuidler.testSnapshoo()));
-        // System.err.println(testBuidler.serialize(testBuidler.testCreateVirtualMachine()));
+        return new ReconfigureVirtualMachineJobBuilder()//
+            .connection(HypervisorType.XEN_3, "10.60.1.15", "root", "root") //
+            .setVirtualMachineDefinition(vmbuilder, "virtualMachineID") //
+            .setNewVirtualMachineDefinition(vmbuilder.hardware(4, 512), "virtualMachineID") //
+            .buildReconfigureVirtualMachineDto();
 
     }
 

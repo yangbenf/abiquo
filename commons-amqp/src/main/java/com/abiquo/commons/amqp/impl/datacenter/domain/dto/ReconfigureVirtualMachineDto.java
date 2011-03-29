@@ -21,17 +21,13 @@
 
 package com.abiquo.commons.amqp.impl.datacenter.domain.dto;
 
-import com.abiquo.commons.amqp.domain.Queuable;
-import com.abiquo.commons.amqp.impl.datacenter.domain.HypervisorConnection;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition;
 import com.abiquo.commons.amqp.util.JSONUtils;
 
-// Used by exist operation
-public class ReconfigureVirtualMachineDto implements Queuable
+public class ReconfigureVirtualMachineDto extends ConfigureVirtualMachineDto
 {
-    public HypervisorConnection hypervisorConnection;
 
-    public VirtualMachineDefinition virtualMachine;
+    public VirtualMachineDefinition newVirtualMachine;
 
     @Override
     public byte[] toByteArray()

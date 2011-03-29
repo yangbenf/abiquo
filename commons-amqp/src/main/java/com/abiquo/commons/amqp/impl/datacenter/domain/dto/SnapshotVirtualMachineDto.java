@@ -22,6 +22,7 @@
 package com.abiquo.commons.amqp.impl.datacenter.domain.dto;
 
 import com.abiquo.commons.amqp.domain.Queuable;
+import com.abiquo.commons.amqp.impl.datacenter.domain.DiskStandard;
 import com.abiquo.commons.amqp.impl.datacenter.domain.HypervisorConnection;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition;
 import com.abiquo.commons.amqp.util.JSONUtils;
@@ -32,6 +33,8 @@ public class SnapshotVirtualMachineDto implements Queuable
     public HypervisorConnection hypervisorConnection;
 
     public VirtualMachineDefinition virtualMachine;
+    
+    public DiskStandard destinationDisk;
 
     @Override
     public byte[] toByteArray()

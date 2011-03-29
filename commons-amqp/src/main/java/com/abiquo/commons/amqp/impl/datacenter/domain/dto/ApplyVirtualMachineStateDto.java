@@ -24,6 +24,7 @@ package com.abiquo.commons.amqp.impl.datacenter.domain.dto;
 import com.abiquo.commons.amqp.domain.Queuable;
 import com.abiquo.commons.amqp.impl.datacenter.domain.DiskStandard;
 import com.abiquo.commons.amqp.impl.datacenter.domain.HypervisorConnection;
+import com.abiquo.commons.amqp.impl.datacenter.domain.StateTransaction;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition;
 import com.abiquo.commons.amqp.util.JSONUtils;
 
@@ -33,7 +34,7 @@ public class ApplyVirtualMachineStateDto implements Queuable
 
     public VirtualMachineDefinition virtualMachine;
 
-    public DiskStandard destinationDisk;
+    public StateTransaction transition;
 
     @Override
     public byte[] toByteArray()
