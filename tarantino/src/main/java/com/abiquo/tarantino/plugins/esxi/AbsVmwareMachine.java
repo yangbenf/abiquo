@@ -45,11 +45,14 @@ import com.vmware.vim25.VirtualMachinePowerState;
 import com.vmware.vim25.mo.VirtualMachine;
 
 /**
- * @author pnavarro
+ * <p>
+ * NOTICE: almost all the TODOs are related to premium integration
+ * </p>
+ * 
+ * @author apuig (based on the great work of Pedro Navarro)
  */
 public abstract class AbsVmwareMachine implements IVirtualMachine<VmwareHypervisorConnection>
 {
-    /** The logger */
     protected static final Logger logger = LoggerFactory.getLogger(AbsVmwareMachine.class);
 
     /**
@@ -59,114 +62,11 @@ public abstract class AbsVmwareMachine implements IVirtualMachine<VmwareHypervis
      * @param hostMOR, the host related to the current VM.
      * @return a configuration containing the specified resources
      */
-    public abstract VirtualMachineConfigSpec configureVM(ManagedObjectReference computerResMOR,
+    public abstract VirtualMachineConfigSpec configureVM(VmwareHypervisorConnection hypervisor,
+        VirtualMachineDefinition vmdefinition, ManagedObjectReference computerResMOR,
         ManagedObjectReference hostMOR) throws VirtualFactoryException;
 
-    /**
-     * Private helper to create a virtual machine template from the open virtualization format
-     * parameters
-     * 
-     * @throws VirtualFactoryException
-     * @throws Exception
-     */
-    private void createVirtualMachine(VmwareHypervisorConnection hypervisor, String virtualMachineId)
-        throws VirtualFactoryException // throws
-    // VirtualMachineException
-    {
-        ManagedObjectReference dcmor; // datacenter
-        ManagedObjectReference hfmor; // host folder
-        ManagedObjectReference hostmor;// host
-        ArrayList<ManagedObjectReference> crmors;// all computer resources on host folder
-        ManagedObjectReference crmor; // computer resource
-        VirtualMachineConfigSpec vmConfigSpec; // virtual machine configuration
-        VirtualDeviceConfigSpec[] vdiskSpec; // disk configuration
-
-        try
-        {
-
-            dcmor = hypervisor.getUtils().getDatacenterMor();
-
-            hfmor = hypervisor.getUtils().getHostFolder();
-
-            hostmor = hypervisor.getUtils().getHostSystemMor(dcmor, hfmor); // TODO on EsxiUtils
-
-            crmors = hypervisor.getUtils().getDecendentMoRefs(hfmor, "ComputeResource");
-
-            crmor = hypervisor.getUtils().getComputerResourceFromHost(crmors, hostmor);
-
-            // TODO #createVMConfigSpec defines not convenient default data, change this
-            vmConfigSpec = configureVM(crmor, hostmor);
-
-            logger.info("Machine :{} ready to be created", virtualMachineId);
-
-            ManagedObjectReference resourcePool =
-                hypervisor.getUtils().getMoRefProp(crmor, "resourcePool");
-            ManagedObjectReference vmFolderMor =
-                hypervisor.getUtils().getMoRefProp(dcmor, "vmFolder");
-
-            ManagedObjectReference taskmor =
-                hypervisor.getUtils().getVimStub()
-                    .createVM_Task(vmFolderMor, vmConfigSpec, resourcePool, hostmor);
-
-            /*
-             * TODO ing //customizationIPSettings for the deploy CustomizationSpec customMachine =
-             * setCustomizationSpec(); //setting the variable _virtualMachine
-             * getVmMor(this.machineName);
-             * apputil.getServiceConnection3().getService().customizeVM_Task(_virtualMachine,
-             * customMachine);
-             */
-
-            hypervisor.getUtils().checkTaskState(taskmor);
-
-        }
-        catch (VirtualFactoryException e)
-        {
-            throw e;
-        }
-        catch (Exception e)
-        {
-            throw new VirtualFactoryException(VirtualFactoryError.CREATE_VM, String.format(
-                "Virtual Machine : %s" + "\nCaused by:%s", virtualMachineId, e.toString()));
-        }
-
-    }
-
-    // /**
-    // * Destroy a VM.
-    // *
-    // * @param vmMOR, a virtual machine related to ''machineName''
-    // */
-    // private void destroyVM(final ManagedObjectReference vmMOR) throws VirtualMachineException
-    // {
-    // ManagedObjectReference taskDestroy;
-    //
-    // String vmName = "unknow dynamic property ''name''";
-    // try
-    // {
-    // vmName = (String) utils.getAppUtil().getServiceUtil().getDynamicProperty(vmMOR, "name");
-    //
-    // logger.info("Powering off virtualmachine '{}'", vmName);
-    // }
-    // catch (Exception e) // getDynamicProperty
-    // {
-    // logger.warn("Can not get the dynamic property 'name' for the VM [{}]",
-    // vmMOR.get_value());
-    // }
-    //
-    // try
-    // {
-    // taskDestroy = utils.getService().destroy_Task(vmMOR);
-    //
-    // utils.checkTaskState(taskDestroy);
-    //
-    // logger.info("VM {} powered off successfuly", vmName);
-    // }
-    // catch (Exception e)
-    // {
-    // throw new VirtualMachineException("Can not destroy the VM " + vmName, e);
-    // }
-    // }
-
+    // TODO
     private String getMachineName(String machineName)
     {
         // The 4 last characters of the machine name are erased because are omitted by the ESXi
@@ -180,12 +80,6 @@ public abstract class AbsVmwareMachine implements IVirtualMachine<VmwareHypervis
             return machineName;
         }
     }
-
-    // //
-
-    /*
-     * INTERFACE IMPLEMENTATION *
-     */
 
     @Override
     public boolean exist(VmwareHypervisorConnection hypervisor,
@@ -244,7 +138,7 @@ public abstract class AbsVmwareMachine implements IVirtualMachine<VmwareHypervis
         hypervisor.getUtils().getUtilNetwork().configureNetwork(nics);
 
         // Create the template vdestPathirtual machine
-        createVirtualMachine(hypervisor, vmUuid);
+        createVirtualMachine(hypervisor, vmdefinition);
 
         // Stateless image located on the Enterprise Repository require to be copy on the local fs.
         DiskStandardConfiguration disk = vmdefinition.getPrimaryDisk().getDiskStandardConf();
@@ -439,47 +333,77 @@ public abstract class AbsVmwareMachine implements IVirtualMachine<VmwareHypervis
                 "Virtual Machine : %s" + "\nCaused by:%s", currentvmachine.getMachineID(),
                 e.toString()));
         }
-        // TODO
-        // finally
-        // {
-        // utils.logout();
-        // }
+    }
+
+    /**
+     * Private helper to create a virtual machine template from the open virtualization format
+     * parameters
+     * 
+     * @throws VirtualFactoryException
+     * @throws Exception
+     */
+    private void createVirtualMachine(VmwareHypervisorConnection hypervisor,
+        VirtualMachineDefinition vmdefinition) throws VirtualFactoryException // throws
+    // VirtualMachineException
+    {
+        final String virtualMachineId = vmdefinition.getMachineID();
+
+        ManagedObjectReference dcmor; // datacenter
+        ManagedObjectReference hfmor; // host folder
+        ManagedObjectReference hostmor;// host
+        ArrayList<ManagedObjectReference> crmors;// all computer resources on host folder
+        ManagedObjectReference crmor; // computer resource
+        VirtualMachineConfigSpec vmConfigSpec; // virtual machine configuration
+        // VirtualDeviceConfigSpec[] vdiskSpec; // disk configuration
+
+        try
+        {
+
+            dcmor = hypervisor.getUtils().getDatacenterMor();
+
+            hfmor = hypervisor.getUtils().getHostFolder();
+
+            hostmor = hypervisor.getUtils().getHostSystemMor(dcmor, hfmor); // TODO on EsxiUtils
+
+            crmors = hypervisor.getUtils().getDecendentMoRefs(hfmor, "ComputeResource");
+
+            crmor = hypervisor.getUtils().getComputerResourceFromHost(crmors, hostmor);
+
+            // TODO #createVMConfigSpec defines not convenient default data, change this
+            vmConfigSpec = configureVM(hypervisor, vmdefinition, crmor, hostmor);
+
+            logger.info("Machine :{} ready to be created", virtualMachineId);
+
+            ManagedObjectReference resourcePool =
+                hypervisor.getUtils().getMoRefProp(crmor, "resourcePool");
+            ManagedObjectReference vmFolderMor =
+                hypervisor.getUtils().getMoRefProp(dcmor, "vmFolder");
+
+            ManagedObjectReference taskmor =
+                hypervisor.getUtils().getVimStub()
+                    .createVM_Task(vmFolderMor, vmConfigSpec, resourcePool, hostmor);
+
+            /*
+             * TODO ing //customizationIPSettings for the deploy CustomizationSpec customMachine =
+             * setCustomizationSpec(); //setting the variable _virtualMachine
+             * getVmMor(this.machineName);
+             * apputil.getServiceConnection3().getService().customizeVM_Task(_virtualMachine,
+             * customMachine);
+             */
+
+            hypervisor.getUtils().checkTaskState(taskmor);
+
+        }
+        catch (VirtualFactoryException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            throw new VirtualFactoryException(VirtualFactoryError.CREATE_VM, String.format(
+                "Virtual Machine : %s" + "\nCaused by:%s", virtualMachineId, e.toString()));
+        }
 
     }
 
-    //
-    // /**
-    // * Attach the initial extended disk on configuration
-    // */
-    // private void initDisks(SecondaryDisks disks) throws VirtualFactoryException
-    // {
-    // // VirtualMachineConfigSpec vmConfigSpec = new VirtualMachineConfigSpec();
-    // // VirtualDeviceConfigSpec[] vdiskSpec;
-    // //
-    // // try
-    // // {
-    // // _virtualMachine = utils.getVmMor(machineName);
-    // //
-    // // vdiskSpec = disks.initialDiskDeviceConfigSpec();
-    // //
-    // // if (vdiskSpec != null)
-    // // {
-    // // logger.debug("Adding [{}] initial extended disks", vdiskSpec.length);
-    // // vmConfigSpec.setDeviceChange(vdiskSpec);
-    // // }
-    // // else
-    // // {
-    // // logger.debug("Any disk configruation to add");
-    // // }
-    // //
-    // // ManagedObjectReference tmor =
-    // // utils.getService().reconfigVM_Task(_virtualMachine, vmConfigSpec);
-    // //
-    // // utils.monitorTask(tmor);
-    // // }
-    // // catch (Exception e)
-    // // {
-    // // throw new VirtualMachineException("Can not initialize the extended disks", e);
-    // // }
-    // }
 }

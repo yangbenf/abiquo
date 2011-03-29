@@ -27,9 +27,6 @@ import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.abiquo.commons.amqp.impl.datacenter.domain.HypervisorConnection;
 import com.abiquo.tarantino.errors.VirtualFactoryError;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
@@ -88,8 +85,7 @@ public class VmwareHypervisorConnection implements IHypervisorConnection
         ServiceInstance serviceInstance;
         try
         {
-            final String urlstr =
-                connection.getHypervisorType().getConnectionURI(connection.getIp());
+            final String urlstr = connection.getConnectionURI();
 
             final URL hUrl = new URL(urlstr);
 
