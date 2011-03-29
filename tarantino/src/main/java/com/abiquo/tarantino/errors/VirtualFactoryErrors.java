@@ -28,9 +28,20 @@ package com.abiquo.tarantino.errors;
  */
 public enum VirtualFactoryErrors
 {
+    
+    
 	
 	VIRTUAL_MACHINE_NOT_EXIST("ASDFASF","ASDF"),
-    CONFIG("asdf","asdfasdfasdfs"),
+    
+	
+	VIRTUAL_MACHINE_ALREADY_EXIST("ASDFASF","try to configure a virtual machine with a uuid already present on the hypervisor"),
+	
+	
+	COMMUNITY_ONLY_STATELESS_DISKS("adfasdf","try to configure an statefull virtual image using community edition"),
+	
+	
+	
+	CONFIG("asdf","asdfasdfasdfs"),
     RECONFIG("asdf","adsf"),
     DEPLOY("adfas","asdfasd"),
     CREATE_VM("afasdf","asdfasdf"),

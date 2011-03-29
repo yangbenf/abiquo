@@ -27,48 +27,48 @@ import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
 import com.abiquo.tarantino.hypervisor.IHypervisorConnection;
 
-public interface IVirtualMachine
+public interface IVirtualMachine<H extends IHypervisorConnection>
 {
-    boolean exist(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition)
+    boolean exist(H connection, VirtualMachineDefinition vmdefinition)
         throws VirtualFactoryException;
 
-    State getState(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition)
+    State getState(H connection, VirtualMachineDefinition vmdefinition)
         throws VirtualFactoryException;
 
     /**
      * Creates a new virtual machine instance
      */
-    void doConfigure(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition)
+    void doConfigure(H connection, VirtualMachineDefinition vmdefinition)
         throws VirtualFactoryException;
 
     /**
      * Destroy the virtual machine
      */
-    void doDeconfigure(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition)
+    void doDeconfigure(H connection, VirtualMachineDefinition vmdefinition)
         throws VirtualFactoryException;
 
-    void doPowerOn(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition)
+    void doPowerOn(H connection, VirtualMachineDefinition vmdefinition)
         throws VirtualFactoryException;
 
-    void doPowerOff(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition)
+    void doPowerOff(H connection, VirtualMachineDefinition vmdefinition)
         throws VirtualFactoryException;
 
-    void doReset(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition)
+    void doReset(H connection, VirtualMachineDefinition vmdefinition)
         throws VirtualFactoryException;
 
-    void doPause(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition)
+    void doPause(H connection, VirtualMachineDefinition vmdefinition)
         throws VirtualFactoryException;
 
-    void doResume(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition)
+    void doResume(H connection, VirtualMachineDefinition vmdefinition)
         throws VirtualFactoryException;
 
     /**
      * Copy disk
      */
-    void doSnapshot(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition,
+    void doSnapshot(H connection, VirtualMachineDefinition vmdefinition,
         DiskStandard destinationDisk) throws VirtualFactoryException;
 
-    void reconfigure(IHypervisorConnection connection, VirtualMachineDefinition currentvmachine,
+    void reconfigure(H connection, VirtualMachineDefinition currentvmachine,
         VirtualMachineDefinition newvmachine) throws VirtualFactoryException; // lo que deixem
                                                                               // cambiar
 
