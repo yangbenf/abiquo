@@ -39,7 +39,7 @@ import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.P
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.SecondaryDisks;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualNIC;
 import com.abiquo.commons.amqp.impl.datacenter.domain.dto.SnapshotVirtualMachineDto;
-import com.abiquo.tarantino.errors.VirtualFactoryErrors;
+import com.abiquo.tarantino.errors.VirtualFactoryError;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
 import com.abiquo.tarantino.hypervisor.IHypervisorConnection;
 import com.abiquo.tarantino.plugins.esxi.utils.VmwareMachineBasics.VMTasks;
@@ -136,7 +136,7 @@ public abstract class AbsVmwareMachine implements IVirtualMachine<VmwareHypervis
         }
         catch (Exception e)
         {
-            throw new VirtualFactoryException(VirtualFactoryErrors.CREATE_VM, String.format(
+            throw new VirtualFactoryException(VirtualFactoryError.CREATE_VM, String.format(
                 "Virtual Machine : %s" + "\nCaused by:%s", virtualMachineId, e.toString()));
         }
 
@@ -251,7 +251,7 @@ public abstract class AbsVmwareMachine implements IVirtualMachine<VmwareHypervis
 
         if (exist(hypervisor, vmdefinition))
         {
-            throw new VirtualFactoryException(VirtualFactoryErrors.VIRTUAL_MACHINE_ALREADY_EXIST,
+            throw new VirtualFactoryException(VirtualFactoryError.VIRTUAL_MACHINE_ALREADY_EXIST,
                 vmUuid);
         }
 
@@ -266,7 +266,7 @@ public abstract class AbsVmwareMachine implements IVirtualMachine<VmwareHypervis
         DiskStandardConfiguration disk = vmdefinition.getPrimaryDisk().getDiskStandardConf();
         if (disk == null)
         {
-            throw new VirtualFactoryException(VirtualFactoryErrors.COMMUNITY_ONLY_STATELESS_DISKS);
+            throw new VirtualFactoryException(VirtualFactoryError.COMMUNITY_ONLY_STATELESS_DISKS);
         }
         // TODO premium
 
@@ -449,7 +449,7 @@ public abstract class AbsVmwareMachine implements IVirtualMachine<VmwareHypervis
         }
         catch (Exception e)
         {
-            throw new VirtualFactoryException(VirtualFactoryErrors.RECONFIG, String.format(
+            throw new VirtualFactoryException(VirtualFactoryError.RECONFIG, String.format(
                 "Virtual Machine : %s" + "\nCaused by:%s", currentvmachine.getMachineID(), e.toString()));
         }
         // TODO

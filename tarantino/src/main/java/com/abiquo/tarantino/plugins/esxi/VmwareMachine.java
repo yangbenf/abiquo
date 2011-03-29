@@ -27,7 +27,7 @@ import java.util.List;
 import com.abiquo.commons.amqp.impl.datacenter.domain.DiskStandard;
 import com.abiquo.commons.amqp.impl.datacenter.domain.State;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition;
-import com.abiquo.tarantino.errors.VirtualFactoryErrors;
+import com.abiquo.tarantino.errors.VirtualFactoryError;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
 import com.abiquo.tarantino.hypervisor.IHypervisorConnection;
 import com.abiquo.tarantino.utils.AddressingUtils;
@@ -124,7 +124,7 @@ public class VmwareMachine extends AbsVmwareMachine
         }
         catch (Exception e)
         {
-            throw new VirtualFactoryException(VirtualFactoryErrors.CONFIG, String.format(
+            throw new VirtualFactoryException(VirtualFactoryError.CONFIG, String.format(
                 "Virtual Machine : %s\nCaused by:%s", vmdef.getMachineID(), e.toString()));
         }
 

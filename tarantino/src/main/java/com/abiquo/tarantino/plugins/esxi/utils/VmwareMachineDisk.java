@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import com.abiquo.commons.amqp.impl.datacenter.domain.DiskStandard;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.PrimaryDisk;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.PrimaryDisk.DiskStandardConfiguration;
-import com.abiquo.tarantino.errors.VirtualFactoryErrors;
+import com.abiquo.tarantino.errors.VirtualFactoryError;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
 import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.VirtualDevice;
@@ -126,7 +126,7 @@ public class VmwareMachineDisk
                     "Virtual Machine %s using source disk at : %s and destintatino %s\nCaused By:",
                     machineUuid, sourcePath, destPath, e.toString());
 
-            throw new VirtualFactoryException(VirtualFactoryErrors.CLONING_DISK, detail);
+            throw new VirtualFactoryException(VirtualFactoryError.CLONING_DISK, detail);
         }
 
         utils.checkTaskState(taskCopyMor);
@@ -263,7 +263,7 @@ public class VmwareMachineDisk
         catch (Exception e)
         {
             final String detail = String.format("from %s to %s", sourcePathComposed, destPath);
-            throw new VirtualFactoryException(VirtualFactoryErrors.SNAPSHOT, detail);
+            throw new VirtualFactoryException(VirtualFactoryError.SNAPSHOT, detail);
         }
 
         utils.checkTaskState(taskCopyMor);
