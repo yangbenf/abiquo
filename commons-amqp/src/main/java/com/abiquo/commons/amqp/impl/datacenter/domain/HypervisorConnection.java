@@ -21,6 +21,12 @@
 
 package com.abiquo.commons.amqp.impl.datacenter.domain;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonTypeInfo;
+import org.codehaus.jackson.annotate.JsonTypeInfo.As;
+import org.codehaus.jackson.annotate.JsonTypeInfo.Id;
+
+@JsonTypeInfo(use = Id.CLASS, include = As.PROPERTY, property = "@class")
 public class HypervisorConnection
 {
     protected HypervisorType hypervisorType;
@@ -71,6 +77,7 @@ public class HypervisorConnection
         this.hypervisorType = hypervisorType;
     }
 
+    @JsonIgnore
     public String getConnectionURI()
     {
         return this.hypervisorType.getConnectionURI(getIp());
