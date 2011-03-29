@@ -22,26 +22,18 @@ package com.abiquo.tarantino.plugins.esxi;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-
-import javax.management.RuntimeErrorException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import akka.japi.SideEffect;
-
 import com.abiquo.commons.amqp.impl.datacenter.domain.DiskStandard;
 import com.abiquo.commons.amqp.impl.datacenter.domain.State;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition;
-import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.PrimaryDisk.DiskStandardConfiguration;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.PrimaryDisk;
-import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.SecondaryDisks;
+import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.PrimaryDisk.DiskStandardConfiguration;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualNIC;
-import com.abiquo.commons.amqp.impl.datacenter.domain.dto.SnapshotVirtualMachineDto;
 import com.abiquo.tarantino.errors.VirtualFactoryError;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
-import com.abiquo.tarantino.hypervisor.IHypervisorConnection;
 import com.abiquo.tarantino.plugins.esxi.utils.VmwareMachineBasics.VMTasks;
 import com.abiquo.tarantino.utils.ReconfigureUtils;
 import com.abiquo.tarantino.virtualmachine.IVirtualMachine;
@@ -60,7 +52,6 @@ public abstract class AbsVmwareMachine implements IVirtualMachine<VmwareHypervis
     /** The logger */
     protected static final Logger logger = LoggerFactory.getLogger(AbsVmwareMachine.class);
 
-
     /**
      * Used during creation sets the additional configuration into the VM.
      * 
@@ -70,8 +61,6 @@ public abstract class AbsVmwareMachine implements IVirtualMachine<VmwareHypervis
      */
     public abstract VirtualMachineConfigSpec configureVM(ManagedObjectReference computerResMOR,
         ManagedObjectReference hostMOR) throws VirtualFactoryException;
-    
-    
 
     /**
      * Private helper to create a virtual machine template from the open virtualization format
@@ -142,10 +131,6 @@ public abstract class AbsVmwareMachine implements IVirtualMachine<VmwareHypervis
 
     }
 
-  
-
-
-
     // /**
     // * Destroy a VM.
     // *
@@ -198,14 +183,13 @@ public abstract class AbsVmwareMachine implements IVirtualMachine<VmwareHypervis
 
     // //
 
-
     /*
      * INTERFACE IMPLEMENTATION *
      */
 
     @Override
-    public boolean exist(VmwareHypervisorConnection hypervisor, VirtualMachineDefinition vmdefinition)
-        throws VirtualFactoryException
+    public boolean exist(VmwareHypervisorConnection hypervisor,
+        VirtualMachineDefinition vmdefinition) throws VirtualFactoryException
     {
         final String vmUuid = vmdefinition.getMachineID();
 
@@ -213,9 +197,9 @@ public abstract class AbsVmwareMachine implements IVirtualMachine<VmwareHypervis
     }
 
     @Override
-    public State getState(VmwareHypervisorConnection hypervisor, VirtualMachineDefinition vmdefinition)
-        throws VirtualFactoryException
-    {        
+    public State getState(VmwareHypervisorConnection hypervisor,
+        VirtualMachineDefinition vmdefinition) throws VirtualFactoryException
+    {
         final String vmUuid = vmdefinition.getMachineID();
 
         if (!exist(hypervisor, vmdefinition))
@@ -244,8 +228,8 @@ public abstract class AbsVmwareMachine implements IVirtualMachine<VmwareHypervis
     }
 
     @Override
-    public void doConfigure(VmwareHypervisorConnection hypervisor, VirtualMachineDefinition vmdefinition)
-        throws VirtualFactoryException
+    public void doConfigure(VmwareHypervisorConnection hypervisor,
+        VirtualMachineDefinition vmdefinition) throws VirtualFactoryException
     {
         final String vmUuid = vmdefinition.getMachineID();
 
@@ -323,9 +307,9 @@ public abstract class AbsVmwareMachine implements IVirtualMachine<VmwareHypervis
     }
 
     @Override
-    public void doPowerOn(VmwareHypervisorConnection hypervisor, VirtualMachineDefinition vmdefinition)
-        throws VirtualFactoryException
-    {        
+    public void doPowerOn(VmwareHypervisorConnection hypervisor,
+        VirtualMachineDefinition vmdefinition) throws VirtualFactoryException
+    {
         final String vmUuid = vmdefinition.getMachineID();
 
         VirtualMachine vm = hypervisor.getUtils().getVm(vmUuid);
@@ -334,8 +318,8 @@ public abstract class AbsVmwareMachine implements IVirtualMachine<VmwareHypervis
     }
 
     @Override
-    public void doPowerOff(VmwareHypervisorConnection hypervisor, VirtualMachineDefinition vmdefinition)
-        throws VirtualFactoryException
+    public void doPowerOff(VmwareHypervisorConnection hypervisor,
+        VirtualMachineDefinition vmdefinition) throws VirtualFactoryException
     {
         final String vmUuid = vmdefinition.getMachineID();
 
@@ -358,7 +342,7 @@ public abstract class AbsVmwareMachine implements IVirtualMachine<VmwareHypervis
     @Override
     public void doPause(VmwareHypervisorConnection hypervisor, VirtualMachineDefinition vmdefinition)
         throws VirtualFactoryException
-    {     
+    {
         final String vmUuid = vmdefinition.getMachineID();
 
         VirtualMachine vm = hypervisor.getUtils().getVm(vmUuid);
@@ -367,8 +351,8 @@ public abstract class AbsVmwareMachine implements IVirtualMachine<VmwareHypervis
     }
 
     @Override
-    public void doResume(VmwareHypervisorConnection hypervisor, VirtualMachineDefinition vmdefinition)
-        throws VirtualFactoryException
+    public void doResume(VmwareHypervisorConnection hypervisor,
+        VirtualMachineDefinition vmdefinition) throws VirtualFactoryException
     {
         final String vmUuid = vmdefinition.getMachineID();
 
@@ -378,8 +362,9 @@ public abstract class AbsVmwareMachine implements IVirtualMachine<VmwareHypervis
     }
 
     @Override
-    public void doSnapshot(VmwareHypervisorConnection hypervisor, VirtualMachineDefinition vmdefinition,
-        DiskStandard destinationDisk) throws VirtualFactoryException
+    public void doSnapshot(VmwareHypervisorConnection hypervisor,
+        VirtualMachineDefinition vmdefinition, DiskStandard destinationDisk)
+        throws VirtualFactoryException
     {
         final PrimaryDisk sourceDisk = vmdefinition.getPrimaryDisk();
 
@@ -408,7 +393,7 @@ public abstract class AbsVmwareMachine implements IVirtualMachine<VmwareHypervis
             // Setting the new Ram value
             long newRam = ReconfigureUtils.getRamInMbDiff(currentvmachine, newvmachine);
             int newCpu = ReconfigureUtils.getNumVirtualCpuDiff(currentvmachine, newvmachine);
-            
+
             if (newRam != 0)
             {
                 Long ram = Long.valueOf(newRam / 1048576);
@@ -417,7 +402,7 @@ public abstract class AbsVmwareMachine implements IVirtualMachine<VmwareHypervis
 
             if (newCpu != 0)
             {
-                vmConfigSpec.setNumCPUs(newCpu);                
+                vmConfigSpec.setNumCPUs(newCpu);
             }
 
             // Setting the disk disk value
@@ -435,7 +420,8 @@ public abstract class AbsVmwareMachine implements IVirtualMachine<VmwareHypervis
             // logger.debug("Any disk configruation changed");
             // }
 
-            ManagedObjectReference vmMor = hypervisor.getUtils().getVmMor(currentvmachine.getMachineID());
+            ManagedObjectReference vmMor =
+                hypervisor.getUtils().getVmMor(currentvmachine.getMachineID());
             ManagedObjectReference tmor =
                 hypervisor.getUtils().getVimStub().reconfigVM_Task(vmMor, vmConfigSpec);
             hypervisor.getUtils().monitorTask(tmor);
@@ -450,7 +436,8 @@ public abstract class AbsVmwareMachine implements IVirtualMachine<VmwareHypervis
         catch (Exception e)
         {
             throw new VirtualFactoryException(VirtualFactoryError.RECONFIG, String.format(
-                "Virtual Machine : %s" + "\nCaused by:%s", currentvmachine.getMachineID(), e.toString()));
+                "Virtual Machine : %s" + "\nCaused by:%s", currentvmachine.getMachineID(),
+                e.toString()));
         }
         // TODO
         // finally

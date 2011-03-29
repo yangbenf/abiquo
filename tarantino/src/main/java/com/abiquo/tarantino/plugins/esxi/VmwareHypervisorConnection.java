@@ -231,43 +231,4 @@ public class VmwareHypervisorConnection implements IHypervisorConnection
 
     }
 
-    // // //
-    // private void copyDataStorefile() throws Exception
-    // {
-    // Configuration mainConfig =
-    // AbiCloudModel.getInstance().getConfigManager().getConfiguration();
-    // VmwareHypervisorConfiguration config = mainConfig.getVmwareHyperConfig();
-    // // String dcName = apputil.get_option("datacentername");
-    // String dcName = config.getDatacenterName();
-    // ManagedObjectReference dcmor = serviceUtil.getDecendentMoRef(null, "Datacenter", dcName);
-    // ManagedObjectReference fileManager =
-    // apputil.getServiceInstance().getServiceContent().getFileManager();
-    // ManagedObjectReference taskCopyMor =
-    // serviceUtil.getVimService().copyDatastoreFile_Task(fileManager,
-    // "[nfsrepository] ubuntu810desktop/ubuntu810desktop-flat.vmdk", dcmor,
-    // "[datastore1] test/test-flat.vmdk", dcmor, true);
-    // /*
-    // * ManagedObjectReference taskCopyMor =
-    // * serviceUtil.getService().copyDatastoreFile_Task(fileManager,
-    // * "[datastore1] testubuntu/testubuntu.vmdk", dcmor,
-    // *
-    // "[datastore1] 11b0b35e-4810-4aed-95c5-12b4dc06e80a/11b0b35e-4810-4aed-95c5-12b4dc06e80a.vmdk"
-    // * , dcmor, true);
-    // */
-    // // ManagedObjectReference taskCopyMor =
-    // // serviceUtil.getService().copyVirtualDisk_Task(virtualDiskManager,
-    // // "[nfsrepository] ubuntu/Ubuntu.8.10.Server.vmdk", dcmor,
-    // // "[datastore1] test/Nostalgia.vmdk", dcmor, null, true);
-    // String res = serviceUtil.waitForTask(taskCopyMor);
-    // if (res.equalsIgnoreCase("success"))
-    // {
-    // logger.info("Virtual Machine Created Sucessfully");
-    // }
-    // else
-    // {
-    // String message = "Virtual Machine could not be created. " + res;
-    // logger.error(message);
-    // throw new VirtualMachineException(message);
-    // }
-    // }
 }
