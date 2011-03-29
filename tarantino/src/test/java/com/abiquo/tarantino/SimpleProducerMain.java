@@ -22,7 +22,6 @@
 package com.abiquo.tarantino;
 
 import java.io.IOException;
-import java.util.UUID;
 
 import com.abiquo.commons.amqp.impl.datacenter.JobsProducer;
 import com.abiquo.commons.amqp.impl.datacenter.domain.dto.DatacenterJobDto;
@@ -41,7 +40,7 @@ public class SimpleProducerMain
 
         JobsProducer producer = new JobsProducer(datacenterId);
         DatacenterJobDto job = new DatacenterJobDto();
-        job.dummy = UUID.randomUUID().toString();
+        // job.setOperation(operation) // Set operation!
 
         producer.openChannel();
         producer.publish(job);
