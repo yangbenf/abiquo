@@ -69,9 +69,9 @@ public class LibvirtConnection extends Connect implements IHypervisorConnection
 
     }
 
-    public LibvirtConnection()
+    public LibvirtConnection() throws LibvirtException
     {
-
+        super("");
     }
 
     private LibvirtConnection(String url) throws LibvirtException

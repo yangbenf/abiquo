@@ -98,8 +98,7 @@ public class VmwareHypervisorConnection implements IHypervisorConnection
         ServiceInstance serviceInstance;
         try
         {
-            final String urlstr =
-                connection.getHypervisorType().getConnectionURI(connection.getIp());
+            final String urlstr = connection.getConnectionURI();
 
             final URL hUrl = new URL(urlstr);
 
