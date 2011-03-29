@@ -19,13 +19,14 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.commons.amqp.impl.datacenter.domain.jobs;
+package com.abiquo.commons.amqp.impl.datacenter.domain;
 
 import static com.abiquo.commons.amqp.impl.datacenter.domain.StateTransaction.CONFIGURE;
 import static com.abiquo.commons.amqp.impl.datacenter.domain.StateTransaction.DECONFIGURE;
 import static com.abiquo.commons.amqp.impl.datacenter.domain.StateTransaction.PAUSE;
 import static com.abiquo.commons.amqp.impl.datacenter.domain.StateTransaction.POWEROFF;
 import static com.abiquo.commons.amqp.impl.datacenter.domain.StateTransaction.POWERON;
+import static com.abiquo.commons.amqp.impl.datacenter.domain.StateTransaction.RECONFIGURE;
 import static com.abiquo.commons.amqp.impl.datacenter.domain.StateTransaction.RESET;
 import static com.abiquo.commons.amqp.impl.datacenter.domain.StateTransaction.RESUME;
 import static com.abiquo.commons.amqp.impl.datacenter.domain.StateTransaction.SNAPSHOT;
@@ -33,12 +34,36 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
-import org.testng.annotations.Test;
+import java.util.HashSet;
+import java.util.Set;
 
-import com.abiquo.commons.amqp.impl.datacenter.domain.State;
+import org.testng.annotations.Test;
 
 public class StateTransactionTest
 {
+    @Test
+    public void test_availableTransactions()
+    {
+        Set<StateTransaction> transactions = new HashSet<StateTransaction>();
+
+        transactions.add(StateTransaction.CONFIGURE);
+        transactions.add(StateTransaction.DECONFIGURE);
+        transactions.add(StateTransaction.PAUSE);
+        transactions.add(StateTransaction.POWEROFF);
+        transactions.add(StateTransaction.POWERON);
+        transactions.add(StateTransaction.RECONFIGURE);
+        transactions.add(StateTransaction.RESET);
+        transactions.add(StateTransaction.RESUME);
+        transactions.add(StateTransaction.SNAPSHOT);
+
+        assertEquals(StateTransaction.values().length, 9);
+
+        for (StateTransaction transaction : StateTransaction.values())
+        {
+            assertTrue(transactions.contains(transaction));
+        }
+    }
+
     @Test
     public void test_configure()
     {
@@ -49,6 +74,18 @@ public class StateTransactionTest
         assertFalse(CONFIGURE.isValidOrigin(State.UNKNOWN));
         assertFalse(CONFIGURE.isValidOrigin(State.PAUSED));
         assertFalse(CONFIGURE.isValidOrigin(State.CONFIGURED));
+    }
+
+    @Test
+    public void test_reconfigure()
+    {
+        assertEquals(RECONFIGURE.getEndState(), State.CONFIGURED);
+        assertTrue(RECONFIGURE.isValidOrigin(State.OFF));
+        assertFalse(RECONFIGURE.isValidOrigin(State.UNDEPLOYED));
+        assertFalse(RECONFIGURE.isValidOrigin(State.ON));
+        assertFalse(RECONFIGURE.isValidOrigin(State.UNKNOWN));
+        assertFalse(RECONFIGURE.isValidOrigin(State.PAUSED));
+        assertFalse(RECONFIGURE.isValidOrigin(State.CONFIGURED));
     }
 
     @Test

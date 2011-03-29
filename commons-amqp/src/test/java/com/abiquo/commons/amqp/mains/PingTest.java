@@ -19,25 +19,18 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.commons.amqp.impl.datacenter.domain.dto;
+package com.abiquo.commons.amqp.mains;
 
-import java.util.UUID;
+import org.testng.AssertJUnit;
+import org.testng.annotations.Test;
 
-import com.abiquo.commons.amqp.domain.Queuable;
-import com.abiquo.commons.amqp.util.JSONUtils;
+import com.abiquo.commons.amqp.util.RabbitMQUtils;
 
-public class DatacenterJob implements Queuable
+public class PingTest
 {
-    public String dummy = UUID.randomUUID().toString();
-
-    @Override
-    public byte[] toByteArray()
+    @Test(enabled = false)
+    public void ping()
     {
-        return JSONUtils.serialize(this);
-    }
-
-    public static DatacenterJob fromByteArray(final byte[] bytes)
-    {
-        return JSONUtils.deserialize(bytes, DatacenterJob.class);
+        AssertJUnit.assertTrue(RabbitMQUtils.pingRabbitMQ());
     }
 }

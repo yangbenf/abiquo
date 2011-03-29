@@ -19,17 +19,38 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.commons.amqp.impl.datacenter.domain.jobs;
+package com.abiquo.commons.amqp.impl.datacenter.domain;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import org.testng.annotations.Test;
 
-import com.abiquo.commons.amqp.impl.datacenter.domain.State;
-import com.abiquo.commons.amqp.impl.datacenter.domain.StateTransaction;
-
 public class StateTest
 {
+    @Test
+    public void test_availableStates()
+    {
+        Set<State> states = new HashSet<State>();
+
+        states.add(State.CONFIGURED);
+        states.add(State.OFF);
+        states.add(State.ON);
+        states.add(State.PAUSED);
+        states.add(State.UNDEPLOYED);
+        states.add(State.UNKNOWN);
+
+        assertEquals(State.values().length, 6);
+
+        for (State state : State.values())
+        {
+            assertTrue(states.contains(state));
+        }
+    }
+
     @Test(expectedExceptions = RuntimeException.class)
     public void test_invalidTravel()
     {
@@ -40,6 +61,12 @@ public class StateTest
     public void test_configureTravel()
     {
         assertEquals(State.UNDEPLOYED.travel(StateTransaction.CONFIGURE), State.CONFIGURED);
+    }
+
+    @Test
+    public void test_reconfigureTravel()
+    {
+        assertEquals(State.OFF.travel(StateTransaction.RECONFIGURE), State.CONFIGURED);
     }
 
     @Test

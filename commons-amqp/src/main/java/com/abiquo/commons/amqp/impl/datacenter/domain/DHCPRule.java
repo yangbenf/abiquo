@@ -6,6 +6,8 @@ public class DHCPRule
 
     protected String macAddress;
 
+    protected String leaseName;
+
     public String getIp()
     {
         return ip;
@@ -26,5 +28,15 @@ public class DHCPRule
     {
         // TODO validate
         this.macAddress = macAddress;
+    }
+
+    public String getLeaseName()
+    {
+        return leaseName;
+    }
+
+    public void setLeaseName(String leaseName)
+    {
+        this.leaseName = leaseName;
     }
 }
