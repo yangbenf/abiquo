@@ -48,10 +48,13 @@ import com.vmware.vim25.VirtualEthernetCardNetworkBackingInfo;
 import com.vmware.vim25.VirtualMachineConfigSpec;
 import com.vmware.vim25.VirtualMachineNetworkInfo;
 
+/**
+ * @author apuig (based on the great work of Pedro Navarro)
+ * */
 public class VmwareMachineNetwork
 {
 
-    private final static Logger logger = LoggerFactory.getLogger(VmwareMachineNetwork.class);
+//    private final static Logger logger = LoggerFactory.getLogger(VmwareMachineNetwork.class);
 
     private EsxiUtils utils;
 
@@ -59,18 +62,6 @@ public class VmwareMachineNetwork
     {
         this.utils = utils;
     }
-
-    // /////////////////////////////////////////////////////////////////////////
-    // /////////////////////////////////////////////////////////////////////////
-    // /////////////////////////////////////////////////////////////////////////
-    // /////////////////////////////////////////////////////////////////////////
-
-    // networking
-
-    // /////////////////////////////////////////////////////////////////////////
-    // /////////////////////////////////////////////////////////////////////////
-    // /////////////////////////////////////////////////////////////////////////
-    // /////////////////////////////////////////////////////////////////////////
 
     private String getNetworkName(ConfigTarget configTarget) throws VirtualFactoryException
     {
@@ -187,7 +178,7 @@ public class VmwareMachineNetwork
                 portgrp.setPolicy(new HostNetworkPolicy());
                 portgrp.setVlanId(Integer.valueOf(vnic.getVlanTag()));
 
-                logger.debug("Adding port group: " + portGroupName + " tagged with VLAN: "
+                utils.logger.debug("Adding port group: " + portGroupName + " tagged with VLAN: "
                     + vnic.getVlanTag() + " to Virtual Switch " + vnic.getVSwitchName());
 
                 try
@@ -261,7 +252,7 @@ public class VmwareMachineNetwork
 
                 if (vmsUsedByNetwork.length == 0)
                 {
-                    logger.debug("There is no virtual machine using network: " + portGroup
+                    utils.logger.debug("There is no virtual machine using network: " + portGroup
                         + " proceeding to delete");
 
                     ManagedObjectReference hostmor = utils.getHostSystemMOR();
@@ -271,7 +262,7 @@ public class VmwareMachineNetwork
 
                     utils.getServiceInstance().getServerConnection().getVimService()
                         .removePortGroup(nwSystem, portGroup);
-                    logger.debug("Removing port group: " + portGroup);
+                    utils.logger.debug("Removing port group: " + portGroup);
                 }
 
             }

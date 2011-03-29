@@ -39,6 +39,7 @@ class EsxiVim25Util
 {
     protected final static Logger logger = LoggerFactory.getLogger(EsxiVim25Util.class);
 
+    
     class EsxiVim25UtilException extends RuntimeException
     {
         private static final long serialVersionUID = -4841957566580698325L;

@@ -38,15 +38,14 @@ import com.abiquo.tarantino.plugins.esxi.utils.EsxiUtils;
 import com.vmware.vim25.mo.ServiceInstance;
 import com.vmware.vim25.mo.util.OptionSpec;
 
+/**
+ * @author apuig (based on the great work of Pedro Navarro)
+ */
 // TODO @Hypervisor(type = HypervisorType.VMX_04)
 public class VmwareHypervisorConnection implements IHypervisorConnection
 {
-    /** The Constant logger. */
-    private final static Logger logger = LoggerFactory.getLogger(VmwareHypervisorConnection.class);
 
-    /**
-     * ESXi session
-     */
+    /** Aggregate internal ESXi functionalities. */
     private EsxiUtils esxi;
 
     public EsxiUtils getUtils()
@@ -65,19 +64,10 @@ public class VmwareHypervisorConnection implements IHypervisorConnection
             esxi = createConnection(connection);
 
             esxi.getUtilBasics().checkLicense();
-            String datasoreRepositoryName =
-                esxi.getUtilBasics().getAndCheckRepositoryDatastore(
-                    globalConfig.getRepositoryLocation());
-            // TODO WTF set set set
-            globalConfig.setRepositoryDatastore(datasoreRepositoryName);
-
         }
         catch (VirtualFactoryException vfe)
         {
-            logger.debug("An error was occurred when connecting to the hypervisor", vfe);
-
             logout();
-
             throw vfe;
         }
     }
@@ -98,7 +88,8 @@ public class VmwareHypervisorConnection implements IHypervisorConnection
         ServiceInstance serviceInstance;
         try
         {
-            final String urlstr = connection.getConnectionURI();
+            final String urlstr =
+                connection.getHypervisorType().getConnectionURI(connection.getIp());
 
             final URL hUrl = new URL(urlstr);
 
