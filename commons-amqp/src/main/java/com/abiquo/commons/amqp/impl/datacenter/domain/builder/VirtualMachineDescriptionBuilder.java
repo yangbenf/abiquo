@@ -23,18 +23,19 @@ package com.abiquo.commons.amqp.impl.datacenter.domain.builder;
 
 import com.abiquo.commons.amqp.impl.datacenter.domain.AuxiliaryDisk;
 import com.abiquo.commons.amqp.impl.datacenter.domain.DiskDescription;
+import com.abiquo.commons.amqp.impl.datacenter.domain.DiskDescription.DiskFormatType;
 import com.abiquo.commons.amqp.impl.datacenter.domain.DiskStandard;
 import com.abiquo.commons.amqp.impl.datacenter.domain.DiskStateful;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition;
-import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualNIC;
+import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.HardwareConfiguration;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.NetworkConfiguration;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.PrimaryDisk;
-import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.SecondaryDisks;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.PrimaryDisk.DiskStandardConfiguration;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.CreateVirtualMachine;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.HardwareConfiguration;
+import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.SecondaryDisks;
+import com.abiquo.commons.amqp.impl.datacenter.domain.operations.ConfigureVirtualMachineOp;
+import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualNIC;
 
-public class CreateVirtualMachineJobBuilder extends VirtualFactoryJobBuilder
+public class VirtualMachineDescriptionBuilder
 {
     private HardwareConfiguration hardConf;
 
@@ -44,25 +45,31 @@ public class CreateVirtualMachineJobBuilder extends VirtualFactoryJobBuilder
 
     private SecondaryDisks secondaryDisks;
 
-    public CreateVirtualMachineJobBuilder connection(String hypervisorID, String hypervisortype,
-        String ip, String port, String protocol, String loginUser, String loginPasswoed)
-    {
-        super
-            .connection(hypervisorID, hypervisortype, ip, port, protocol, loginUser, loginPasswoed);
-        return this;
-    }
-
-    public CreateVirtualMachineJobBuilder hardware(int virtualCpu, int ramInMb)
+ 
+    public VirtualMachineDescriptionBuilder hardware(int virtualCpu, int ramInMb)
     {
         hardConf = new HardwareConfiguration();
-        hardConf.setVirtualCpu(virtualCpu);
+        hardConf.setNumVirtualCpus(virtualCpu);
         hardConf.setRamInMb(ramInMb);
 
         return this;
     }
 
-    public CreateVirtualMachineJobBuilder addNetwork(String vSwitchName, String macAddress,
-        String networkName, String vlanTag, String sequence)
+    public VirtualMachineDescriptionBuilder setRdPort(int rdport)
+    {
+        if (netConf == null)
+        {
+            netConf = new NetworkConfiguration();
+        }
+        netConf.setRdPort(rdport);
+
+        return this;
+    }
+
+    public VirtualMachineDescriptionBuilder addNetwork(String macAddress, String ip,
+        String vSwitchName, String networkName, int vlanTag, String leaseName, String forwardMode,
+        String netAddress, String gateway, String mask, String primaryDNS, String secondaryDNS,
+        String sufixDNS, int sequence)
     {
         if (netConf == null)
         {
@@ -70,28 +77,40 @@ public class CreateVirtualMachineJobBuilder extends VirtualFactoryJobBuilder
         }
 
         VirtualNIC nic = new VirtualNIC();
-        nic.setVSwitchName(vSwitchName);
         nic.setMacAddress(macAddress);
+        nic.setIp(ip);
+
+        nic.setVSwitchName(vSwitchName);
         nic.setNetworkName(networkName);
         nic.setVlanTag(vlanTag);
         nic.setSequence(sequence);
-        
+
+        nic.setLeaseName(leaseName);
+        nic.setForwardMode(forwardMode);
+        nic.setNetAddress(netAddress);
+        nic.setGateway(gateway);
+        nic.setMask(mask);
+        nic.setPrimaryDNS(primaryDNS);
+        nic.setSecondaryDNS(secondaryDNS);
+        nic.setSufixDNS(sufixDNS);
+
         netConf.getVirtualNIC().add(nic);
 
         return this;
     }
 
-    public CreateVirtualMachineJobBuilder primaryDisk(String format, String capacity,
-        String sourceDatastore, String sourcePath, String destinationDatastore)
+    public VirtualMachineDescriptionBuilder primaryDisk(DiskFormatType format,
+        long capacityInBytes, String sourceDatastore, String sourcePath, String destinationDatastore)
     {
 
         DiskStandard disk = new DiskStandard();
         disk.setFormat(format);
-        disk.setCapacity(capacity);
+        disk.setCapacityInBytes(capacityInBytes);
         disk.setDatastore(sourceDatastore);
         disk.setPath(sourcePath);
 
-        VirtualMachineDefinition.PrimaryDisk.DiskStandardConfiguration standard = new DiskStandardConfiguration();
+        VirtualMachineDefinition.PrimaryDisk.DiskStandardConfiguration standard =
+            new DiskStandardConfiguration();
         standard.setDiskStandard(disk);
         standard.setDestinationDatastore(destinationDatastore);
 
@@ -100,20 +119,21 @@ public class CreateVirtualMachineJobBuilder extends VirtualFactoryJobBuilder
         return this;
     }
 
-    public CreateVirtualMachineJobBuilder primaryDisk(String format, String capacity, String iqn)
+    public VirtualMachineDescriptionBuilder primaryDisk(DiskFormatType format,
+        long capacityInBytes, String iqn)
     {
         DiskStateful disk = new DiskStateful();
         disk.setFormat(format);
-        disk.setCapacity(capacity);
+        disk.setCapacityInBytes(capacityInBytes);
         disk.setIqn(iqn);
 
         primaryDisk = new PrimaryDisk();
-        primaryDisk.setDiskStatefull(disk);
+        primaryDisk.setDiskStateful(disk);
         return this;
     }
 
-    public CreateVirtualMachineJobBuilder addAuxDisk(String format, String capacity, String iqn,
-        int sequence)
+    public VirtualMachineDescriptionBuilder addAuxDisk(DiskFormatType format,
+        long capacityInBytes, String iqn, int sequence)
     {
         if (secondaryDisks == null)
         {
@@ -121,36 +141,27 @@ public class CreateVirtualMachineJobBuilder extends VirtualFactoryJobBuilder
         }
 
         AuxiliaryDisk auxDisk = new AuxiliaryDisk();
-        // auxDisk.setDiskID(value); // XXX unset
         auxDisk.setFormat(format);
-        auxDisk.setCapacity(capacity);
+        auxDisk.setCapacityInBytes(capacityInBytes);
         auxDisk.setIqn(iqn);
 
-        secondaryDisks.getAuxDisk().add(auxDisk);
+        secondaryDisks.getAuxiliaryDisks().add(auxDisk);
 
         return this;
     }
 
-    public CreateVirtualMachine build(String virtualMachineId)
+    public VirtualMachineDefinition build(String virtualMachineId)
     {
         VirtualMachineDefinition virtualMachine = new VirtualMachineDefinition();
         // TODO check not null
         virtualMachine.setMachineID(virtualMachineId);
-        virtualMachine.setHardwareConf(hardConf);
-        virtualMachine.setNetworkConf(netConf);
+        virtualMachine.setHardwareConfiguration(hardConf);
+        virtualMachine.setNetworkConfiguration(netConf);
+
         virtualMachine.setPrimaryDisk(primaryDisk);
         virtualMachine.setSecondaryDisks(secondaryDisks);
-        // set machine ID on the diskId
-        DiskDescription primDisk =
-            primaryDisk.getDiskStatefull() != null ? primaryDisk.getDiskStatefull() : primaryDisk
-                .getDiskStandardConf().getDiskStandard();
 
-        primDisk.setDiskID(virtualMachineId);
-
-        CreateVirtualMachine create = new CreateVirtualMachine();
-        create.setHypervisorConnection(connection);
-        create.setVirtualMahine(virtualMachine);
-        return create;
+        return virtualMachine;
     }
 
 }// create builder

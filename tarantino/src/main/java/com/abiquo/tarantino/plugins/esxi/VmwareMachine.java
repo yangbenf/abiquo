@@ -24,16 +24,12 @@ package com.abiquo.tarantino.plugins.esxi;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.abiquo.commons.amqp.impl.datacenter.domain.DiskStandard;
 import com.abiquo.commons.amqp.impl.datacenter.domain.State;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.SnapshotVirtualMachine.SourceDisk;
 import com.abiquo.tarantino.errors.VirtualFactoryErrors;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
-import com.abiquo.tarantino.plugins.esxi.utils.EsxiUtils;
+import com.abiquo.tarantino.hypervisor.IHypervisorConnection;
 import com.abiquo.tarantino.utils.AddressingUtils;
 import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.OptionValue;
@@ -50,7 +46,7 @@ public class VmwareMachine extends AbsVmwareMachine
 {
 
     public VmwareMachine(com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition vmdef,
-        VmwareHypervisor hypervisor)
+        VmwareHypervisorConnection hypervisor)
     {
         super(vmdef, hypervisor);
     }
@@ -78,9 +74,8 @@ public class VmwareMachine extends AbsVmwareMachine
             // TODO use the datastore name instead of mount point
             final String datastoreName =
                 vmdef.getPrimaryDisk().getDiskStandardConf().getDestinationDatastore();
-            final long diskSize =
-                Long.parseLong(vmdef.getPrimaryDisk().getDiskStandardConf().getDiskStandard()
-                    .getCapacity());
+            final long diskSize = vmdef.getPrimaryDisk().getDiskStandardConf().getDiskStandard()
+                    .getCapacityInBytes();
 
             vmConfigSpec =
                 hypervisor
@@ -91,11 +86,11 @@ public class VmwareMachine extends AbsVmwareMachine
 
             List<VirtualDeviceConfigSpec> nicSpecList =
                 hypervisor.getUtils().getUtilNetwork()
-                    .configureNetworkInterfaces(vmdef.getNetworkConf().getVirtualNIC());
+                    .configureNetworkInterfaces(vmdef.getNetworkConfiguration().getVirtualNIC());
             vmConfigSpec = addDeviceSpecs(vmConfigSpec, nicSpecList);
 
-            final long rammb = vmdef.getHardwareConf().getRamInMb();
-            final int cpu = vmdef.getHardwareConf().getVirtualCpu();
+            final long rammb = vmdef.getHardwareConfiguration().getRamInMb();
+            final int cpu = vmdef.getHardwareConfiguration().getNumVirtualCpus();
 
             String guestId = hypervisor.getUtils().getSessionOption("guestosid");
 
@@ -105,7 +100,7 @@ public class VmwareMachine extends AbsVmwareMachine
             vmConfigSpec.setNumCPUs(cpu);// config.getCpuNumber());
             vmConfigSpec.setGuestId(guestId);
 
-            final int rdport = vmdef.getNetworkConf().getRdPort();
+            final int rdport = vmdef.getNetworkConfiguration().getRdPort();
 
             if (AddressingUtils.isValidPort(String.valueOf(rdport)))
             {
@@ -150,53 +145,7 @@ public class VmwareMachine extends AbsVmwareMachine
         return vmConfigSpec;
     }
 
-    @Override
-    public void applyState(State newState)
-    {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void deploy()
-    {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void delete()
-    {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void reconfigure(VirtualMachineDefinition vmachine)
-    {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public boolean exist()
-    {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public void snapshoot(SourceDisk sourceDisk, DiskStandard destinationDisk)
-    {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public VirtualMachineDefinition getVirtualMachine()
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
+   
+ 
 
 }

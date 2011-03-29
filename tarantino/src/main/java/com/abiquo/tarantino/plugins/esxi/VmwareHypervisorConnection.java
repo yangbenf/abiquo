@@ -31,22 +31,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.commons.amqp.impl.datacenter.domain.HypervisorConnection;
-import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition;
 import com.abiquo.tarantino.errors.VirtualFactoryErrors;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
 import com.abiquo.tarantino.hypervisor.IHypervisorConnection;
 import com.abiquo.tarantino.plugins.esxi.utils.EsxiUtils;
-import com.abiquo.tarantino.virtualmachine.IVirtualMachine;
-import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.mo.ServiceInstance;
 import com.vmware.vim25.mo.util.OptionSpec;
 
 // TODO @Hypervisor(type = HypervisorType.VMX_04)
-public class VmwareHypervisor implements IHypervisorConnection
+public class VmwareHypervisorConnection implements IHypervisorConnection
 {
-
     /** The Constant logger. */
-    private final static Logger logger = LoggerFactory.getLogger(VmwareHypervisor.class.getName());
+    private final static Logger logger = LoggerFactory.getLogger(VmwareHypervisorConnection.class);
 
     /**
      * ESXi session
@@ -58,27 +54,15 @@ public class VmwareHypervisor implements IHypervisorConnection
         return esxi;
     }
 
-    // private VmwareMachineBasics utils;
-    //
-    // public VmwareMachineBasics getUtilsVm()
-    // {
-    // return utils;
-    // }
-    //
-    // public EsxiUtils getUtilsEsxi()
-    // {
-    // return esxi;
-    // }
-
     @Override
-    public void connectAndLogin(HypervisorConnection hconn) throws VirtualFactoryException
+    public void login(HypervisorConnection connection) throws VirtualFactoryException
     {
 
         try
         {
             logout();
 
-            esxi = createConnection(hconn);
+            esxi = createConnection(connection);
 
             esxi.getUtilBasics().checkLicense();
             String datasoreRepositoryName =
@@ -98,23 +82,34 @@ public class VmwareHypervisor implements IHypervisorConnection
         }
     }
 
-    private EsxiUtils createConnection(HypervisorConnection hconn) throws VirtualFactoryException
+    @Override
+    public void logout()
+    {
+        if (esxi != null && esxi.isConnected())
+        {
+            esxi.disConnect();
+        }
+    }
+
+    private EsxiUtils createConnection(HypervisorConnection connection)
+        throws VirtualFactoryException
     {
 
         ServiceInstance serviceInstance;
         try
         {
-            final URL hUrl =
-                new URL(String.format("%s://%s:%s/sdk", hconn.getProtocol(), hconn.getIp(),
-                    hconn.getPort()));
+            final String urlstr =
+                connection.getHypervisorType().getConnectionURI(connection.getIp());
+
+            final URL hUrl = new URL(urlstr);
 
             serviceInstance =
                 new ServiceInstance(hUrl,
-                    hconn.getLoginUser(),
-                    hconn.getLoginPassword(),
+                    connection.getLoginUser(),
+                    connection.getLoginPassword(),
                     globalConfig.ignoreCert());
 
-            return new EsxiUtils(serviceInstance, constructOptions(), builtinOptionsEntered(hconn,
+            return new EsxiUtils(serviceInstance, constructOptions(), builtinOptionsEntered(connection,
                 hUrl.toString()));
         }
         catch (RemoteException e)
@@ -129,70 +124,6 @@ public class VmwareHypervisor implements IHypervisorConnection
         }
     }
 
-    @Override
-    public void logout()
-    {
-        if (esxi != null && esxi.isConnected())
-        {
-            esxi.disConnect();
-        }
-    }
-
-    @Override
-    public IVirtualMachine createMachine(VirtualMachineDefinition vmachine)
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public IVirtualMachine getMachine(String vmachineId) throws VirtualFactoryException
-    {
-        // // Gets the VMWare API main interface
-        // init(this.url, this.user, this.password);
-        // connect(this.url);
-
-        // TODO connectAndLogin
-
-        try
-        {
-            // ManagedObjectReference machinemor =
-            // utils.getVmMor(virtualMachineConfig.getMachineName());
-
-            ManagedObjectReference machinemoruuid = esxi.getVmMor(vmachineId);
-
-            if (machinemoruuid != null)
-            {
-                // TODO TODO TODO TODO TODO TODO
-                // virtualMachineConfig.setHypervisor(this);
-                // AbsVirtualMachine vm = createMachine(virtualMachineConfig);
-                //
-                // AbsVmwareMachine vm = new VmwareMachine(vmdef, hypervisor);
-                // vm.setState(State.DEPLOYED);
-                //
-                //
-                // return vm;
-                return null;
-
-            }
-            else
-            {
-                throw new VirtualFactoryException(VirtualFactoryErrors.VIRTUAL_MACHINE_NOT_FOUND,
-                    vmachineId);
-            }
-        }
-        catch (Exception e) // EsxiUtilsException
-        {
-            throw new VirtualFactoryException(VirtualFactoryErrors.VIRTUAL_MACHINE_RETRIEVE_ERROR,
-                e.getMessage());
-        }
-
-        // TODO at the end logout
-        // finally
-        // {
-        // logout();
-        // }
-    }
 
     private VmwareHypervisorConfig globalConfig = new VmwareHypervisorConfig();
 

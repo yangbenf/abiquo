@@ -19,25 +19,22 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.commons.amqp.impl.datacenter.domain.dto;
+package com.abiquo.commons.amqp.impl.datacenter.domain.operations;
 
-import java.util.UUID;
+import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition;
 
-import com.abiquo.commons.amqp.domain.Queuable;
-import com.abiquo.commons.amqp.util.JSONUtils;
-
-public class DatacenterJob implements Queuable
+// Used by exist operation
+public class ConfigureVirtualMachineOp extends BasicDatacenterOp
 {
-    public String dummy = UUID.randomUUID().toString();
+    protected VirtualMachineDefinition virtualMachine;
 
-    @Override
-    public byte[] toByteArray()
+    public VirtualMachineDefinition getVirtualMachine()
     {
-        return JSONUtils.serialize(this);
+        return virtualMachine;
     }
 
-    public static DatacenterJob fromByteArray(final byte[] bytes)
+    public void setVirtualMachine(VirtualMachineDefinition virtualMachine)
     {
-        return JSONUtils.deserialize(bytes, DatacenterJob.class);
+        this.virtualMachine = virtualMachine;
     }
 }

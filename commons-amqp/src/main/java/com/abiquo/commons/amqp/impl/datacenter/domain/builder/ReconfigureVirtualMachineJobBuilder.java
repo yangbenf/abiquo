@@ -21,23 +21,23 @@
 
 package com.abiquo.commons.amqp.impl.datacenter.domain.builder;
 
-import com.abiquo.commons.amqp.impl.datacenter.domain.DiskDescription.DiskFormatType;
-import com.abiquo.commons.amqp.impl.datacenter.domain.DiskStandard;
 import com.abiquo.commons.amqp.impl.datacenter.domain.HypervisorConnection.HypervisorType;
-import com.abiquo.commons.amqp.impl.datacenter.domain.operations.SnapshotVirtualMachineOp;
+import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition;
+import com.abiquo.commons.amqp.impl.datacenter.domain.operations.ReconfigureVirtualMachineOp;
 
-public class SnapshotVirtualMachineJobBuilder extends ConfigureVirtualMachineJobBuilder
+public class ReconfigureVirtualMachineJobBuilder extends ConfigureVirtualMachineJobBuilder
 {
-    private DiskStandard destination;
+    VirtualMachineDefinition newVmachineDefinition;
 
-    public SnapshotVirtualMachineJobBuilder connection(HypervisorType hypervisortype, String ip,
+    public ReconfigureVirtualMachineJobBuilder connection(HypervisorType hypervisortype, String ip,
         String loginUser, String loginPasswoed)
     {
         super.connection(hypervisortype, ip, loginUser, loginPasswoed);
+
         return this;
     }
 
-    public SnapshotVirtualMachineJobBuilder setVirtualMachineDefinition(
+    public ReconfigureVirtualMachineJobBuilder setVirtualMachineDefinition(
         VirtualMachineDescriptionBuilder vmBuilder, String virtualMachineId)
     {
         super.setVirtualMachineDefinition(vmBuilder, virtualMachineId);
@@ -45,27 +45,21 @@ public class SnapshotVirtualMachineJobBuilder extends ConfigureVirtualMachineJob
         return this;
     }
 
-    public SnapshotVirtualMachineJobBuilder destinationDisk(DiskFormatType format,
-        long capacityInBytes, String datastore, String path)
+    public ReconfigureVirtualMachineJobBuilder setNewVirtualMachineDefinition(
+        VirtualMachineDescriptionBuilder newVmBuilder, String virtualMachineId)
     {
-
-        destination = new DiskStandard();
-
-        destination.setFormat(format);
-        destination.setCapacityInBytes(capacityInBytes);
-        destination.setDatastore(datastore);
-        destination.setPath(path);
+        newVmachineDefinition = newVmBuilder.build(virtualMachineId);
 
         return this;
     }
 
-    public SnapshotVirtualMachineOp buildSnapshotVirtualMachineDto()
+    public ReconfigureVirtualMachineOp buildReconfigureVirtualMachineDto()
     {
-        SnapshotVirtualMachineOp sn = new SnapshotVirtualMachineOp();
-        sn.setHypervisorConnection(connection);
-        sn.setVirtualMachine(vmachineDefinition);
-        sn.setDestinationDisk(destination);
+        ReconfigureVirtualMachineOp reconfigure = new ReconfigureVirtualMachineOp();
+        reconfigure.setHypervisorConnection(this.connection);
+        reconfigure.setVirtualMachine(this.vmachineDefinition);
+        reconfigure.setNewVirtualMachine(this.newVmachineDefinition);
 
-        return sn;
+        return reconfigure;
     }
 }

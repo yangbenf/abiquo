@@ -22,18 +22,22 @@
 package com.abiquo.commons.amqp.impl.datacenter.domain.dto;
 
 import com.abiquo.commons.amqp.domain.Queuable;
-import com.abiquo.commons.amqp.impl.datacenter.domain.DiskStandard;
-import com.abiquo.commons.amqp.impl.datacenter.domain.HypervisorConnection;
-import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition;
+import com.abiquo.commons.amqp.impl.datacenter.domain.operations.BasicDatacenterOp;
 import com.abiquo.commons.amqp.util.JSONUtils;
 
-public class ApplyVirtualMachineStateDto implements Queuable
+public class DatacenterJobDto implements Queuable
 {
-    public HypervisorConnection hypervisorConnection;
+    protected BasicDatacenterOp operation;
 
-    public VirtualMachineDefinition virtualMachine;
+    public BasicDatacenterOp getOperation()
+    {
+        return operation;
+    }
 
-    public DiskStandard destinationDisk;
+    public void setOperation(BasicDatacenterOp operation)
+    {
+        this.operation = operation;
+    }
 
     @Override
     public byte[] toByteArray()
@@ -41,8 +45,8 @@ public class ApplyVirtualMachineStateDto implements Queuable
         return JSONUtils.serialize(this);
     }
 
-    public static ApplyVirtualMachineStateDto fromByteArray(final byte[] bytes)
+    public static DatacenterJobDto fromByteArray(byte[] bytes)
     {
-        return JSONUtils.deserialize(bytes, ApplyVirtualMachineStateDto.class);
+        return JSONUtils.deserialize(bytes, DatacenterJobDto.class);
     }
 }

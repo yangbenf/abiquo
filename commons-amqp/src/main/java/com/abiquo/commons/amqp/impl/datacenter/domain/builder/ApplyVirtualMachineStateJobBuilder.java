@@ -21,23 +21,22 @@
 
 package com.abiquo.commons.amqp.impl.datacenter.domain.builder;
 
-import com.abiquo.commons.amqp.impl.datacenter.domain.DiskDescription.DiskFormatType;
-import com.abiquo.commons.amqp.impl.datacenter.domain.DiskStandard;
 import com.abiquo.commons.amqp.impl.datacenter.domain.HypervisorConnection.HypervisorType;
-import com.abiquo.commons.amqp.impl.datacenter.domain.operations.SnapshotVirtualMachineOp;
+import com.abiquo.commons.amqp.impl.datacenter.domain.StateTransaction;
+import com.abiquo.commons.amqp.impl.datacenter.domain.operations.ApplyVirtualMachineStateOp;
 
-public class SnapshotVirtualMachineJobBuilder extends ConfigureVirtualMachineJobBuilder
+public class ApplyVirtualMachineStateJobBuilder extends ConfigureVirtualMachineJobBuilder
 {
-    private DiskStandard destination;
+    private StateTransaction transaction;
 
-    public SnapshotVirtualMachineJobBuilder connection(HypervisorType hypervisortype, String ip,
+    public ApplyVirtualMachineStateJobBuilder connection(HypervisorType hypervisortype, String ip,
         String loginUser, String loginPasswoed)
     {
         super.connection(hypervisortype, ip, loginUser, loginPasswoed);
         return this;
     }
 
-    public SnapshotVirtualMachineJobBuilder setVirtualMachineDefinition(
+    public ApplyVirtualMachineStateJobBuilder setVirtualMachineDefinition(
         VirtualMachineDescriptionBuilder vmBuilder, String virtualMachineId)
     {
         super.setVirtualMachineDefinition(vmBuilder, virtualMachineId);
@@ -45,27 +44,20 @@ public class SnapshotVirtualMachineJobBuilder extends ConfigureVirtualMachineJob
         return this;
     }
 
-    public SnapshotVirtualMachineJobBuilder destinationDisk(DiskFormatType format,
-        long capacityInBytes, String datastore, String path)
+    public ApplyVirtualMachineStateJobBuilder state(StateTransaction transition)
     {
-
-        destination = new DiskStandard();
-
-        destination.setFormat(format);
-        destination.setCapacityInBytes(capacityInBytes);
-        destination.setDatastore(datastore);
-        destination.setPath(path);
+        this.transaction = transition;
 
         return this;
     }
 
-    public SnapshotVirtualMachineOp buildSnapshotVirtualMachineDto()
+    public ApplyVirtualMachineStateOp buildApplyVirtualMachineStateDto()
     {
-        SnapshotVirtualMachineOp sn = new SnapshotVirtualMachineOp();
-        sn.setHypervisorConnection(connection);
-        sn.setVirtualMachine(vmachineDefinition);
-        sn.setDestinationDisk(destination);
+        ApplyVirtualMachineStateOp vmaction = new ApplyVirtualMachineStateOp();
+        vmaction.setHypervisorConnection(connection);
+        vmaction.setVirtualMachine(vmachineDefinition);
+        vmaction.setTransaction(transaction);
 
-        return sn;
+        return vmaction;
     }
 }

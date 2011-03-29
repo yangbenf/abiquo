@@ -25,8 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.commons.amqp.impl.datacenter.domain.DiskStandard;
+import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.PrimaryDisk;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.PrimaryDisk.DiskStandardConfiguration;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.SnapshotVirtualMachine;
 import com.abiquo.tarantino.errors.VirtualFactoryErrors;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
 import com.vmware.vim25.ManagedObjectReference;
@@ -225,7 +225,7 @@ public class VmwareMachineDisk
      * @param isManaged
      * @throws VirtualMachineException
      */
-    public void bundleVirtualDisk(SnapshotVirtualMachine snpahot) throws VirtualFactoryException
+    public void bundleVirtualDisk(PrimaryDisk sourceDisk, DiskStandard destinatinoDisk) throws VirtualFactoryException
     // (String sourcePath, String sourceDatastoreName,
     // String destinationDatastoreName, String destinationPath, String snapShotName,
     //
@@ -243,11 +243,11 @@ public class VmwareMachineDisk
 
         // TODO not for statefull images !!!
 
-        sourcePathComposed = getSourceDiskPathToBundle(snpahot.getSourceDisk().getDiskStandard());// (sourceDatastoreName,
+        sourcePathComposed = getSourceDiskPathToBundle(sourceDisk.getDiskStandardConf().getDiskStandard());// (sourceDatastoreName,
                                                                                                   // sourcePath,
                                                                                                   // isManaged);
 
-        destPath = getDestinationPathToBundle(snpahot.getDestinationDisk());// (destinationDatastoreName,
+        destPath = getDestinationPathToBundle(destinatinoDisk);// (destinationDatastoreName,
                                                                             // destinationPath,
                                                                             // snapShotName);
 

@@ -24,14 +24,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.management.RuntimeErrorException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.SecondaryDisks;
+import com.abiquo.commons.amqp.impl.datacenter.domain.DiskStandard;
+import com.abiquo.commons.amqp.impl.datacenter.domain.State;
+import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.PrimaryDisk.DiskStandardConfiguration;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.SnapshotVirtualMachine;
+import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.SecondaryDisks;
+import com.abiquo.commons.amqp.impl.datacenter.domain.dto.SnapshotVirtualMachineDto;
 import com.abiquo.tarantino.errors.VirtualFactoryErrors;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
+import com.abiquo.tarantino.hypervisor.IHypervisorConnection;
 import com.abiquo.tarantino.plugins.esxi.utils.VmwareMachineBasics.VMTasks;
 import com.abiquo.tarantino.virtualmachine.IVirtualMachine;
 import com.vmware.vim25.ManagedObjectReference;
@@ -49,32 +55,11 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
     /** The logger */
     protected static final Logger logger = LoggerFactory.getLogger(AbsVmwareMachine.class);
 
-    protected String networkUUID = UUID.randomUUID().toString();
+    // protected String networkUUID = UUID.randomUUID().toString();
 
-    /** Self virtual machine managed object reference. */
-    // private ManagedObjectReference _virtualMachine;
-
-    protected VmwareHypervisor hypervisor;
-
-    protected com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition vmdef;
-
-    /**
-     * The standard constructor
-     * 
-     * @param configuration the virtual machine configuration
-     * @throws VirtualMachineException
-     */
-    public AbsVmwareMachine(
-        com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition vmdef,
-        VmwareHypervisor hypervisor)
-    {
-        // super(configuration);
-
-        this.hypervisor = hypervisor;
-        this.vmdef = vmdef;
-    }
-
-    public void deployMachine() throws VirtualFactoryException// throws VirtualMachineException
+    protected void deployMachine(VmwareHypervisorConnection hypervisor,
+        VirtualMachineDefinition vmdef) throws VirtualFactoryException// throws
+                                                                      // VirtualMachineException
     {
         try
         {
@@ -85,12 +70,12 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
             {
 
                 List<com.abiquo.commons.amqp.impl.datacenter.domain.VirtualNIC> nics =
-                    vmdef.getNetworkConf().getVirtualNIC();
+                    vmdef.getNetworkConfiguration().getVirtualNIC();
 
                 hypervisor.getUtils().getUtilNetwork().configureNetwork(nics);
 
                 // Create the template vdestPathirtual machine
-                createVirtualMachine();
+                createVirtualMachine(hypervisor, vmdef.getMachineID());
 
                 // Stateless image located on the Enterprise Repository require to be copy on the
                 // local fs.
@@ -122,7 +107,7 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
             logger.error("Failed to deploy machine :{}", e);
             // The roll back in the virtual machine is done in top level when rolling back the
             // virtual appliance
-            deleteMachine();
+            deleteMachine(hypervisor, vmdef);
 
             // TODO state = State.CANCELLED;
             throw new VirtualFactoryException(VirtualFactoryErrors.DEPLOY, String.format(
@@ -150,8 +135,9 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
      * @throws VirtualFactoryException
      * @throws Exception
      */
-    private void createVirtualMachine() throws VirtualFactoryException // throws
-                                                                       // VirtualMachineException
+    private void createVirtualMachine(VmwareHypervisorConnection hypervisor, String virtualMachineId)
+        throws VirtualFactoryException // throws
+    // VirtualMachineException
     {
         ManagedObjectReference dcmor; // datacenter
         ManagedObjectReference hfmor; // host folder
@@ -177,7 +163,7 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
             // TODO #createVMConfigSpec defines not convenient default data, change this
             vmConfigSpec = configureVM(crmor, hostmor);
 
-            logger.info("Machine :{} ready to be created", vmdef.getMachineID());
+            logger.info("Machine :{} ready to be created", virtualMachineId);
 
             ManagedObjectReference resourcePool =
                 hypervisor.getUtils().getMoRefProp(crmor, "resourcePool");
@@ -206,12 +192,13 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
         catch (Exception e)
         {
             throw new VirtualFactoryException(VirtualFactoryErrors.CREATE_VM, String.format(
-                "Virtual Machine : %s" + "\nCaused by:%s", vmdef.getMachineID(), e.toString()));
+                "Virtual Machine : %s" + "\nCaused by:%s", virtualMachineId, e.toString()));
         }
 
     }
 
-    public void deleteMachine() throws VirtualFactoryException
+    public void deleteMachine(VmwareHypervisorConnection hypervisor, VirtualMachineDefinition vmdef)
+        throws VirtualFactoryException
     {
         // TODO utils.reconnect();
         // Force to power off the machine before deleting
@@ -230,7 +217,7 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
         {
             // Deconfigure networking resources
             hypervisor.getUtils().getUtilNetwork()
-                .deconfigureNetwork(vmdef.getNetworkConf().getVirtualNIC());
+                .deconfigureNetwork(vmdef.getNetworkConfiguration().getVirtualNIC());
         }
         catch (Exception e)
         {
@@ -248,9 +235,8 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
     }
 
     // @Override
-    public void reconfigVM(
-        com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition newVmDesc)
-        throws VirtualFactoryException
+    public void reconfigVM(VmwareHypervisorConnection hypervisor, VirtualMachineDefinition vmdef,
+        VirtualMachineDefinition newVmDesc) throws VirtualFactoryException
     {
         ResourceAllocationInfo raRAM;
         ResourceAllocationInfo raCPU;
@@ -267,23 +253,24 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
             vmConfigSpec = new VirtualMachineConfigSpec();
 
             // Setting the new Ram value
-            if (isRamSet(newVmDesc))
+            if (isRamSet(vmdef, newVmDesc))
             {
                 logger.info("Reconfiguring The Virtual Machine For Memory Update {}",
                     vmdef.getMachineID());
 
-                Long ram = Long.valueOf(newVmDesc.getHardwareConf().getRamInMb() / 1048576);
+                Long ram =
+                    Long.valueOf(newVmDesc.getHardwareConfiguration().getRamInMb() / 1048576);
 
                 vmConfigSpec.setMemoryMB(ram); //
             }
 
             // Setting the number cpu value
-            if (isCpuSet(newVmDesc))
+            if (isCpuSet(vmdef, newVmDesc))
             {
                 logger.info("Reconfiguring The Virtual Machine For CPU Update {}",
                     vmdef.getMachineID());
 
-                vmConfigSpec.setNumCPUs(newVmDesc.getHardwareConf().getVirtualCpu());
+                vmConfigSpec.setNumCPUs(newVmDesc.getHardwareConfiguration().getNumVirtualCpus());
             }
 
             // Setting the disk disk value
@@ -325,17 +312,16 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
         // }
     }
 
-    private boolean isRamSet(
-        com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition newVmDef)
+    private boolean isRamSet(VirtualMachineDefinition vmdef, VirtualMachineDefinition newVmDef)
     {
-        return newVmDef.getHardwareConf().getRamInMb() != vmdef.getHardwareConf().getRamInMb();
+        return newVmDef.getHardwareConfiguration().getRamInMb() != vmdef.getHardwareConfiguration()
+            .getRamInMb();
     }
 
-    private boolean isCpuSet(
-        com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition newVmDef)
+    private boolean isCpuSet(VirtualMachineDefinition vmdef, VirtualMachineDefinition newVmDef)
     {
-        return newVmDef.getHardwareConf().getVirtualCpu() != vmdef.getHardwareConf()
-            .getVirtualCpu();
+        return newVmDef.getHardwareConfiguration().getNumVirtualCpus() != vmdef
+            .getHardwareConfiguration().getNumVirtualCpus();
     }
 
     /**
@@ -383,37 +369,13 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
     public abstract VirtualMachineConfigSpec configureVM(ManagedObjectReference computerResMOR,
         ManagedObjectReference hostMOR) throws VirtualFactoryException;
 
-    /**
-     * Private helper to check the real state of the virtual machine
-     * 
-     * @param stateToCheck the state to check
-     * @return true if the state in the hypervisors equals to the state as parameter, false if
-     *         contrary
-     */
-    // private boolean checkState(final State stateToCheck) throws VirtualMachineException
-    // {
-    // return getStateInHypervisor().compareTo(stateToCheck) == 0;
-    // }
-
-    public com.abiquo.commons.amqp.impl.datacenter.domain.State getState()
-    {
-        VirtualMachinePowerState st = hypervisor.getUtils().getVmState(vmdef.getMachineID());
-
-        /**
-         * TODO state switch
-         */
-
-        return com.abiquo.commons.amqp.impl.datacenter.domain.State.CONFIGURED;
-
-    }
-
     // @Override
-    public void bundleVirtualMachine(SnapshotVirtualMachine snapshot)
-        throws VirtualFactoryException
+    public void bundleVirtualMachine(VmwareHypervisorConnection hypervisor,
+        VirtualMachineDefinition vmdef, DiskStandard destination) throws VirtualFactoryException
     {
         // TODO check is power off
 
-        hypervisor.getUtils().getUtilDisks().bundleVirtualDisk(snapshot);
+        hypervisor.getUtils().getUtilDisks().bundleVirtualDisk(vmdef.getPrimaryDisk(), destination);
 
         // utils.reconnect();
         //
@@ -474,6 +436,146 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
         {
             return machineName;
         }
+    }
+
+    // //
+
+    private VmwareHypervisorConnection getConnection(IHypervisorConnection connection)
+    {
+        if (connection instanceof VmwareHypervisorConnection)
+        {
+            return (VmwareHypervisorConnection) connection;
+        }
+        else
+        {
+            throw new RuntimeException("VMware connection expected");
+        }
+    }
+
+    /*
+     * INTERFACE IMPLEMENTATION *
+     */
+
+    @Override
+    public boolean exist(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition) throws VirtualFactoryException
+    {
+        final VmwareHypervisorConnection hypervisor = getConnection(connection);
+        final String vmUuid = vmdefinition.getMachineID();
+
+        return hypervisor.getUtils().isVMAlreadyCreated(vmUuid);
+    }
+
+    @Override
+    public State getState(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition) throws VirtualFactoryException
+    {
+        final VmwareHypervisorConnection hypervisor = getConnection(connection);
+        final String vmUuid = vmdefinition.getMachineID();
+
+        
+        if(!exist(hypervisor, vmdefinition))
+        {
+            return State.UNDEPLOYED;
+        }
+        
+        VirtualMachinePowerState hypervisorState = hypervisor.getUtils().getVmState(vmUuid);
+        
+        switch (hypervisorState)
+        {
+            case poweredOff:
+                return State.OFF;
+                    
+            case poweredOn:
+                return State.ON;
+
+            case suspended:
+                return State.PAUSED;
+
+            default:
+                return State.UNKNOWN;                
+        }
+        
+        // TODO never return CONFIGURED 
+    }
+    
+    
+
+    @Override
+    public void doConfigure(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition) throws VirtualFactoryException
+    {
+        VmwareHypervisorConnection hypervisor = getConnection(connection);
+        
+        
+        deployMachine(hypervisor, vmdefinition);
+        
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void doDeconfigure(IHypervisorConnection connection,
+        VirtualMachineDefinition vmdefinition) throws VirtualFactoryException
+    {
+        VmwareHypervisorConnection hypervisor = getConnection(connection);
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void doPowerOn(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition) throws VirtualFactoryException
+    {
+        VmwareHypervisorConnection hypervisor = getConnection(connection);
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void doPowerOff(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition) throws VirtualFactoryException
+    {
+        VmwareHypervisorConnection hypervisor = getConnection(connection);
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void doReset(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition) throws VirtualFactoryException
+    {
+        VmwareHypervisorConnection hypervisor = getConnection(connection);
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void doPause(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition) throws VirtualFactoryException
+    {
+        VmwareHypervisorConnection hypervisor = getConnection(connection);
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override 
+    public void doResume(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition) throws VirtualFactoryException
+    {
+        VmwareHypervisorConnection hypervisor = getConnection(connection);
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void doSnapshot(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition,
+        DiskStandard destinationDisk) throws VirtualFactoryException
+    {
+        VmwareHypervisorConnection hypervisor = getConnection(connection);
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void reconfigure(IHypervisorConnection connection,
+        VirtualMachineDefinition currentvmachine, VirtualMachineDefinition newvmachine) throws VirtualFactoryException
+    {
+        VmwareHypervisorConnection hypervisor = getConnection(connection);
+        // TODO Auto-generated method stub
+
     }
 
 }

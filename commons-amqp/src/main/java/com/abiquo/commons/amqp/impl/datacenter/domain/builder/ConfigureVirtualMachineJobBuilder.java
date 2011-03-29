@@ -21,24 +21,36 @@
 
 package com.abiquo.commons.amqp.impl.datacenter.domain.builder;
 
-import com.abiquo.commons.amqp.impl.datacenter.domain.HypervisorConnection;
 import com.abiquo.commons.amqp.impl.datacenter.domain.HypervisorConnection.HypervisorType;
+import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition;
+import com.abiquo.commons.amqp.impl.datacenter.domain.operations.ConfigureVirtualMachineOp;
 
-public class VirtualFactoryJobBuilder
+public class ConfigureVirtualMachineJobBuilder extends VirtualFactoryJobBuilder
 {
+    VirtualMachineDefinition vmachineDefinition;
 
-    protected HypervisorConnection connection;
-
-    public VirtualFactoryJobBuilder connection(HypervisorType hypervisortype, String ip,
+    public ConfigureVirtualMachineJobBuilder connection(HypervisorType hypervisortype, String ip,
         String loginUser, String loginPasswoed)
     {
-        connection = new HypervisorConnection();
-        connection.setHypervisorType(hypervisortype);
-        connection.setIp(ip);
-        connection.setLoginUser(loginUser);
-        connection.setLoginPassword(loginPasswoed);
+        super.connection(hypervisortype, ip, loginUser, loginPasswoed);
 
         return this;
     }
 
+    public ConfigureVirtualMachineJobBuilder setVirtualMachineDefinition(
+        VirtualMachineDescriptionBuilder vmBuilder, String virtualMachineId)
+    {
+        vmachineDefinition = vmBuilder.build(virtualMachineId);
+
+        return this;
+    }
+
+    public ConfigureVirtualMachineOp buildConfigureVirtualMachineDto()
+    {
+        ConfigureVirtualMachineOp configure = new ConfigureVirtualMachineOp();
+        configure.setHypervisorConnection(this.connection);
+        configure.setVirtualMachine(this.vmachineDefinition);
+
+        return configure;
+    }
 }
