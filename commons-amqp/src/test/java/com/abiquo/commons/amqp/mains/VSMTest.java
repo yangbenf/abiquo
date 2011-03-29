@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.commons.ampq.vsm;
+package com.abiquo.commons.amqp.mains;
 
 import java.io.IOException;
 
