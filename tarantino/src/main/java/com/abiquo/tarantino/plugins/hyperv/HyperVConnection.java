@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.commons.amqp.impl.datacenter.domain.HypervisorConnection;
-import com.abiquo.tarantino.errors.VirtualFactoryErrors;
+import com.abiquo.tarantino.errors.VirtualFactoryError;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
 import com.abiquo.tarantino.hypervisor.IHypervisorConnection;
 import com.abiquo.tarantino.plugins.hyperv.utils.HyperVConstants;
@@ -50,7 +50,7 @@ public class HyperVConnection implements IHypervisorConnection
         catch (Exception e)
         {
             logger.debug("An error was occurred when connecting to the hypervisor", e);
-            throw new VirtualFactoryException(VirtualFactoryErrors.HYPERVISOR_CONNECTION, e.getMessage());
+            throw new VirtualFactoryException(VirtualFactoryError.HYPERVISOR_CONNECTION, e.getMessage());
         }
 
 
@@ -99,7 +99,7 @@ public class HyperVConnection implements IHypervisorConnection
         }
         catch (Exception e)
         {
-            throw new VirtualFactoryException(VirtualFactoryErrors.HYPERVISOR_CONNECTION, e.getMessage());
+            throw new VirtualFactoryException(VirtualFactoryError.HYPERVISOR_CONNECTION, e.getMessage());
         }
         return wmiService;
     }

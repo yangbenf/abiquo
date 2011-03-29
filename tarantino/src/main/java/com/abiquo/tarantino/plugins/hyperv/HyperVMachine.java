@@ -36,7 +36,7 @@ import com.abiquo.commons.amqp.impl.datacenter.domain.DiskStandard;
 import com.abiquo.commons.amqp.impl.datacenter.domain.State;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualNIC;
-import com.abiquo.tarantino.errors.VirtualFactoryErrors;
+import com.abiquo.tarantino.errors.VirtualFactoryError;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
 import com.abiquo.tarantino.hypervisor.IHypervisorConnection;
 import com.abiquo.tarantino.plugins.hyperv.utils.HyperVConstants;
@@ -51,9 +51,9 @@ import com.hyper9.jwbem.msvm.virtualsystem.MsvmComputerSystem;
 /**
  * @author destevez
  */
-public class HyperVMachineTarantino implements IVirtualMachine
+public class HyperVMachine implements IVirtualMachine
 {
-    private static final Logger logger = LoggerFactory.getLogger(HyperVMachineTarantino.class);
+    private static final Logger logger = LoggerFactory.getLogger(HyperVMachine.class);
 
     private VirtualMachineDefinition vmdefinition;
 
@@ -65,7 +65,7 @@ public class HyperVMachineTarantino implements IVirtualMachine
     protected IJIDispatch vmDispatch;
 
     @Override
-    public void doConfigure(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition)
+    public void doConfigure(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition) throws VirtualFactoryException
     {
         this.vmdefinition = vmdefinition;
         this.connection = (HyperVConnection) connection;
@@ -309,7 +309,7 @@ public class HyperVMachineTarantino implements IVirtualMachine
                 // .error(
                 // "External network not found. The VM NIC with MAC address: {} will have no connectivity",
                 // vnic.getMacAddress());
-                throw new VirtualFactoryException(VirtualFactoryErrors.NETWORK_CONFIGURATION, msg);
+                throw new VirtualFactoryException(VirtualFactoryError.NETWORK_CONFIGURATION, msg);
 
             }
 
@@ -389,7 +389,7 @@ public class HyperVMachineTarantino implements IVirtualMachine
                 String msg =
                     "External network: " + vnic.getVSwitchName()
                         + " not connected. The networking resources couldn't be configured";
-                throw new VirtualFactoryException(VirtualFactoryErrors.NETWORK_CONFIGURATION, msg);
+                throw new VirtualFactoryException(VirtualFactoryError.NETWORK_CONFIGURATION, msg);
 
             }
 
@@ -740,7 +740,7 @@ public class HyperVMachineTarantino implements IVirtualMachine
                 String message =
                     "We couldn't get the state of the virtual machine since it doesn't exist";
                 logger.error(message);
-                throw new VirtualFactoryException(VirtualFactoryErrors.VIRTUAL_MACHINE_NOT_FOUND,
+                throw new VirtualFactoryException(VirtualFactoryError.VIRTUAL_MACHINE_NOT_FOUND,
                     message);
             }
 
@@ -771,7 +771,7 @@ public class HyperVMachineTarantino implements IVirtualMachine
                         String message =
                             "An exception occured while monitoring " + machineName
                                 + "this state changement" + state + e;
-                        throw new VirtualFactoryException(VirtualFactoryErrors.EXECUTING_ACTION,
+                        throw new VirtualFactoryException(VirtualFactoryError.EXECUTING_ACTION,
                             message);
                     }
                 }
@@ -779,7 +779,7 @@ public class HyperVMachineTarantino implements IVirtualMachine
                 {
                     String message =
                         "Failed at powering " + machineName + " on. Error code: " + result;
-                    throw new VirtualFactoryException(VirtualFactoryErrors.EXECUTING_ACTION,
+                    throw new VirtualFactoryException(VirtualFactoryError.EXECUTING_ACTION,
                         message);
                 }
             }
@@ -787,7 +787,7 @@ public class HyperVMachineTarantino implements IVirtualMachine
         }
         catch (Exception e)
         {
-            throw new VirtualFactoryException(VirtualFactoryErrors.EXECUTING_ACTION, e.getMessage());
+            throw new VirtualFactoryException(VirtualFactoryError.EXECUTING_ACTION, e.getMessage());
         }
     }
     
