@@ -28,6 +28,8 @@
 
 package com.abiquo.commons.amqp.impl.datacenter.domain;
 
+import java.net.URL;
+
 public class HypervisorConnection
 {
     protected HypervisorType hypervisorType;
@@ -105,7 +107,22 @@ public class HypervisorConnection
         {
             this.defaultPort = port;
         }
-
+        
+        
         // TODO build url
+        public String getConnectionURI(String ip)
+        {
+            switch (this)
+            {
+                case VMX_04:
+                    //sdkUrl = new URL("https://" + ip + "/sdk");
+                    return String.format("https://%s:%d/sdk", ip, defaultPort);
+             
+                default:
+                    return "NOT IMPLEMENTED FOR OTHER HYPERVISORS";
+            }
+        }
+        
+
     }
 }
