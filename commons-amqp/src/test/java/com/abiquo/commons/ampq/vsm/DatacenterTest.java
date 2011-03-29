@@ -30,8 +30,8 @@ import com.abiquo.commons.amqp.impl.datacenter.JobsProducer;
 import com.abiquo.commons.amqp.impl.datacenter.NotificationCallback;
 import com.abiquo.commons.amqp.impl.datacenter.NotificationsConsumer;
 import com.abiquo.commons.amqp.impl.datacenter.NotificationsProducer;
-import com.abiquo.commons.amqp.impl.datacenter.domain.DatacenterJob;
 import com.abiquo.commons.amqp.impl.datacenter.domain.DatacenterNotification;
+import com.abiquo.commons.amqp.impl.datacenter.domain.dto.DatacenterJob;
 
 public class DatacenterTest
 {

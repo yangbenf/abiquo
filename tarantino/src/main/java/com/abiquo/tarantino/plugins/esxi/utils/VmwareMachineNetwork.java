@@ -27,7 +27,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualNIC;
+import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualNIC;
 import com.abiquo.tarantino.errors.VirtualFactoryErrors;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
 import com.abiquo.tarantino.plugins.esxi.utils.EsxiUtils.EsxiUtilsException;

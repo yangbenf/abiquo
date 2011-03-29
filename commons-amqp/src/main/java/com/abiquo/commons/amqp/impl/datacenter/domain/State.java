@@ -19,20 +19,27 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.tarantino.hypervisor;
+package com.abiquo.commons.amqp.impl.datacenter.domain;
 
-import com.abiquo.commons.amqp.impl.datacenter.domain.HypervisorConnection;
-import com.abiquo.tarantino.errors.VirtualFactoryException;
-
-public interface IHypervisorConnection
+/**
+ * The states that a virtual machine can have.
+ */
+public enum State
 {
-    /**
-     * Start a new connection to the hypervisor and login.
-     */
-    public void login(HypervisorConnection connection) throws VirtualFactoryException;
+    ON, OFF, PAUSED, UNDEPLOYED, CONFIGURED, UNKNOWN;
 
-    /**
-     * Logout the user and close the connection to the hypervisor.
-     */
-    public void logout() throws VirtualFactoryException;
+    public static State fromValue(String value)
+    {
+        return State.valueOf(value.toUpperCase());
+    }
+
+    public State travel(StateTransaction transaction)
+    {
+        if (!transaction.isValidOrigin(this))
+        {
+            throw new RuntimeException("Invalid origin " + this + " for transaction " + transaction);
+        }
+
+        return transaction.getEndState();
+    }
 }

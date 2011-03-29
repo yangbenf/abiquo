@@ -24,9 +24,9 @@ package com.abiquo.tarantino.plugins.esxi.utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.DiskStandard;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.SnapshootVirtualMachine;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto.PrimaryDisk.DiskStandardConf;
+import com.abiquo.commons.amqp.impl.datacenter.domain.DiskStandard;
+import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.PrimaryDisk.DiskStandardConfiguration;
+import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.SnapshotVirtualMachine;
 import com.abiquo.tarantino.errors.VirtualFactoryErrors;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
 import com.vmware.vim25.ManagedObjectReference;
@@ -65,7 +65,7 @@ public class VmwareMachineDisk
      * Gets the virtual disk path form the codified "[repository]diskPath" from the source datastore
      * (SAN) on configuration (on the OVF disk location)
      */
-    private String getSourceDiskPath(DiskStandardConf diskConf)
+    private String getSourceDiskPath(DiskStandardConfiguration diskConf)
     {
         final DiskStandard disk = diskConf.getDiskStandard();
 
@@ -77,7 +77,7 @@ public class VmwareMachineDisk
     /**
      * Codify the disk destination path on the target datastore (VMFS).
      */
-    private String getDestinationDiskPath(DiskStandardConf diskConf, final String machineUuid)
+    private String getDestinationDiskPath(DiskStandardConfiguration diskConf, final String machineUuid)
     {
 
         // TODO DATASTORE -- obtain the [datastorename] based on the datastore location
@@ -92,7 +92,7 @@ public class VmwareMachineDisk
      * 
      * @throws Exception
      */
-    public void moveVirtualDiskToDataStore(DiskStandardConf diskConf, final String machineUuid)
+    public void moveVirtualDiskToDataStore(DiskStandardConfiguration diskConf, final String machineUuid)
         throws VirtualFactoryException
     {
 
@@ -225,7 +225,7 @@ public class VmwareMachineDisk
      * @param isManaged
      * @throws VirtualMachineException
      */
-    public void bundleVirtualDisk(SnapshootVirtualMachine snpahot) throws VirtualFactoryException
+    public void bundleVirtualDisk(SnapshotVirtualMachine snpahot) throws VirtualFactoryException
     // (String sourcePath, String sourceDatastoreName,
     // String destinationDatastoreName, String destinationPath, String snapShotName,
     //

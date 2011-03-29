@@ -19,20 +19,25 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.tarantino.hypervisor;
+package com.abiquo.commons.amqp.impl.datacenter.domain.dto;
 
-import com.abiquo.commons.amqp.impl.datacenter.domain.HypervisorConnection;
-import com.abiquo.tarantino.errors.VirtualFactoryException;
+import java.util.UUID;
 
-public interface IHypervisorConnection
+import com.abiquo.commons.amqp.domain.Queuable;
+import com.abiquo.commons.amqp.util.JSONUtils;
+
+public class DatacenterJob implements Queuable
 {
-    /**
-     * Start a new connection to the hypervisor and login.
-     */
-    public void login(HypervisorConnection connection) throws VirtualFactoryException;
+    public String dummy = UUID.randomUUID().toString();
 
-    /**
-     * Logout the user and close the connection to the hypervisor.
-     */
-    public void logout() throws VirtualFactoryException;
+    @Override
+    public byte[] toByteArray()
+    {
+        return JSONUtils.serialize(this);
+    }
+
+    public static DatacenterJob fromByteArray(final byte[] bytes)
+    {
+        return JSONUtils.deserialize(bytes, DatacenterJob.class);
+    }
 }

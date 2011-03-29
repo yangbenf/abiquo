@@ -27,10 +27,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.DiskStandard;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.SnapshootVirtualMachine.SourceDisk;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.State;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto;
+import com.abiquo.commons.amqp.impl.datacenter.domain.DiskStandard;
+import com.abiquo.commons.amqp.impl.datacenter.domain.State;
+import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition;
+import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.SnapshotVirtualMachine.SourceDisk;
 import com.abiquo.tarantino.errors.VirtualFactoryErrors;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
 import com.abiquo.tarantino.plugins.esxi.utils.EsxiUtils;
@@ -49,7 +49,7 @@ import com.vmware.vim25.VirtualMachineConfigSpec;
 public class VmwareMachine extends AbsVmwareMachine
 {
 
-    public VmwareMachine(com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto vmdef,
+    public VmwareMachine(com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition vmdef,
         VmwareHypervisor hypervisor)
     {
         super(vmdef, hypervisor);
@@ -172,7 +172,7 @@ public class VmwareMachine extends AbsVmwareMachine
     }
 
     @Override
-    public void reconfigure(VirtualMachineDefinitionDto vmachine)
+    public void reconfigure(VirtualMachineDefinition vmachine)
     {
         // TODO Auto-generated method stub
 
@@ -193,7 +193,7 @@ public class VmwareMachine extends AbsVmwareMachine
     }
 
     @Override
-    public VirtualMachineDefinitionDto getVirtualMachine()
+    public VirtualMachineDefinition getVirtualMachine()
     {
         // TODO Auto-generated method stub
         return null;

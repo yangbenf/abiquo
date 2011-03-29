@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 import com.abiquo.commons.amqp.impl.datacenter.JobsProducer;
-import com.abiquo.commons.amqp.impl.datacenter.domain.DatacenterJob;
+import com.abiquo.commons.amqp.impl.datacenter.domain.dto.DatacenterJob;
 
 public class SimpleProducerMain
 {

@@ -27,9 +27,9 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.SnapshootVirtualMachine;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto.PrimaryDisk.DiskStandardConf;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto.SecondaryDisks;
+import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.SecondaryDisks;
+import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.PrimaryDisk.DiskStandardConfiguration;
+import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.SnapshotVirtualMachine;
 import com.abiquo.tarantino.errors.VirtualFactoryErrors;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
 import com.abiquo.tarantino.plugins.esxi.utils.VmwareMachineBasics.VMTasks;
@@ -56,7 +56,7 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
 
     protected VmwareHypervisor hypervisor;
 
-    protected com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto vmdef;
+    protected com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition vmdef;
 
     /**
      * The standard constructor
@@ -65,7 +65,7 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
      * @throws VirtualMachineException
      */
     public AbsVmwareMachine(
-        com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto vmdef,
+        com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition vmdef,
         VmwareHypervisor hypervisor)
     {
         // super(configuration);
@@ -84,7 +84,7 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
             if (!hypervisor.getUtils().isVMAlreadyCreated(vmdef.getMachineID()))
             {
 
-                List<com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualNIC> nics =
+                List<com.abiquo.commons.amqp.impl.datacenter.domain.VirtualNIC> nics =
                     vmdef.getNetworkConf().getVirtualNIC();
 
                 hypervisor.getUtils().getUtilNetwork().configureNetwork(nics);
@@ -94,7 +94,7 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
 
                 // Stateless image located on the Enterprise Repository require to be copy on the
                 // local fs.
-                DiskStandardConf disk = vmdef.getPrimaryDisk().getDiskStandardConf();
+                DiskStandardConfiguration disk = vmdef.getPrimaryDisk().getDiskStandardConf();
                 if (disk != null)
                 {
                     // Copy from the NAS to the template virtual machine
@@ -249,7 +249,7 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
 
     // @Override
     public void reconfigVM(
-        com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto newVmDesc)
+        com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition newVmDesc)
         throws VirtualFactoryException
     {
         ResourceAllocationInfo raRAM;
@@ -326,13 +326,13 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
     }
 
     private boolean isRamSet(
-        com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto newVmDef)
+        com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition newVmDef)
     {
         return newVmDef.getHardwareConf().getRamInMb() != vmdef.getHardwareConf().getRamInMb();
     }
 
     private boolean isCpuSet(
-        com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto newVmDef)
+        com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition newVmDef)
     {
         return newVmDef.getHardwareConf().getVirtualCpu() != vmdef.getHardwareConf()
             .getVirtualCpu();
@@ -395,7 +395,7 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
     // return getStateInHypervisor().compareTo(stateToCheck) == 0;
     // }
 
-    public com.abiquo.commons.amqp.impl.datacenter.domain.jobs.State getState()
+    public com.abiquo.commons.amqp.impl.datacenter.domain.State getState()
     {
         VirtualMachinePowerState st = hypervisor.getUtils().getVmState(vmdef.getMachineID());
 
@@ -403,12 +403,12 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
          * TODO state switch
          */
 
-        return com.abiquo.commons.amqp.impl.datacenter.domain.jobs.State.CONFIGURED;
+        return com.abiquo.commons.amqp.impl.datacenter.domain.State.CONFIGURED;
 
     }
 
     // @Override
-    public void bundleVirtualMachine(SnapshootVirtualMachine snapshot)
+    public void bundleVirtualMachine(SnapshotVirtualMachine snapshot)
         throws VirtualFactoryException
     {
         // TODO check is power off

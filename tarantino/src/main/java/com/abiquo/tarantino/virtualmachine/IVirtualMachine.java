@@ -21,46 +21,45 @@
 
 package com.abiquo.tarantino.virtualmachine;
 
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.DiskStandard;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.SnapshootVirtualMachine;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.State;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto;
+import com.abiquo.commons.amqp.impl.datacenter.domain.DiskStandard;
+import com.abiquo.commons.amqp.impl.datacenter.domain.State;
+import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition;
 import com.abiquo.tarantino.hypervisor.IHypervisorConnection;
 
 public interface IVirtualMachine
 {
-	boolean exist(IHypervisorConnection connection, VirtualMachineDefinitionDto vmdefinition);
-	
-    State getState(IHypervisorConnection connection, VirtualMachineDefinitionDto vmdefinition);
+    boolean exist(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition);
+
+    State getState(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition);
 
     /**
      * Creates a new virtual machine instance
      */
-    void doConfigure(IHypervisorConnection connection, VirtualMachineDefinitionDto vmdefinition);
-    
+    void doConfigure(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition);
+
     /**
      * Destroy the virtual machine
      */
-    void doDeconfigure(IHypervisorConnection connection, VirtualMachineDefinitionDto vmdefinition);  
-    
-    void doPowerOn(IHypervisorConnection connection, VirtualMachineDefinitionDto vmdefinition);
-    
-    void doPowerOff(IHypervisorConnection connection, VirtualMachineDefinitionDto vmdefinition);
-    
-    void doReset(IHypervisorConnection connection, VirtualMachineDefinitionDto vmdefinition);
-    
-    void doPause(IHypervisorConnection connection, VirtualMachineDefinitionDto vmdefinition);
-    
-    void doResume(IHypervisorConnection connection, VirtualMachineDefinitionDto vmdefinition);
-    
-    /**
-     * Copy disk 
-     */
-    void doSnapshot(IHypervisorConnection connection, VirtualMachineDefinitionDto vmdefinition, DiskStandard destinationDisk);
- 
-    
-    void reconfigure(IHypervisorConnection connection, VirtualMachineDefinitionDto currentvmachine,VirtualMachineDefinitionDto newvmachine); // lo que deixem cambiar
+    void doDeconfigure(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition);
 
-    
+    void doPowerOn(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition);
+
+    void doPowerOff(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition);
+
+    void doReset(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition);
+
+    void doPause(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition);
+
+    void doResume(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition);
+
+    /**
+     * Copy disk
+     */
+    void doSnapshot(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition,
+        DiskStandard destinationDisk);
+
+    void reconfigure(IHypervisorConnection connection, VirtualMachineDefinition currentvmachine,
+        VirtualMachineDefinition newvmachine); // lo que deixem cambiar
+
     // public VirtualMachineDefinitionDto getVirtualMachine();
 }

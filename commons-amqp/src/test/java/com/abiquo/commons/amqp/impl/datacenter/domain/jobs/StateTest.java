@@ -25,6 +25,9 @@ import static org.testng.Assert.assertEquals;
 
 import org.testng.annotations.Test;
 
+import com.abiquo.commons.amqp.impl.datacenter.domain.State;
+import com.abiquo.commons.amqp.impl.datacenter.domain.StateTransaction;
+
 public class StateTest
 {
     @Test(expectedExceptions = RuntimeException.class)

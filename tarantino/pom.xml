@@ -23,6 +23,7 @@
     </properties>
 
     <dependencies>
+    	<!-- Abiquo dependences -->
         <dependency>
             <groupId>com.abiquo</groupId>
             <artifactId>commons-amqp</artifactId>
@@ -46,7 +47,7 @@
             <version>0.9.11</version>
         </dependency>
 
-        <!-- only compile-time depencences -->
+        <!-- only compile-time dependences -->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
@@ -76,7 +77,7 @@
         </dependency>
 
 
-        <!-- plugin : ESXi -->
+        <!-- ESXi plugin -->
         <dependency>
             <groupId>com.vmware.vim25</groupId>
             <artifactId>vim25</artifactId>
@@ -88,6 +89,12 @@
             <version>1.4</version>
         </dependency>
 
+		<!-- Libvirt plugin -->
+		<dependency>
+			<groupId>org.libvirt</groupId>
+			<artifactId>libvirt</artifactId>
+			<version>0.4.6</version>
+		</dependency>
 
     </dependencies>
 

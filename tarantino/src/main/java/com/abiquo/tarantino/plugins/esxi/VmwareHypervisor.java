@@ -30,8 +30,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.HypervisorConnectionDto;
-import com.abiquo.commons.amqp.impl.datacenter.domain.jobs.VirtualMachineDefinitionDto;
+import com.abiquo.commons.amqp.impl.datacenter.domain.HypervisorConnection;
+import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition;
 import com.abiquo.tarantino.errors.VirtualFactoryErrors;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
 import com.abiquo.tarantino.hypervisor.IHypervisorConnection;
@@ -71,7 +71,7 @@ public class VmwareHypervisor implements IHypervisorConnection
     // }
 
     @Override
-    public void connectAndLogin(HypervisorConnectionDto hconn) throws VirtualFactoryException
+    public void connectAndLogin(HypervisorConnection hconn) throws VirtualFactoryException
     {
 
         try
@@ -98,7 +98,7 @@ public class VmwareHypervisor implements IHypervisorConnection
         }
     }
 
-    private EsxiUtils createConnection(HypervisorConnectionDto hconn) throws VirtualFactoryException
+    private EsxiUtils createConnection(HypervisorConnection hconn) throws VirtualFactoryException
     {
 
         ServiceInstance serviceInstance;
@@ -139,7 +139,7 @@ public class VmwareHypervisor implements IHypervisorConnection
     }
 
     @Override
-    public IVirtualMachine createMachine(VirtualMachineDefinitionDto vmachine)
+    public IVirtualMachine createMachine(VirtualMachineDefinition vmachine)
     {
         // TODO Auto-generated method stub
         return null;
@@ -196,7 +196,7 @@ public class VmwareHypervisor implements IHypervisorConnection
 
     private VmwareHypervisorConfig globalConfig = new VmwareHypervisorConfig();
 
-    private Map<String, String> builtinOptionsEntered(HypervisorConnectionDto hconn,
+    private Map<String, String> builtinOptionsEntered(HypervisorConnection hconn,
         String urlConnection)
     {
         HashMap<String, String> optsEntered = new HashMap<String, String>();

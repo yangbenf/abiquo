@@ -21,19 +21,21 @@
 
 package com.abiquo.commons.amqp.impl.datacenter.domain.jobs;
 
-import static com.abiquo.commons.amqp.impl.datacenter.domain.jobs.StateTransaction.CONFIGURE;
-import static com.abiquo.commons.amqp.impl.datacenter.domain.jobs.StateTransaction.DECONFIGURE;
-import static com.abiquo.commons.amqp.impl.datacenter.domain.jobs.StateTransaction.PAUSE;
-import static com.abiquo.commons.amqp.impl.datacenter.domain.jobs.StateTransaction.POWEROFF;
-import static com.abiquo.commons.amqp.impl.datacenter.domain.jobs.StateTransaction.POWERON;
-import static com.abiquo.commons.amqp.impl.datacenter.domain.jobs.StateTransaction.RESET;
-import static com.abiquo.commons.amqp.impl.datacenter.domain.jobs.StateTransaction.RESUME;
-import static com.abiquo.commons.amqp.impl.datacenter.domain.jobs.StateTransaction.SNAPSHOT;
+import static com.abiquo.commons.amqp.impl.datacenter.domain.StateTransaction.CONFIGURE;
+import static com.abiquo.commons.amqp.impl.datacenter.domain.StateTransaction.DECONFIGURE;
+import static com.abiquo.commons.amqp.impl.datacenter.domain.StateTransaction.PAUSE;
+import static com.abiquo.commons.amqp.impl.datacenter.domain.StateTransaction.POWEROFF;
+import static com.abiquo.commons.amqp.impl.datacenter.domain.StateTransaction.POWERON;
+import static com.abiquo.commons.amqp.impl.datacenter.domain.StateTransaction.RESET;
+import static com.abiquo.commons.amqp.impl.datacenter.domain.StateTransaction.RESUME;
+import static com.abiquo.commons.amqp.impl.datacenter.domain.StateTransaction.SNAPSHOT;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.Test;
+
+import com.abiquo.commons.amqp.impl.datacenter.domain.State;
 
 public class StateTransactionTest
 {

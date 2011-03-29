@@ -19,20 +19,59 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.tarantino.hypervisor;
+package com.abiquo.commons.amqp.impl.datacenter.domain;
 
-import com.abiquo.commons.amqp.impl.datacenter.domain.HypervisorConnection;
-import com.abiquo.tarantino.errors.VirtualFactoryException;
-
-public interface IHypervisorConnection
+public class DiskDescription
 {
-    /**
-     * Start a new connection to the hypervisor and login.
-     */
-    public void login(HypervisorConnection connection) throws VirtualFactoryException;
+    protected DiskFormatType format;
 
-    /**
-     * Logout the user and close the connection to the hypervisor.
-     */
-    public void logout() throws VirtualFactoryException;
+    protected long capacityInBytes;
+
+    public DiskFormatType getFormat()
+    {
+        return format;
+    }
+
+    public void setFormat(DiskFormatType format)
+    {
+        this.format = format;
+    }
+
+    public long getCapacityInBytes()
+    {
+        return capacityInBytes;
+    }
+
+    public void setCapacityInBytes(long capacityInBytes)
+    {
+        this.capacityInBytes = capacityInBytes;
+    }
+
+    // TODO duplicated
+    public enum DiskFormatType
+    {
+        UNKNOWN,
+
+        RAW,
+
+        INCOMPATIBLE,
+
+        VMDK_STREAM_OPTIMIZED,
+
+        VMDK_FLAT,
+
+        VMDK_SPARSE,
+
+        VHD_FLAT,
+
+        VHD_SPARSE,
+
+        VDI_FLAT,
+
+        VDI_SPARSE,
+
+        QCOW2_FLAT,
+
+        QCOW2_SPARSE;
+    }
 }

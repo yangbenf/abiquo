@@ -19,20 +19,31 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.tarantino.hypervisor;
+package com.abiquo.commons.amqp.impl.datacenter.domain;
 
-import com.abiquo.commons.amqp.impl.datacenter.domain.HypervisorConnection;
-import com.abiquo.tarantino.errors.VirtualFactoryException;
-
-public interface IHypervisorConnection
+public class DiskStandard extends DiskDescription
 {
-    /**
-     * Start a new connection to the hypervisor and login.
-     */
-    public void login(HypervisorConnection connection) throws VirtualFactoryException;
+    protected String datastore;
 
-    /**
-     * Logout the user and close the connection to the hypervisor.
-     */
-    public void logout() throws VirtualFactoryException;
+    protected String path;
+
+    public String getDatastore()
+    {
+        return datastore;
+    }
+
+    public void setDatastore(String value)
+    {
+        this.datastore = value;
+    }
+
+    public String getPath()
+    {
+        return path;
+    }
+
+    public void setPath(String value)
+    {
+        this.path = value;
+    }
 }
