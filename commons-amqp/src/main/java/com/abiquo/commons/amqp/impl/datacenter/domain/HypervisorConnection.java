@@ -83,22 +83,22 @@ public class HypervisorConnection
     // TODO duplicated
     public enum HypervisorType
     {
-        /** */
+        /** Virtual Box */
         VBOX(8889),
 
-        /** */
+        /** KVM */
         KVM(8889),
 
-        /** */
+        /** XEN */
         XEN_3(8889),
 
-        /** */
+        /** ESXi */
         VMX_04(443),
 
-        /** */
+        /** Hyper V */
         HYPERV_301(5985),
 
-        /** */
+        /** Xen Server */
         XENSERVER(9363);
 
         public final int defaultPort;
@@ -108,8 +108,6 @@ public class HypervisorConnection
             this.defaultPort = port;
         }
         
-        
-        // TODO build url
         public String getConnectionURI(String ip)
         {
             switch (this)

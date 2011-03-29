@@ -21,14 +21,13 @@
 
 package com.abiquo.commons.amqp.impl.datacenter.domain.builder;
 
-import com.abiquo.commons.amqp.impl.datacenter.domain.StateTransaction;
 import com.abiquo.commons.amqp.impl.datacenter.domain.HypervisorConnection.HypervisorType;
-import com.abiquo.commons.amqp.impl.datacenter.domain.dto.ApplyVirtualMachineStateDto;
+import com.abiquo.commons.amqp.impl.datacenter.domain.StateTransaction;
+import com.abiquo.commons.amqp.impl.datacenter.domain.operations.ApplyVirtualMachineStateOp;
 
 public class ApplyVirtualMachineStateJobBuilder extends ConfigureVirtualMachineJobBuilder
 {
-
-    private StateTransaction transition;
+    private StateTransaction transaction;
 
     public ApplyVirtualMachineStateJobBuilder connection(HypervisorType hypervisortype, String ip,
         String loginUser, String loginPasswoed)
@@ -36,7 +35,6 @@ public class ApplyVirtualMachineStateJobBuilder extends ConfigureVirtualMachineJ
         super.connection(hypervisortype, ip, loginUser, loginPasswoed);
         return this;
     }
-    
 
     public ApplyVirtualMachineStateJobBuilder setVirtualMachineDefinition(
         VirtualMachineDescriptionBuilder vmBuilder, String virtualMachineId)
@@ -46,23 +44,20 @@ public class ApplyVirtualMachineStateJobBuilder extends ConfigureVirtualMachineJ
         return this;
     }
 
-
     public ApplyVirtualMachineStateJobBuilder state(StateTransaction transition)
     {
-        this.transition = transition;
+        this.transaction = transition;
 
         return this;
     }
 
-    public ApplyVirtualMachineStateDto buildApplyVirtualMachineStateDto()
+    public ApplyVirtualMachineStateOp buildApplyVirtualMachineStateDto()
     {
-        ApplyVirtualMachineStateDto vmaction = new ApplyVirtualMachineStateDto();
-        vmaction.hypervisorConnection = connection;
-        vmaction.virtualMachine = vmachineDefinition;
-        vmaction.transition = transition;
+        ApplyVirtualMachineStateOp vmaction = new ApplyVirtualMachineStateOp();
+        vmaction.setHypervisorConnection(connection);
+        vmaction.setVirtualMachine(vmachineDefinition);
+        vmaction.setTransaction(transaction);
 
         return vmaction;
-
     }
-
 }

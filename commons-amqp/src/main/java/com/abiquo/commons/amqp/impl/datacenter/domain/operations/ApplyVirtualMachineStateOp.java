@@ -19,19 +19,34 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.tarantino.errors;
+package com.abiquo.commons.amqp.impl.datacenter.domain.operations;
 
-public class VirtualFactoryException extends Exception
+import com.abiquo.commons.amqp.impl.datacenter.domain.StateTransaction;
+import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition;
+
+public class ApplyVirtualMachineStateOp extends BasicDatacenterOp
 {
-    private static final long serialVersionUID = -8193478568635170646L;
+    protected VirtualMachineDefinition virtualMachine;
 
-    public VirtualFactoryException(VirtualFactoryErrors error)
+    protected StateTransaction transaction;
+
+    public VirtualMachineDefinition getVirtualMachine()
     {
-        super(error.getMessage());
+        return virtualMachine;
     }
 
-    public VirtualFactoryException(VirtualFactoryErrors error, String detail)
+    public void setVirtualMachine(VirtualMachineDefinition virtualMachine)
     {
-        super(error.getMessage() + "\n" + detail);
+        this.virtualMachine = virtualMachine;
+    }
+
+    public StateTransaction getTransaction()
+    {
+        return transaction;
+    }
+
+    public void setTransaction(StateTransaction transaction)
+    {
+        this.transaction = transaction;
     }
 }

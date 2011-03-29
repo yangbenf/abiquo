@@ -19,20 +19,24 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.commons.amqp.impl.datacenter.domain.builder;
+package com.abiquo.commons.amqp.impl.datacenter.domain;
 
 import com.abiquo.commons.amqp.impl.datacenter.domain.DiskDescription.DiskFormatType;
 import com.abiquo.commons.amqp.impl.datacenter.domain.HypervisorConnection.HypervisorType;
-import com.abiquo.commons.amqp.impl.datacenter.domain.StateTransaction;
-import com.abiquo.commons.amqp.impl.datacenter.domain.dto.ApplyVirtualMachineStateDto;
-import com.abiquo.commons.amqp.impl.datacenter.domain.dto.ConfigureVirtualMachineDto;
-import com.abiquo.commons.amqp.impl.datacenter.domain.dto.ReconfigureVirtualMachineDto;
-import com.abiquo.commons.amqp.impl.datacenter.domain.dto.SnapshotVirtualMachineDto;
+import com.abiquo.commons.amqp.impl.datacenter.domain.builder.ApplyVirtualMachineStateJobBuilder;
+import com.abiquo.commons.amqp.impl.datacenter.domain.builder.ConfigureVirtualMachineJobBuilder;
+import com.abiquo.commons.amqp.impl.datacenter.domain.builder.ReconfigureVirtualMachineJobBuilder;
+import com.abiquo.commons.amqp.impl.datacenter.domain.builder.SnapshotVirtualMachineJobBuilder;
+import com.abiquo.commons.amqp.impl.datacenter.domain.builder.VirtualMachineDescriptionBuilder;
+import com.abiquo.commons.amqp.impl.datacenter.domain.operations.ApplyVirtualMachineStateOp;
+import com.abiquo.commons.amqp.impl.datacenter.domain.operations.ConfigureVirtualMachineOp;
+import com.abiquo.commons.amqp.impl.datacenter.domain.operations.ReconfigureVirtualMachineOp;
+import com.abiquo.commons.amqp.impl.datacenter.domain.operations.SnapshotVirtualMachineOp;
 
 public class VirtualFactoryTestJobs
 {
 
-    public VirtualMachineDescriptionBuilder testVirtualMachine()
+    public static VirtualMachineDescriptionBuilder testVirtualMachine()
     {
         return new VirtualMachineDescriptionBuilder() //
             .hardware(1, 256) //
@@ -46,7 +50,7 @@ public class VirtualFactoryTestJobs
 
     }
 
-    public ConfigureVirtualMachineDto testConfigureVirtualMachine(
+    public static ConfigureVirtualMachineOp testConfigureVirtualMachine(
         VirtualMachineDescriptionBuilder vmbuilder)
     {
 
@@ -57,7 +61,7 @@ public class VirtualFactoryTestJobs
 
     }
 
-    public ApplyVirtualMachineStateDto testApplyVirtualMachineState(
+    public static ApplyVirtualMachineStateOp testApplyVirtualMachineState(
         VirtualMachineDescriptionBuilder vmbuilder)
     {
         return new ApplyVirtualMachineStateJobBuilder() //
@@ -67,7 +71,7 @@ public class VirtualFactoryTestJobs
             .buildApplyVirtualMachineStateDto();
     }
 
-    public SnapshotVirtualMachineDto testSnapshotVirtualMachine(
+    public static SnapshotVirtualMachineOp testSnapshotVirtualMachine(
         VirtualMachineDescriptionBuilder vmbuilder)
     {
         return new SnapshotVirtualMachineJobBuilder()
@@ -78,7 +82,7 @@ public class VirtualFactoryTestJobs
             .buildSnapshotVirtualMachineDto();
     }
 
-    public ReconfigureVirtualMachineDto testReconfigureVirtualMachine(
+    public static ReconfigureVirtualMachineOp testReconfigureVirtualMachine(
         VirtualMachineDescriptionBuilder vmbuilder)
     {
         return new ReconfigureVirtualMachineJobBuilder()//
