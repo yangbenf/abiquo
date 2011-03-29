@@ -29,16 +29,21 @@ import javax.management.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import akka.japi.SideEffect;
+
 import com.abiquo.commons.amqp.impl.datacenter.domain.DiskStandard;
 import com.abiquo.commons.amqp.impl.datacenter.domain.State;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.PrimaryDisk.DiskStandardConfiguration;
+import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.PrimaryDisk;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.SecondaryDisks;
+import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualNIC;
 import com.abiquo.commons.amqp.impl.datacenter.domain.dto.SnapshotVirtualMachineDto;
 import com.abiquo.tarantino.errors.VirtualFactoryErrors;
 import com.abiquo.tarantino.errors.VirtualFactoryException;
 import com.abiquo.tarantino.hypervisor.IHypervisorConnection;
 import com.abiquo.tarantino.plugins.esxi.utils.VmwareMachineBasics.VMTasks;
+import com.abiquo.tarantino.utils.ReconfigureUtils;
 import com.abiquo.tarantino.virtualmachine.IVirtualMachine;
 import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.ResourceAllocationInfo;
@@ -50,83 +55,23 @@ import com.vmware.vim25.mo.VirtualMachine;
 /**
  * @author pnavarro
  */
-public abstract class AbsVmwareMachine implements IVirtualMachine
+public abstract class AbsVmwareMachine implements IVirtualMachine<VmwareHypervisorConnection>
 {
     /** The logger */
     protected static final Logger logger = LoggerFactory.getLogger(AbsVmwareMachine.class);
 
-    // protected String networkUUID = UUID.randomUUID().toString();
 
-    protected void deployMachine(VmwareHypervisorConnection hypervisor,
-        VirtualMachineDefinition vmdef) throws VirtualFactoryException// throws
-                                                                      // VirtualMachineException
-    {
-        try
-        {
-            // if (!apputil.getServiceConnection3().isConnected())
-            // TODO hypervisor.connectAndLogin(hconn)
-
-            if (!hypervisor.getUtils().isVMAlreadyCreated(vmdef.getMachineID()))
-            {
-
-                List<com.abiquo.commons.amqp.impl.datacenter.domain.VirtualNIC> nics =
-                    vmdef.getNetworkConfiguration().getVirtualNIC();
-
-                hypervisor.getUtils().getUtilNetwork().configureNetwork(nics);
-
-                // Create the template vdestPathirtual machine
-                createVirtualMachine(hypervisor, vmdef.getMachineID());
-
-                // Stateless image located on the Enterprise Repository require to be copy on the
-                // local fs.
-                DiskStandardConfiguration disk = vmdef.getPrimaryDisk().getDiskStandardConf();
-                if (disk != null)
-                {
-                    // Copy from the NAS to the template virtual machine
-                    // Perform the virtual image cloning. Creates a copy of the original image and
-                    // put it on where
-                    // the current hypervisor expects to load it.
-                    hypervisor.getUtils().getUtilDisks()
-                        .moveVirtualDiskToDataStore(disk, vmdef.getMachineID());
-                }
-
-                // Attach the initial extended disks
-                initDisks(vmdef.getSecondaryDisks());
-
-                // reconfigureNetwork();
-
-            }
-
-            // TODO The method areDisksAlreadyDeployed is not used to check if the disks are already
-            // deployed
-
-            // TODO checkIsCancelled();
-        }
-        catch (Exception e)
-        {
-            logger.error("Failed to deploy machine :{}", e);
-            // The roll back in the virtual machine is done in top level when rolling back the
-            // virtual appliance
-            deleteMachine(hypervisor, vmdef);
-
-            // TODO state = State.CANCELLED;
-            throw new VirtualFactoryException(VirtualFactoryErrors.DEPLOY, String.format(
-                "Virtual Machine : %s" + "\nCaused by:%s", vmdef.getMachineID(), e.toString()));
-        }
-        // TODO
-        // finally
-        // {
-        // utils.logout();
-        // }
-
-        logger.info("Deployed vmware machine {}", vmdef.getMachineID());
-
-        // logger.info("Created vmware machine name:" + config.getMachineName() + "\t ID:"
-        // + config.getMachineId().toString() + "\t " + "using hypervisor connection at "
-        // + config.getHyper().getAddress().toString());
-
-        // TODO state = State.DEPLOYED;
-    }
+    /**
+     * Used during creation sets the additional configuration into the VM.
+     * 
+     * @param computerResMOR, the computer resource related to the current VM.
+     * @param hostMOR, the host related to the current VM.
+     * @return a configuration containing the specified resources
+     */
+    public abstract VirtualMachineConfigSpec configureVM(ManagedObjectReference computerResMOR,
+        ManagedObjectReference hostMOR) throws VirtualFactoryException;
+    
+    
 
     /**
      * Private helper to create a virtual machine template from the open virtualization format
@@ -197,196 +142,9 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
 
     }
 
-    public void deleteMachine(VmwareHypervisorConnection hypervisor, VirtualMachineDefinition vmdef)
-        throws VirtualFactoryException
-    {
-        // TODO utils.reconnect();
-        // Force to power off the machine before deleting
+  
 
-        VirtualMachine vm = hypervisor.getUtils().getVm(vmdef.getMachineID());
 
-        hypervisor.getUtils().getUtilBasics().executeTask(VMTasks.POWER_OFF, vm);
-
-        // affect all the VM for the given machine name
-        // ServiceInstance si = utils.getAppUtil().getServiceInstance();
-        // Folder rootFolder = si.getRootFolder();
-
-        hypervisor.getUtils().getUtilBasics().executeTask(VMTasks.DELETE, vm);
-
-        try
-        {
-            // Deconfigure networking resources
-            hypervisor.getUtils().getUtilNetwork()
-                .deconfigureNetwork(vmdef.getNetworkConfiguration().getVirtualNIC());
-        }
-        catch (Exception e)
-        {
-            logger
-                .error("An error was occurred then deconfiguring the networking resources: {}", e);
-        }
-
-        // TODO
-        // finally
-        // {
-        // utils.logout();
-        // }
-
-        logger.debug("Deleted machine [{}]", vmdef.getMachineID());
-    }
-
-    // @Override
-    public void reconfigVM(VmwareHypervisorConnection hypervisor, VirtualMachineDefinition vmdef,
-        VirtualMachineDefinition newVmDesc) throws VirtualFactoryException
-    {
-        ResourceAllocationInfo raRAM;
-        ResourceAllocationInfo raCPU;
-
-        VirtualMachineConfigSpec vmConfigSpec;
-        VirtualDeviceConfigSpec[] vdiskSpec = null;
-
-        // TODO utils.reconnect();
-
-        try
-        {
-
-            // utils.getVmMor(machineName);
-            vmConfigSpec = new VirtualMachineConfigSpec();
-
-            // Setting the new Ram value
-            if (isRamSet(vmdef, newVmDesc))
-            {
-                logger.info("Reconfiguring The Virtual Machine For Memory Update {}",
-                    vmdef.getMachineID());
-
-                Long ram =
-                    Long.valueOf(newVmDesc.getHardwareConfiguration().getRamInMb() / 1048576);
-
-                vmConfigSpec.setMemoryMB(ram); //
-            }
-
-            // Setting the number cpu value
-            if (isCpuSet(vmdef, newVmDesc))
-            {
-                logger.info("Reconfiguring The Virtual Machine For CPU Update {}",
-                    vmdef.getMachineID());
-
-                vmConfigSpec.setNumCPUs(newVmDesc.getHardwareConfiguration().getNumVirtualCpus());
-            }
-
-            // Setting the disk disk value
-            // logger.info("Reconfiguring The Virtual Machine For disk Update " + machineName);
-
-            // TODO community doesn't change disks
-            // vdiskSpec = disks.getDiskDeviceConfigSpec(newConfiguration);
-            //
-            // if (vdiskSpec != null)
-            // {
-            // vmConfigSpec.setDeviceChange(vdiskSpec);
-            // }
-            // else
-            // {
-            // logger.debug("Any disk configruation changed");
-            // }
-
-            ManagedObjectReference vmMor = hypervisor.getUtils().getVmMor(vmdef.getMachineID());
-            ManagedObjectReference tmor =
-                hypervisor.getUtils().getVimStub().reconfigVM_Task(vmMor, vmConfigSpec);
-            hypervisor.getUtils().monitorTask(tmor);
-            // Updating configuration
-
-            // vmConfig = newConfiguration;
-            // disks.setVMConfig(vmConfig);
-
-            vmdef = newVmDesc;
-
-        }
-        catch (Exception e)
-        {
-            throw new VirtualFactoryException(VirtualFactoryErrors.RECONFIG, String.format(
-                "Virtual Machine : %s" + "\nCaused by:%s", vmdef.getMachineID(), e.toString()));
-        }
-        // TODO
-        // finally
-        // {
-        // utils.logout();
-        // }
-    }
-
-    private boolean isRamSet(VirtualMachineDefinition vmdef, VirtualMachineDefinition newVmDef)
-    {
-        return newVmDef.getHardwareConfiguration().getRamInMb() != vmdef.getHardwareConfiguration()
-            .getRamInMb();
-    }
-
-    private boolean isCpuSet(VirtualMachineDefinition vmdef, VirtualMachineDefinition newVmDef)
-    {
-        return newVmDef.getHardwareConfiguration().getNumVirtualCpus() != vmdef
-            .getHardwareConfiguration().getNumVirtualCpus();
-    }
-
-    /**
-     * Attach the initial extended disk on configuration
-     */
-    private void initDisks(SecondaryDisks disks) throws VirtualFactoryException
-    {
-        // VirtualMachineConfigSpec vmConfigSpec = new VirtualMachineConfigSpec();
-        // VirtualDeviceConfigSpec[] vdiskSpec;
-        //
-        // try
-        // {
-        // _virtualMachine = utils.getVmMor(machineName);
-        //
-        // vdiskSpec = disks.initialDiskDeviceConfigSpec();
-        //
-        // if (vdiskSpec != null)
-        // {
-        // logger.debug("Adding [{}] initial extended disks", vdiskSpec.length);
-        // vmConfigSpec.setDeviceChange(vdiskSpec);
-        // }
-        // else
-        // {
-        // logger.debug("Any disk configruation to add");
-        // }
-        //
-        // ManagedObjectReference tmor =
-        // utils.getService().reconfigVM_Task(_virtualMachine, vmConfigSpec);
-        //
-        // utils.monitorTask(tmor);
-        // }
-        // catch (Exception e)
-        // {
-        // throw new VirtualMachineException("Can not initialize the extended disks", e);
-        // }
-    }
-
-    /**
-     * Used during creation sets the additional configuration into the VM.
-     * 
-     * @param computerResMOR, the computer resource related to the current VM.
-     * @param hostMOR, the host related to the current VM.
-     * @return a configuration containing the specified resources
-     */
-    public abstract VirtualMachineConfigSpec configureVM(ManagedObjectReference computerResMOR,
-        ManagedObjectReference hostMOR) throws VirtualFactoryException;
-
-    // @Override
-    public void bundleVirtualMachine(VmwareHypervisorConnection hypervisor,
-        VirtualMachineDefinition vmdef, DiskStandard destination) throws VirtualFactoryException
-    {
-        // TODO check is power off
-
-        hypervisor.getUtils().getUtilDisks().bundleVirtualDisk(vmdef.getPrimaryDisk(), destination);
-
-        // utils.reconnect();
-        //
-        // disks.bundleVirtualDisk(sourcePath, destinationPath, snapshotName, isManaged);
-
-        // TODO
-        // finally
-        // {
-        // utils.logout();
-        // }
-    }
 
     // /**
     // * Destroy a VM.
@@ -440,50 +198,38 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
 
     // //
 
-    private VmwareHypervisorConnection getConnection(IHypervisorConnection connection)
-    {
-        if (connection instanceof VmwareHypervisorConnection)
-        {
-            return (VmwareHypervisorConnection) connection;
-        }
-        else
-        {
-            throw new RuntimeException("VMware connection expected");
-        }
-    }
 
     /*
      * INTERFACE IMPLEMENTATION *
      */
 
     @Override
-    public boolean exist(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition) throws VirtualFactoryException
+    public boolean exist(VmwareHypervisorConnection hypervisor, VirtualMachineDefinition vmdefinition)
+        throws VirtualFactoryException
     {
-        final VmwareHypervisorConnection hypervisor = getConnection(connection);
         final String vmUuid = vmdefinition.getMachineID();
 
         return hypervisor.getUtils().isVMAlreadyCreated(vmUuid);
     }
 
     @Override
-    public State getState(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition) throws VirtualFactoryException
-    {
-        final VmwareHypervisorConnection hypervisor = getConnection(connection);
+    public State getState(VmwareHypervisorConnection hypervisor, VirtualMachineDefinition vmdefinition)
+        throws VirtualFactoryException
+    {        
         final String vmUuid = vmdefinition.getMachineID();
 
-        
-        if(!exist(hypervisor, vmdefinition))
+        if (!exist(hypervisor, vmdefinition))
         {
             return State.UNDEPLOYED;
         }
-        
+
         VirtualMachinePowerState hypervisorState = hypervisor.getUtils().getVmState(vmUuid);
-        
+
         switch (hypervisorState)
         {
             case poweredOff:
                 return State.OFF;
-                    
+
             case poweredOn:
                 return State.ON;
 
@@ -491,91 +237,262 @@ public abstract class AbsVmwareMachine implements IVirtualMachine
                 return State.PAUSED;
 
             default:
-                return State.UNKNOWN;                
+                return State.UNKNOWN;
         }
-        
-        // TODO never return CONFIGURED 
+
+        // TODO never return CONFIGURED
     }
-    
-    
 
     @Override
-    public void doConfigure(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition) throws VirtualFactoryException
+    public void doConfigure(VmwareHypervisorConnection hypervisor, VirtualMachineDefinition vmdefinition)
+        throws VirtualFactoryException
     {
-        VmwareHypervisorConnection hypervisor = getConnection(connection);
-        
-        
-        deployMachine(hypervisor, vmdefinition);
-        
-        // TODO Auto-generated method stub
+        final String vmUuid = vmdefinition.getMachineID();
 
+        if (exist(hypervisor, vmdefinition))
+        {
+            throw new VirtualFactoryException(VirtualFactoryErrors.VIRTUAL_MACHINE_ALREADY_EXIST,
+                vmUuid);
+        }
+
+        // Configure the network
+        List<VirtualNIC> nics = vmdefinition.getNetworkConfiguration().getVirtualNIC();
+        hypervisor.getUtils().getUtilNetwork().configureNetwork(nics);
+
+        // Create the template vdestPathirtual machine
+        createVirtualMachine(hypervisor, vmUuid);
+
+        // Stateless image located on the Enterprise Repository require to be copy on the local fs.
+        DiskStandardConfiguration disk = vmdefinition.getPrimaryDisk().getDiskStandardConf();
+        if (disk == null)
+        {
+            throw new VirtualFactoryException(VirtualFactoryErrors.COMMUNITY_ONLY_STATELESS_DISKS);
+        }
+        // TODO premium
+
+        // Copy from the NAS to the template virtual machine Perform the virtual image cloning.
+        // Creates a copy of the original image and put it on where the current hypervisor expects
+        // to load it.
+        hypervisor.getUtils().getUtilDisks().moveVirtualDiskToDataStore(disk, vmUuid);
+
+        // Attach the initial extended disks
+        // TODO premium initDisks(vmdef.getSecondaryDisks());
+        // reconfigureNetwork();
+        // TODO The method areDisksAlreadyDeployed is not used to check if the disks are already
+        // deployed
+        // TODO checkIsCancelled();
+        // }
+        // TODO rollback on the supervisor ??? TODO
+        // catch (VirtualFactoryException vfe)
+        // {
+        // logger.error("Failed to configure machine, will rollback :{}", vfe);
+        // // The roll back in the virtual machine is done in top level when rolling back the
+        // virtual appliance
+        //
+        //
+        // doDeconfigure(connection, vmdefinition);
+        //
+        // throw vfe;
+        // }
     }
 
+    // TODO is power off
     @Override
-    public void doDeconfigure(IHypervisorConnection connection,
+    public void doDeconfigure(VmwareHypervisorConnection hypervisor,
         VirtualMachineDefinition vmdefinition) throws VirtualFactoryException
     {
-        VmwareHypervisorConnection hypervisor = getConnection(connection);
-        // TODO Auto-generated method stub
+        final String vmUuid = vmdefinition.getMachineID();
 
+        VirtualMachine vm = hypervisor.getUtils().getVm(vmUuid);
+
+        // TODO check VMTask.DELETE destroy the disk on destinationDatastore
+        hypervisor.getUtils().getUtilBasics().executeTask(VMTasks.DELETE, vm);
+
+        try
+        {
+            // Deconfigure networking resources
+            List<VirtualNIC> nics = vmdefinition.getNetworkConfiguration().getVirtualNIC();
+            hypervisor.getUtils().getUtilNetwork().deconfigureNetwork(nics);
+        }
+        catch (Exception e)
+        {
+            logger
+                .error("An error was occurred then deconfiguring the networking resources: {}", e);
+            // TODO do not block the operation if the network isn't deconfigured
+        }
     }
 
     @Override
-    public void doPowerOn(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition) throws VirtualFactoryException
-    {
-        VmwareHypervisorConnection hypervisor = getConnection(connection);
-        // TODO Auto-generated method stub
+    public void doPowerOn(VmwareHypervisorConnection hypervisor, VirtualMachineDefinition vmdefinition)
+        throws VirtualFactoryException
+    {        
+        final String vmUuid = vmdefinition.getMachineID();
 
+        VirtualMachine vm = hypervisor.getUtils().getVm(vmUuid);
+
+        hypervisor.getUtils().getUtilBasics().executeTask(VMTasks.POWER_ON, vm);
     }
 
     @Override
-    public void doPowerOff(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition) throws VirtualFactoryException
+    public void doPowerOff(VmwareHypervisorConnection hypervisor, VirtualMachineDefinition vmdefinition)
+        throws VirtualFactoryException
     {
-        VmwareHypervisorConnection hypervisor = getConnection(connection);
-        // TODO Auto-generated method stub
+        final String vmUuid = vmdefinition.getMachineID();
 
+        VirtualMachine vm = hypervisor.getUtils().getVm(vmUuid);
+
+        hypervisor.getUtils().getUtilBasics().executeTask(VMTasks.POWER_OFF, vm);
     }
 
     @Override
-    public void doReset(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition) throws VirtualFactoryException
+    public void doReset(VmwareHypervisorConnection hypervisor, VirtualMachineDefinition vmdefinition)
+        throws VirtualFactoryException
     {
-        VmwareHypervisorConnection hypervisor = getConnection(connection);
-        // TODO Auto-generated method stub
+        final String vmUuid = vmdefinition.getMachineID();
 
+        VirtualMachine vm = hypervisor.getUtils().getVm(vmUuid);
+
+        hypervisor.getUtils().getUtilBasics().executeTask(VMTasks.RESET, vm);
     }
 
     @Override
-    public void doPause(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition) throws VirtualFactoryException
-    {
-        VmwareHypervisorConnection hypervisor = getConnection(connection);
-        // TODO Auto-generated method stub
+    public void doPause(VmwareHypervisorConnection hypervisor, VirtualMachineDefinition vmdefinition)
+        throws VirtualFactoryException
+    {     
+        final String vmUuid = vmdefinition.getMachineID();
 
-    }
+        VirtualMachine vm = hypervisor.getUtils().getVm(vmUuid);
 
-    @Override 
-    public void doResume(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition) throws VirtualFactoryException
-    {
-        VmwareHypervisorConnection hypervisor = getConnection(connection);
-        // TODO Auto-generated method stub
-
+        hypervisor.getUtils().getUtilBasics().executeTask(VMTasks.PAUSE, vm);
     }
 
     @Override
-    public void doSnapshot(IHypervisorConnection connection, VirtualMachineDefinition vmdefinition,
+    public void doResume(VmwareHypervisorConnection hypervisor, VirtualMachineDefinition vmdefinition)
+        throws VirtualFactoryException
+    {
+        final String vmUuid = vmdefinition.getMachineID();
+
+        VirtualMachine vm = hypervisor.getUtils().getVm(vmUuid);
+
+        hypervisor.getUtils().getUtilBasics().executeTask(VMTasks.RESUME, vm);
+    }
+
+    @Override
+    public void doSnapshot(VmwareHypervisorConnection hypervisor, VirtualMachineDefinition vmdefinition,
         DiskStandard destinationDisk) throws VirtualFactoryException
     {
-        VmwareHypervisorConnection hypervisor = getConnection(connection);
-        // TODO Auto-generated method stub
+        final PrimaryDisk sourceDisk = vmdefinition.getPrimaryDisk();
 
+        hypervisor.getUtils().getUtilDisks().bundleVirtualDisk(sourceDisk, destinationDisk);
     }
 
     @Override
-    public void reconfigure(IHypervisorConnection connection,
-        VirtualMachineDefinition currentvmachine, VirtualMachineDefinition newvmachine) throws VirtualFactoryException
+    public void reconfigure(VmwareHypervisorConnection hypervisor,
+        VirtualMachineDefinition currentvmachine, VirtualMachineDefinition newvmachine)
+        throws VirtualFactoryException
     {
-        VmwareHypervisorConnection hypervisor = getConnection(connection);
-        // TODO Auto-generated method stub
+        ResourceAllocationInfo raRAM;
+        ResourceAllocationInfo raCPU;
+
+        VirtualMachineConfigSpec vmConfigSpec;
+        VirtualDeviceConfigSpec[] vdiskSpec = null;
+
+        // TODO utils.reconnect();
+
+        try
+        {
+
+            // utils.getVmMor(machineName);
+            vmConfigSpec = new VirtualMachineConfigSpec();
+
+            // Setting the new Ram value
+            long newRam = ReconfigureUtils.getRamInMbDiff(currentvmachine, newvmachine);
+            int newCpu = ReconfigureUtils.getNumVirtualCpuDiff(currentvmachine, newvmachine);
+            
+            if (newRam != 0)
+            {
+                Long ram = Long.valueOf(newRam / 1048576);
+                vmConfigSpec.setMemoryMB(ram); //
+            }
+
+            if (newCpu != 0)
+            {
+                vmConfigSpec.setNumCPUs(newCpu);                
+            }
+
+            // Setting the disk disk value
+            // logger.info("Reconfiguring The Virtual Machine For disk Update " + machineName);
+
+            // TODO community doesn't change disks
+            // vdiskSpec = disks.getDiskDeviceConfigSpec(newConfiguration);
+            //
+            // if (vdiskSpec != null)
+            // {
+            // vmConfigSpec.setDeviceChange(vdiskSpec);
+            // }
+            // else
+            // {
+            // logger.debug("Any disk configruation changed");
+            // }
+
+            ManagedObjectReference vmMor = hypervisor.getUtils().getVmMor(currentvmachine.getMachineID());
+            ManagedObjectReference tmor =
+                hypervisor.getUtils().getVimStub().reconfigVM_Task(vmMor, vmConfigSpec);
+            hypervisor.getUtils().monitorTask(tmor);
+            // Updating configuration
+
+            // vmConfig = newConfiguration;
+            // disks.setVMConfig(vmConfig);
+
+            // TODO vmdef = newVmDesc;
+
+        }
+        catch (Exception e)
+        {
+            throw new VirtualFactoryException(VirtualFactoryErrors.RECONFIG, String.format(
+                "Virtual Machine : %s" + "\nCaused by:%s", currentvmachine.getMachineID(), e.toString()));
+        }
+        // TODO
+        // finally
+        // {
+        // utils.logout();
+        // }
 
     }
 
+    //
+    // /**
+    // * Attach the initial extended disk on configuration
+    // */
+    // private void initDisks(SecondaryDisks disks) throws VirtualFactoryException
+    // {
+    // // VirtualMachineConfigSpec vmConfigSpec = new VirtualMachineConfigSpec();
+    // // VirtualDeviceConfigSpec[] vdiskSpec;
+    // //
+    // // try
+    // // {
+    // // _virtualMachine = utils.getVmMor(machineName);
+    // //
+    // // vdiskSpec = disks.initialDiskDeviceConfigSpec();
+    // //
+    // // if (vdiskSpec != null)
+    // // {
+    // // logger.debug("Adding [{}] initial extended disks", vdiskSpec.length);
+    // // vmConfigSpec.setDeviceChange(vdiskSpec);
+    // // }
+    // // else
+    // // {
+    // // logger.debug("Any disk configruation to add");
+    // // }
+    // //
+    // // ManagedObjectReference tmor =
+    // // utils.getService().reconfigVM_Task(_virtualMachine, vmConfigSpec);
+    // //
+    // // utils.monitorTask(tmor);
+    // // }
+    // // catch (Exception e)
+    // // {
+    // // throw new VirtualMachineException("Can not initialize the extended disks", e);
+    // // }
+    // }
 }
