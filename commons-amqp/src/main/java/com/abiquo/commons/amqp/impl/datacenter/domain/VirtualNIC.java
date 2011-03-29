@@ -29,8 +29,6 @@ public class VirtualNIC extends DHCPRule
 
     protected int vlanTag;
 
-    protected String leaseName;
-
     protected String forwardMode;
 
     protected String netAddress;
@@ -75,16 +73,6 @@ public class VirtualNIC extends DHCPRule
     public void setVlanTag(int value)
     {
         this.vlanTag = value;
-    }
-
-    public String getLeaseName()
-    {
-        return leaseName;
-    }
-
-    public void setLeaseName(String value)
-    {
-        this.leaseName = value;
     }
 
     public String getForwardMode()
