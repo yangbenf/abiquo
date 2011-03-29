@@ -98,8 +98,7 @@ public class VmwareHypervisorConnection implements IHypervisorConnection
         ServiceInstance serviceInstance;
         try
         {
-            final String urlstr =
-                connection.getHypervisorType().getConnectionURI(connection.getIp());
+            final String urlstr = connection.getConnectionURI();
 
             final URL hUrl = new URL(urlstr);
 
@@ -109,8 +108,8 @@ public class VmwareHypervisorConnection implements IHypervisorConnection
                     connection.getLoginPassword(),
                     globalConfig.ignoreCert());
 
-            return new EsxiUtils(serviceInstance, constructOptions(), builtinOptionsEntered(connection,
-                hUrl.toString()));
+            return new EsxiUtils(serviceInstance, constructOptions(), builtinOptionsEntered(
+                connection, hUrl.toString()));
         }
         catch (RemoteException e)
         {
@@ -123,7 +122,6 @@ public class VmwareHypervisorConnection implements IHypervisorConnection
                 e.getMessage());
         }
     }
-
 
     private VmwareHypervisorConfig globalConfig = new VmwareHypervisorConfig();
 
