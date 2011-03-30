@@ -128,6 +128,5 @@ public class HypervisorConnection
                     throw new RuntimeException("Unable to build the connection URI, unknown hypervisor.");
             }
         }
-
     }
 }
