@@ -167,6 +167,18 @@ public class VirtualMachineDefinition
             this.diskStateful = value;
         }
 
+        public boolean isStateful()
+        {
+            if (getDiskStateful() != null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         public static class DiskStandardConfiguration
         {
             protected DiskStandard diskStandard;
