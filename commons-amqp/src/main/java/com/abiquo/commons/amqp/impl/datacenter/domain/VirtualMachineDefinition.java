@@ -147,7 +147,7 @@ public class VirtualMachineDefinition
 
         protected DiskStateful diskStateful;
 
-        public DiskStandardConfiguration getDiskStandardConf()
+        public DiskStandardConfiguration getDiskStandardConfiguration()
         {
             return diskStandardConf;
         }
@@ -183,7 +183,10 @@ public class VirtualMachineDefinition
         {
             protected DiskStandard diskStandard;
 
-            /** VirtualMachine UUID is added to build the complete destination path */
+            /**
+             * Datastore (rootPath + directory) where the virtualmachine is booted. VirtualMachine
+             * UUID is added to build the complete destination path. Ex: /var/lib/virt
+             */
             protected String destinationDatastore;
 
             public DiskStandard getDiskStandard()

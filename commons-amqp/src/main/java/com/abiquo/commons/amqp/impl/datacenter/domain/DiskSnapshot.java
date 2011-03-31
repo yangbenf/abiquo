@@ -21,35 +21,17 @@
 
 package com.abiquo.commons.amqp.impl.datacenter.domain;
 
-public class DiskStandard extends DiskDescription
+public class DiskSnapshot extends DiskStandard
 {
-    /**
-     * Datastore repository location (abiquo repository if is managed and local datastore if it is
-     * imported). Only used for VBOX. Other hypervisors have a property in abiquo.properties and
-     * aim.ini. Ex: nfs-devel:/opt/vm_repository
-     */
-    protected String repository;
+    protected String snapshotName;
 
-    /** Relative path inside the datastore. Ex: 1/rs.bcn.abiquo.com/nostalgia/nostalgia.vdi */
-    protected String path;
-
-    public String getRepository()
+    public String getSnapshotName()
     {
-        return repository;
+        return snapshotName;
     }
 
-    public void setRepository(String value)
+    public void setSnapshotName(String snapshotName)
     {
-        this.repository = value;
-    }
-
-    public String getPath()
-    {
-        return path;
-    }
-
-    public void setPath(String value)
-    {
-        this.path = value;
+        this.snapshotName = snapshotName;
     }
 }
