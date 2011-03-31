@@ -46,14 +46,14 @@ public class SnapshotVirtualMachineJobBuilder extends ConfigureVirtualMachineJob
     }
 
     public SnapshotVirtualMachineJobBuilder destinationDisk(DiskFormatType format,
-        long capacityInBytes, String datastore, String path)
+        long capacityInBytes, String repository, String path)
     {
 
         destination = new DiskStandard();
 
         destination.setFormat(format);
         destination.setCapacityInBytes(capacityInBytes);
-        destination.setDatastore(datastore);
+        destination.setRepository(repository);
         destination.setPath(path);
 
         return this;

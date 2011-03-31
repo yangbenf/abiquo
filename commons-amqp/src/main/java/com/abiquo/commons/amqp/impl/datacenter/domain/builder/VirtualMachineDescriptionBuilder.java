@@ -100,13 +100,13 @@ public class VirtualMachineDescriptionBuilder
     }
 
     public VirtualMachineDescriptionBuilder primaryDisk(DiskFormatType format,
-        long capacityInBytes, String sourceDatastore, String sourcePath, String destinationDatastore)
+        long capacityInBytes, String repository, String sourcePath, String destinationDatastore)
     {
 
         DiskStandard disk = new DiskStandard();
         disk.setFormat(format);
         disk.setCapacityInBytes(capacityInBytes);
-        disk.setDatastore(sourceDatastore);
+        disk.setRepository(repository);
         disk.setPath(sourcePath);
 
         VirtualMachineDefinition.PrimaryDisk.DiskStandardConfiguration standard =
