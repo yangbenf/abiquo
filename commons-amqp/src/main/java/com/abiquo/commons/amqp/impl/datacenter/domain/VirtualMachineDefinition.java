@@ -26,7 +26,9 @@ import java.util.List;
 
 public class VirtualMachineDefinition
 {
-    protected String machineID;
+    protected String machineUUID;
+
+    protected String machineName;
 
     protected HardwareConfiguration hardwareConfiguration;
 
@@ -36,14 +38,24 @@ public class VirtualMachineDefinition
 
     protected SecondaryDisks secondaryDisks;
 
-    public String getMachineID()
+    public String getMachineUUID()
     {
-        return machineID;
+        return machineUUID;
     }
 
-    public void setMachineID(String value)
+    public void setMachineUUID(String machineUUID)
     {
-        this.machineID = value;
+        this.machineUUID = machineUUID;
+    }
+
+    public String getMachineName()
+    {
+        return machineName;
+    }
+
+    public void setMachineName(String machineName)
+    {
+        this.machineName = machineName;
     }
 
     public HardwareConfiguration getHardwareConfiguration()
