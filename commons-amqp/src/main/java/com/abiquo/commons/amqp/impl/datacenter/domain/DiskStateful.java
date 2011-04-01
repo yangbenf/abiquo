@@ -23,6 +23,19 @@ package com.abiquo.commons.amqp.impl.datacenter.domain;
 
 public class DiskStateful extends DiskDescription
 {
+    
+    protected String targetDatastore;
+    
+    public String getTargetDatastore()
+    {
+        return targetDatastore;
+    }
+
+    public void setTargetDatastore(String targetDatastore)
+    {
+        this.targetDatastore = targetDatastore;
+    }
+
     protected String iqn;
 
     public String getIqn()
