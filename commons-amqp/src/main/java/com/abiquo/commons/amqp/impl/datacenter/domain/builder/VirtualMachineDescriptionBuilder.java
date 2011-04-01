@@ -21,10 +21,7 @@
 
 package com.abiquo.commons.amqp.impl.datacenter.domain.builder;
 
-import java.util.UUID;
-
 import com.abiquo.commons.amqp.impl.datacenter.domain.AuxiliaryDisk;
-import com.abiquo.commons.amqp.impl.datacenter.domain.DiskDescription;
 import com.abiquo.commons.amqp.impl.datacenter.domain.DiskDescription.DiskFormatType;
 import com.abiquo.commons.amqp.impl.datacenter.domain.DiskStandard;
 import com.abiquo.commons.amqp.impl.datacenter.domain.DiskStateful;
@@ -34,7 +31,6 @@ import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.N
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.PrimaryDisk;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.PrimaryDisk.DiskStandardConfiguration;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.SecondaryDisks;
-import com.abiquo.commons.amqp.impl.datacenter.domain.operations.ConfigureVirtualMachineOp;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualNIC;
 
 public class VirtualMachineDescriptionBuilder
@@ -117,7 +113,7 @@ public class VirtualMachineDescriptionBuilder
         standard.setDestinationDatastore(destinationDatastore);
 
         primaryDisk = new PrimaryDisk();
-        primaryDisk.setDiskStandardConf(standard);
+        primaryDisk.setDiskStandardConfiguration(standard);
         return this;
     }
 

@@ -24,6 +24,8 @@ package com.abiquo.commons.amqp.impl.datacenter.domain;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 public class VirtualMachineDefinition
 {
     protected String machineUUID;
@@ -155,21 +157,20 @@ public class VirtualMachineDefinition
 
     public static class PrimaryDisk
     {
-        protected DiskStandardConfiguration diskStandardConf;
+        protected DiskStandardConfiguration diskStandardConfiguration;
 
         protected DiskStateful diskStateful;
 
-        public DiskStandardConfiguration getDiskStandardConfiguration()
-        {
-            return diskStandardConf;
-        }
+        public DiskStandardConfiguration getDiskStandardConfiguration() {
+			return diskStandardConfiguration;
+		}
 
-        public void setDiskStandardConf(DiskStandardConfiguration value)
-        {
-            this.diskStandardConf = value;
-        }
+		public void setDiskStandardConfiguration(
+				DiskStandardConfiguration diskStandardConfiguration) {
+			this.diskStandardConfiguration = diskStandardConfiguration;
+		}
 
-        public DiskStateful getDiskStateful()
+		public DiskStateful getDiskStateful()
         {
             return diskStateful;
         }
@@ -179,6 +180,7 @@ public class VirtualMachineDefinition
             this.diskStateful = value;
         }
 
+        @JsonIgnore
         public boolean isStateful()
         {
             if (getDiskStateful() != null)
