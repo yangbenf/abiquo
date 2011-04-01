@@ -21,6 +21,8 @@
 
 package com.abiquo.commons.amqp.impl.datacenter.domain.builder;
 
+import java.util.UUID;
+
 import com.abiquo.commons.amqp.impl.datacenter.domain.AuxiliaryDisk;
 import com.abiquo.commons.amqp.impl.datacenter.domain.DiskDescription;
 import com.abiquo.commons.amqp.impl.datacenter.domain.DiskDescription.DiskFormatType;
@@ -150,11 +152,12 @@ public class VirtualMachineDescriptionBuilder
         return this;
     }
 
-    public VirtualMachineDefinition build(String virtualMachineId)
+    public VirtualMachineDefinition build(String uuid)
     {
         VirtualMachineDefinition virtualMachine = new VirtualMachineDefinition();
         // TODO check not null
-        virtualMachine.setMachineID(virtualMachineId);
+        virtualMachine.setMachineUUID(uuid);
+        virtualMachine.setMachineName("ABQ_" + uuid);
         virtualMachine.setHardwareConfiguration(hardConf);
         virtualMachine.setNetworkConfiguration(netConf);
 
