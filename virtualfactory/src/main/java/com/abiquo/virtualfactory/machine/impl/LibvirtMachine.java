@@ -45,10 +45,10 @@ import javax.xml.xpath.XPathExpressionException;
 
 import org.libvirt.Connect;
 import org.libvirt.Domain;
+import org.libvirt.DomainInfo.DomainState;
 import org.libvirt.LibvirtException;
 import org.libvirt.StoragePool;
 import org.libvirt.StorageVol;
-import org.libvirt.DomainInfo.DomainState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -58,8 +58,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.abiquo.aimstub.TTransportProxy;
 import com.abiquo.aimstub.Aim.Iface;
+import com.abiquo.aimstub.TTransportProxy;
 import com.abiquo.util.AddressingUtils;
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
 import com.abiquo.virtualfactory.hypervisor.impl.AbsLibvirtHypervisor;
@@ -119,7 +119,7 @@ public class LibvirtMachine extends AbsVirtualMachine
     private String domainXml;
 
     private final String kvmemulation;
-    
+
     private String targetDatstore;
 
     /**
@@ -591,14 +591,14 @@ public class LibvirtMachine extends AbsVirtualMachine
 
             // Removes the domain
             conn = connect(conn);
-            
+
             dom = conn.domainLookupByName(getMachineName());
             dom.undefine();
-            
-            //if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
-            //{
-                removeImage();
-            //}
+
+            // if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
+            // {
+            removeImage();
+            // }
 
             detachExtendedDisksFromConfig(config);
         }
@@ -612,7 +612,6 @@ public class LibvirtMachine extends AbsVirtualMachine
             disconnectAndThrowError(conn, dom);
         }
     }
-    
 
     /**
      * Reconfig the virtual machine.
@@ -996,8 +995,8 @@ public class LibvirtMachine extends AbsVirtualMachine
                 // Creating the VLAN
                 URL phymach_ip = configuration.getHyper().getAddress();
 
-                VlanStub.createVlan(phymach_ip, String.valueOf(virtualNIC.getVlanTag()), virtualNIC
-                    .getVSwitchName(), bridgeName);
+                VlanStub.createVlan(phymach_ip, String.valueOf(virtualNIC.getVlanTag()),
+                    virtualNIC.getVSwitchName(), bridgeName);
 
                 attachBridgeToDoc(doc, virtualNIC.getMacAddress(), bridgeName);
 
@@ -1181,16 +1180,21 @@ public class LibvirtMachine extends AbsVirtualMachine
             conn = connect(conn);
 
             String location = vdisk.getLocation();
+
             int index = location.indexOf("|");
             String ip = location.substring(0, index);
             String iscsiPath = location.substring(index + 1);
             String iqn = AddressingUtils.getIQN(iscsiPath);
             String pool_xml = createisCsiStoragePoolXML(UUID.randomUUID().toString(), ip, iqn);
+
             logger.debug("Creating the Storage pool: {}", pool_xml);
             StoragePool storagePool = conn.storagePoolCreateXML(pool_xml, 0);
             storagePoolList.add(storagePool.getName());
+
             String volumePath = "/dev/disk/by-path/" + iscsiPath;
+
             logger.debug("Adding the volume in this volume path: {}", volumePath);
+
             String target;
             if (forcedTarget == null)
             {
@@ -1201,7 +1205,9 @@ public class LibvirtMachine extends AbsVirtualMachine
             {
                 target = forcedTarget;
             }
+
             attachLUNDisktoDoc(doc, target, volumePath, busType, vdisk.getFormat());
+
             logger.debug("Added new ISCSI target, in this location: {}", location);
         }
         finally
@@ -1321,7 +1327,8 @@ public class LibvirtMachine extends AbsVirtualMachine
 
         Iface aimclient =
             TTransportProxy.getInstance(hypervisorLocation, libvirtHyper.getAddress().getPort());
-        aimclient.copyFromRepositoryToDatastore(imagePath, targetDatstore, getMachineName().toString());
+        aimclient.copyFromRepositoryToDatastore(imagePath, targetDatstore, getMachineName()
+            .toString());
 
         logger.debug("Cloning success, at [{}] ", targetDatstore + getMachineName().toString());
     }
@@ -1333,18 +1340,19 @@ public class LibvirtMachine extends AbsVirtualMachine
     {
         VirtualDisk diskBase = config.getVirtualDiskBase();
         targetDatstore = getDatastore(diskBase);
-        
-        if(targetDatstore != null) 
+
+        if (targetDatstore != null)
         {
             String hypervisorLocation = libvirtHyper.getAddress().getHost();
-            
+
             try
             {
                 Iface aimclient =
-                    TTransportProxy
-                        .getInstance(hypervisorLocation, libvirtHyper.getAddress().getPort());
-            
-                aimclient.deleteVirtualImageFromDatastore(targetDatstore, getMachineName().toString());
+                    TTransportProxy.getInstance(hypervisorLocation, libvirtHyper.getAddress()
+                        .getPort());
+
+                aimclient.deleteVirtualImageFromDatastore(targetDatstore, getMachineName()
+                    .toString());
             }
             catch (Exception e)
             {

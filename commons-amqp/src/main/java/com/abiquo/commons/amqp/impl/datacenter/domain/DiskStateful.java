@@ -23,6 +23,7 @@ package com.abiquo.commons.amqp.impl.datacenter.domain;
 
 public class DiskStateful extends DiskDescription
 {
+    // TODO change name to location
     protected String iqn;
 
     public String getIqn()

@@ -184,14 +184,13 @@ public class VirtualMachineDefinition
         @JsonIgnore
         public boolean isStateful()
         {
-            if (getDiskStateful() != null)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return (getDiskStateful() != null);
+        }
+
+        @JsonIgnore
+        public boolean isStandard()
+        {
+            return (getDiskStandard() != null);
         }
     }
 
