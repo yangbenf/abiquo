@@ -27,6 +27,12 @@ public class DiskDescription
 
     protected long capacityInBytes;
 
+    /**
+     * Datastore (rootPath + directory) where the virtualmachine is booted. VirtualMachine UUID is
+     * added to build the complete destination path. Ex: /var/lib/virt
+     */
+    protected String destinationDatastore;
+
     public DiskFormatType getFormat()
     {
         return format;
@@ -45,6 +51,16 @@ public class DiskDescription
     public void setCapacityInBytes(long capacityInBytes)
     {
         this.capacityInBytes = capacityInBytes;
+    }
+
+    public String getDestinationDatastore()
+    {
+        return destinationDatastore;
+    }
+
+    public void setDestinationDatastore(String destinationDatastore)
+    {
+        this.destinationDatastore = destinationDatastore;
     }
 
     // TODO duplicated

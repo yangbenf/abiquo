@@ -157,20 +157,21 @@ public class VirtualMachineDefinition
 
     public static class PrimaryDisk
     {
-        protected DiskStandardConfiguration diskStandardConfiguration;
+        protected DiskStandard diskStandard;
 
         protected DiskStateful diskStateful;
 
-        public DiskStandardConfiguration getDiskStandardConfiguration() {
-			return diskStandardConfiguration;
-		}
+        public DiskStandard getDiskStandard()
+        {
+            return diskStandard;
+        }
 
-		public void setDiskStandardConfiguration(
-				DiskStandardConfiguration diskStandardConfiguration) {
-			this.diskStandardConfiguration = diskStandardConfiguration;
-		}
+        public void setDiskStandard(DiskStandard diskStandard)
+        {
+            this.diskStandard = diskStandard;
+        }
 
-		public DiskStateful getDiskStateful()
+        public DiskStateful getDiskStateful()
         {
             return diskStateful;
         }
@@ -190,37 +191,6 @@ public class VirtualMachineDefinition
             else
             {
                 return false;
-            }
-        }
-
-        public static class DiskStandardConfiguration
-        {
-            protected DiskStandard diskStandard;
-
-            /**
-             * Datastore (rootPath + directory) where the virtualmachine is booted. VirtualMachine
-             * UUID is added to build the complete destination path. Ex: /var/lib/virt
-             */
-            protected String destinationDatastore;
-
-            public DiskStandard getDiskStandard()
-            {
-                return diskStandard;
-            }
-
-            public void setDiskStandard(DiskStandard value)
-            {
-                this.diskStandard = value;
-            }
-
-            public String getDestinationDatastore()
-            {
-                return destinationDatastore;
-            }
-
-            public void setDestinationDatastore(String value)
-            {
-                this.destinationDatastore = value;
             }
         }
     }

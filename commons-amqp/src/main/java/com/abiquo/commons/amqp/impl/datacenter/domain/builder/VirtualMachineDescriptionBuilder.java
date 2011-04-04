@@ -29,7 +29,6 @@ import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.HardwareConfiguration;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.NetworkConfiguration;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.PrimaryDisk;
-import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.PrimaryDisk.DiskStandardConfiguration;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition.SecondaryDisks;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualNIC;
 
@@ -43,7 +42,6 @@ public class VirtualMachineDescriptionBuilder
 
     private SecondaryDisks secondaryDisks;
 
- 
     public VirtualMachineDescriptionBuilder hardware(int virtualCpu, int ramInMb)
     {
         hardConf = new HardwareConfiguration();
@@ -106,14 +104,11 @@ public class VirtualMachineDescriptionBuilder
         disk.setCapacityInBytes(capacityInBytes);
         disk.setRepository(repository);
         disk.setPath(sourcePath);
-
-        VirtualMachineDefinition.PrimaryDisk.DiskStandardConfiguration standard =
-            new DiskStandardConfiguration();
-        standard.setDiskStandard(disk);
-        standard.setDestinationDatastore(destinationDatastore);
+        disk.setDestinationDatastore(destinationDatastore);
 
         primaryDisk = new PrimaryDisk();
-        primaryDisk.setDiskStandardConfiguration(standard);
+        primaryDisk.setDiskStandard(disk);
+
         return this;
     }
 
@@ -130,8 +125,8 @@ public class VirtualMachineDescriptionBuilder
         return this;
     }
 
-    public VirtualMachineDescriptionBuilder addAuxDisk(DiskFormatType format,
-        long capacityInBytes, String iqn, int sequence)
+    public VirtualMachineDescriptionBuilder addAuxDisk(DiskFormatType format, long capacityInBytes,
+        String iqn, int sequence)
     {
         if (secondaryDisks == null)
         {
