@@ -30,13 +30,13 @@ public class VirtualFactoryJobBuilder
     protected HypervisorConnection connection;
 
     public VirtualFactoryJobBuilder connection(HypervisorType hypervisortype, String ip,
-        String loginUser, String loginPasswoed)
+        String loginUser, String loginPassword)
     {
         connection = new HypervisorConnection();
         connection.setHypervisorType(hypervisortype);
         connection.setIp(ip);
         connection.setLoginUser(loginUser);
-        connection.setLoginPassword(loginPasswoed);
+        connection.setLoginPassword(loginPassword);
 
         return this;
     }

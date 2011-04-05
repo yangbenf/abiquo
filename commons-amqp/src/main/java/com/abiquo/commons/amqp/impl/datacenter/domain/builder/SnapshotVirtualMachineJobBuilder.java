@@ -31,9 +31,9 @@ public class SnapshotVirtualMachineJobBuilder extends ConfigureVirtualMachineJob
     private DiskStandard destination;
 
     public SnapshotVirtualMachineJobBuilder connection(HypervisorType hypervisortype, String ip,
-        String loginUser, String loginPasswoed)
+        String loginUser, String loginPassword)
     {
-        super.connection(hypervisortype, ip, loginUser, loginPasswoed);
+        super.connection(hypervisortype, ip, loginUser, loginPassword);
         return this;
     }
 

@@ -30,9 +30,9 @@ public class ApplyVirtualMachineStateJobBuilder extends ConfigureVirtualMachineJ
     private StateTransaction transaction;
 
     public ApplyVirtualMachineStateJobBuilder connection(HypervisorType hypervisortype, String ip,
-        String loginUser, String loginPasswoed)
+        String loginUser, String loginPassword)
     {
-        super.connection(hypervisortype, ip, loginUser, loginPasswoed);
+        super.connection(hypervisortype, ip, loginUser, loginPassword);
         return this;
     }
 
