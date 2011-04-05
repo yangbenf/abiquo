@@ -66,28 +66,40 @@ public class DiskDescription
     // TODO duplicated
     public enum DiskFormatType
     {
-        UNKNOWN,
+        UNKNOWN("raw"),
 
-        RAW,
+        RAW("raw"),
 
-        INCOMPATIBLE,
+        INCOMPATIBLE("raw"),
 
-        VMDK_STREAM_OPTIMIZED,
+        VMDK_STREAM_OPTIMIZED("raw"),
 
-        VMDK_FLAT,
+        VMDK_FLAT("raw"),
 
-        VMDK_SPARSE,
+        VMDK_SPARSE("vmdk"),
 
-        VHD_FLAT,
+        VHD_FLAT("raw"),
 
-        VHD_SPARSE,
+        VHD_SPARSE("raw"),
 
-        VDI_FLAT,
+        VDI_FLAT("raw"),
 
-        VDI_SPARSE,
+        VDI_SPARSE("raw"),
 
-        QCOW2_FLAT,
+        QCOW2_FLAT("qcow2"),
 
-        QCOW2_SPARSE;
+        QCOW2_SPARSE("qcow2");
+
+        private String libvirtFormat;
+
+        private DiskFormatType(String libvirtFormat)
+        {
+            this.libvirtFormat = libvirtFormat;
+        }
+
+        public String getLibvirtFormat()
+        {
+            return libvirtFormat;
+        }
     }
 }
