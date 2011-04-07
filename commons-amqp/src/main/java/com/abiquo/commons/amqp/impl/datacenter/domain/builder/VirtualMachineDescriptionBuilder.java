@@ -113,12 +113,13 @@ public class VirtualMachineDescriptionBuilder
     }
 
     public VirtualMachineDescriptionBuilder primaryDisk(DiskFormatType format,
-        long capacityInBytes, String iqn)
+        long capacityInBytes, String iqn, String destinationDatastore)
     {
         DiskStateful disk = new DiskStateful();
         disk.setFormat(format);
         disk.setCapacityInBytes(capacityInBytes);
         disk.setIqn(iqn);
+        disk.setDestinationDatastore(destinationDatastore);
 
         primaryDisk = new PrimaryDisk();
         primaryDisk.setDiskStateful(disk);
@@ -126,7 +127,7 @@ public class VirtualMachineDescriptionBuilder
     }
 
     public VirtualMachineDescriptionBuilder addAuxDisk(DiskFormatType format, long capacityInBytes,
-        String iqn, int sequence)
+        String iqn, String destinationDatastore, int sequence)
     {
         if (secondaryDisks == null)
         {
@@ -137,6 +138,7 @@ public class VirtualMachineDescriptionBuilder
         auxDisk.setFormat(format);
         auxDisk.setCapacityInBytes(capacityInBytes);
         auxDisk.setIqn(iqn);
+        auxDisk.setDestinationDatastore(destinationDatastore);
 
         secondaryDisks.getAuxiliaryDisks().add(auxDisk);
 
