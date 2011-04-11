@@ -46,7 +46,7 @@ public class VirtualFactoryTestJobs
             // .primaryDisk("RAW", "1024", "iqn.bla.bla-lun-0")
             .primaryDisk(DiskFormatType.RAW, 1024l, "nfs-devel:/opt/vm_repo",
                 "1/rs.bcn/m0n0/m0n0.iso", "datastore1") //
-            .addAuxDisk(DiskFormatType.RAW, 1024l, "iqn....", 1);
+            .addAuxDisk(DiskFormatType.RAW, 1024l, "iqn....", "sdasd", 1);
 
     }
 
