@@ -78,7 +78,7 @@ public class VirtualFactoryTestJobs
             .connection(HypervisorType.XEN_3, "10.60.1.15", "root", "root") //
             .setVirtualMachineDefinition(vmbuilder, "virtualMachineID") //
             .destinationDisk(DiskFormatType.RAW, 1024l, "nfs-devel:/opt/vm_repository",
-                "1/some/bundle/m0n0.iso")//
+                "1/some/bundle/m0n0.iso", "test-snapshot")//
             .buildSnapshotVirtualMachineDto();
     }
 

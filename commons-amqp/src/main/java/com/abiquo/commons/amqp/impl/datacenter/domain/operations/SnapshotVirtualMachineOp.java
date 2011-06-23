@@ -21,6 +21,7 @@
 
 package com.abiquo.commons.amqp.impl.datacenter.domain.operations;
 
+import com.abiquo.commons.amqp.impl.datacenter.domain.DiskSnapshot;
 import com.abiquo.commons.amqp.impl.datacenter.domain.DiskStandard;
 import com.abiquo.commons.amqp.impl.datacenter.domain.VirtualMachineDefinition;
 
@@ -29,7 +30,7 @@ public class SnapshotVirtualMachineOp extends BasicDatacenterOp
 {
     protected VirtualMachineDefinition virtualMachine;
 
-    protected DiskStandard destinationDisk;
+    protected DiskSnapshot diskSnapshot;
 
     public VirtualMachineDefinition getVirtualMachine()
     {
@@ -41,13 +42,13 @@ public class SnapshotVirtualMachineOp extends BasicDatacenterOp
         this.virtualMachine = virtualMachine;
     }
 
-    public DiskStandard getDestinationDisk()
+    public DiskSnapshot getDiskSnapshot()
     {
-        return destinationDisk;
+        return diskSnapshot;
     }
 
-    public void setDestinationDisk(DiskStandard destinationDisk)
+    public void setDiskSnapshot(DiskSnapshot diskSnapshot)
     {
-        this.destinationDisk = destinationDisk;
+        this.diskSnapshot = diskSnapshot;
     }
 }
