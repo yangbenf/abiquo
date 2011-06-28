@@ -55,7 +55,7 @@ public class VirtualFactoryTestJobs
     {
 
         return new ConfigureVirtualMachineJobBuilder() //
-            .connection(HypervisorType.XEN_3, "10.60.1.15", "root", "root") //
+            .connection(HypervisorType.XEN_3, "localhost", "root", "root") //
             .setVirtualMachineDefinition(vmbuilder, "virtualMachineID") //
             .buildConfigureVirtualMachineDto();
 
