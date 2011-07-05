@@ -132,6 +132,21 @@ public class VirtualMachineDefinition
     {
         protected int rdport;
 
+        protected String rdPassword;
+
+        /** Check if the DVS feature is enabled; */
+        protected boolean dvsEnabled;
+
+        public void setIsDvsEnabled(final boolean dvsEnabled)
+        {
+            this.dvsEnabled = dvsEnabled;
+        }
+
+        public boolean isDvsEnabled()
+        {
+            return dvsEnabled;
+        }
+
         public void setRdPort(int rdport)
         {
             this.rdport = rdport;
@@ -140,6 +155,25 @@ public class VirtualMachineDefinition
         public int getRdPort()
         {
             return rdport;
+        }
+
+        public String getRdPassword()
+        {
+            return rdPassword;
+        }
+
+        public void setRdPassword(final String rdPassword)
+        {
+            this.rdPassword = rdPassword;
+        }
+
+        /**
+         * Null or empty password
+         */
+        @JsonIgnore
+        public boolean isRdPasswordSet()
+        {
+            return rdPassword != null && !rdPassword.isEmpty();
         }
 
         protected List<VirtualNIC> virtualNICs;
@@ -161,6 +195,9 @@ public class VirtualMachineDefinition
 
         protected DiskStateful diskStateful;
 
+        /** If not ''requiresMoveToDatastore'' then is a HA deploy. */
+        protected boolean requiresMoveToDatastore;
+
         public DiskStandard getDiskStandard()
         {
             return diskStandard;
@@ -179,6 +216,17 @@ public class VirtualMachineDefinition
         public void setDiskStateful(DiskStateful value)
         {
             this.diskStateful = value;
+        }
+
+        public void setRequiresMoveToDatastore(final boolean requiresMoveToDatastore)
+        {
+            this.requiresMoveToDatastore = requiresMoveToDatastore;
+        }
+
+        @JsonIgnore
+        public boolean isRequiresMoveToDatastore()
+        {
+            return requiresMoveToDatastore;
         }
 
         @JsonIgnore
