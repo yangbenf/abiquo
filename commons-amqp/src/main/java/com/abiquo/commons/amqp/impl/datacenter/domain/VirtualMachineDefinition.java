@@ -137,14 +137,14 @@ public class VirtualMachineDefinition
         /** Check if the DVS feature is enabled; */
         protected boolean dvsEnabled;
 
-        public void setIsDvsEnabled(final boolean dvsEnabled)
-        {
-            this.dvsEnabled = dvsEnabled;
-        }
-
         public boolean isDvsEnabled()
         {
             return dvsEnabled;
+        }
+
+        public void setDvsEnabled(boolean dvsEnabled)
+        {
+            this.dvsEnabled = dvsEnabled;
         }
 
         public void setRdPort(int rdport)
@@ -218,15 +218,14 @@ public class VirtualMachineDefinition
             this.diskStateful = value;
         }
 
-        public void setRequiresMoveToDatastore(final boolean requiresMoveToDatastore)
-        {
-            this.requiresMoveToDatastore = requiresMoveToDatastore;
-        }
-
-        @JsonIgnore
         public boolean isRequiresMoveToDatastore()
         {
             return requiresMoveToDatastore;
+        }
+
+        public void setRequiresMoveToDatastore(boolean requiresMoveToDatastore)
+        {
+            this.requiresMoveToDatastore = requiresMoveToDatastore;
         }
 
         @JsonIgnore
