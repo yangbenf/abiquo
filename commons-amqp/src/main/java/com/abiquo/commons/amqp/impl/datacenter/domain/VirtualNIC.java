@@ -21,6 +21,8 @@
 
 package com.abiquo.commons.amqp.impl.datacenter.domain;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 public class VirtualNIC extends DHCPRule
 {
     protected String vSwitchName;
@@ -45,14 +47,32 @@ public class VirtualNIC extends DHCPRule
 
     protected int sequence;
 
+    protected boolean configureGateway;
+
     public String getVSwitchName()
     {
         return vSwitchName;
     }
 
-    public void setVSwitchName(String value)
+    public void setVSwitchName(String vSwitchName)
     {
-        this.vSwitchName = value;
+        this.vSwitchName = vSwitchName;
+    }
+
+    public boolean isConfigureGateway()
+    {
+        return configureGateway;
+    }
+
+    public void setConfigureGateway(boolean configureGateway)
+    {
+        this.configureGateway = configureGateway;
+    }
+
+    @JsonIgnore
+    public String getRuleName()
+    {
+        return "host_" + getMacAddress().replaceAll(":", "");
     }
 
     public String getNetworkName()

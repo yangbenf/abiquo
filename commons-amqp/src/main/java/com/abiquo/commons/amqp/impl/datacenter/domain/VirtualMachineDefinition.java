@@ -130,6 +130,12 @@ public class VirtualMachineDefinition
 
     public static class NetworkConfiguration
     {
+        /** OMAPI address */
+        protected String dhcpAddress;
+
+        /** OMAPI port */
+        protected int dhcpPort;
+
         protected int rdport;
 
         protected String rdPassword;
@@ -165,6 +171,26 @@ public class VirtualMachineDefinition
         public void setRdPassword(final String rdPassword)
         {
             this.rdPassword = rdPassword;
+        }
+
+        public String getDhcpAddress()
+        {
+            return dhcpAddress;
+        }
+
+        public void setDhcpAddress(String dhcpAddress)
+        {
+            this.dhcpAddress = dhcpAddress;
+        }
+
+        public int getDhcpPort()
+        {
+            return dhcpPort;
+        }
+
+        public void setDhcpPort(int dhcpPort)
+        {
+            this.dhcpPort = dhcpPort;
         }
 
         /**
@@ -219,15 +245,15 @@ public class VirtualMachineDefinition
         }
 
         /**
-         * Only DiskStandard 
-         * */
+         * Only DiskStandard
+         */
         public boolean isRequiresMoveToDatastore()
         {
             return requiresMoveToDatastore;
         }
 
         public void setRequiresMoveToDatastore(boolean requiresMoveToDatastore)
-        {            
+        {
             this.requiresMoveToDatastore = requiresMoveToDatastore;
         }
 
