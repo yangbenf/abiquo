@@ -239,6 +239,16 @@ public class VirtualMachineDefinition
         {
             return (getDiskStandard() != null);
         }
+
+        /**
+         * @return the destination datastore (even if standard or stateful disk)
+         */
+        @JsonIgnore
+        public String getDestinationDatastore()
+        {
+            return isStateful() ? getDiskStateful().getDestinationDatastore() : getDiskStandard()
+                .getDestinationDatastore();
+        }
     }
 
     public static class SecondaryDisks
