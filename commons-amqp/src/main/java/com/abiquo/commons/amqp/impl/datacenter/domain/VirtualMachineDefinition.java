@@ -218,13 +218,16 @@ public class VirtualMachineDefinition
             this.diskStateful = value;
         }
 
+        /**
+         * Only DiskStandard 
+         * */
         public boolean isRequiresMoveToDatastore()
         {
             return requiresMoveToDatastore;
         }
 
         public void setRequiresMoveToDatastore(boolean requiresMoveToDatastore)
-        {
+        {            
             this.requiresMoveToDatastore = requiresMoveToDatastore;
         }
 
