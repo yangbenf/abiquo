@@ -40,10 +40,14 @@ public class TracerConfiguration extends DefaultConfiguration
     public static final String TRACER_QUEUE = TRACER_ROUTING_KEY;
 
     @Override
-    public void declareBrokerConfiguration(Channel channel) throws IOException
+    public void declareExchanges(Channel channel) throws IOException
     {
         channel.exchangeDeclare(TRACER_EXCHANGE, DirectExchange, Durable);
+    }
 
+    @Override
+    public void declareQueues(Channel channel) throws IOException
+    {
         channel.queueDeclare(TRACER_QUEUE, Durable, NonExclusive, NonAutodelete, null);
         channel.queueBind(TRACER_QUEUE, TRACER_EXCHANGE, TRACER_ROUTING_KEY);
     }

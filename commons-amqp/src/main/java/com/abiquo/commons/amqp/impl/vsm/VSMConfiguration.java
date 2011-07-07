@@ -40,10 +40,14 @@ public class VSMConfiguration extends DefaultConfiguration
     public static final String VSM_ROUTING_KEY = "";
 
     @Override
-    public void declareBrokerConfiguration(Channel channel) throws IOException
+    public void declareExchanges(Channel channel) throws IOException
     {
         channel.exchangeDeclare(VSM_EXCHANGE, FanoutExchange, Durable);
+    }
 
+    @Override
+    public void declareQueues(Channel channel) throws IOException
+    {
         channel.queueDeclare(EVENT_SYNK_QUEUE, Durable, NonExclusive, NonAutodelete, null);
         channel.queueBind(EVENT_SYNK_QUEUE, VSM_EXCHANGE, VSM_ROUTING_KEY);
     }

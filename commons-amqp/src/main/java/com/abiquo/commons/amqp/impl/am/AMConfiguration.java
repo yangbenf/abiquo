@@ -35,10 +35,14 @@ public class AMConfiguration extends DefaultConfiguration
     public static final String AM_QUEUE = AM_ROUTING_KEY;
 
     @Override
-    public void declareBrokerConfiguration(Channel channel) throws IOException
+    public void declareExchanges(Channel channel) throws IOException
     {
         channel.exchangeDeclare(AM_EXCHANGE, DirectExchange, Durable);
+    }
 
+    @Override
+    public void declareQueues(Channel channel) throws IOException
+    {
         channel.queueDeclare(AM_QUEUE, Durable, NonExclusive, NonAutodelete, null);
         channel.queueBind(AM_QUEUE, AM_EXCHANGE, AM_ROUTING_KEY);
     }

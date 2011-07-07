@@ -61,7 +61,8 @@ public abstract class BasicConsumer<T> implements ShutdownListener
             channel.addShutdownListener(this);
             channel.basicQos(getPrefetchCount());
 
-            configuration.declareBrokerConfiguration(channel);
+            configuration.declareExchanges(channel);
+            configuration.declareQueues(channel);
 
             consumer = new QueueSubscriber<BasicConsumer<T>>(channel, this);
             channel.basicConsume(queueName, false, consumer);

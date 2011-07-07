@@ -41,12 +41,12 @@ public class DatacenterConfiguration extends DefaultConfiguration
         return DATACENTER_DIRECT_EXCHANGE;
     }
 
-    public static String getJobsRoutingKey(final String datacenterId)
+    public static String buildJobsRoutingKey(final String datacenterId)
     {
         return JOBS_ROUTING_KEY.concat(".").concat(datacenterId);
     }
 
-    public static String getJobsQueue(final String datacenterId)
+    public static String buildJobsQueue(final String datacenterId)
     {
         return JOBS_QUEUE.concat(".").concat(datacenterId);
     }
@@ -57,13 +57,17 @@ public class DatacenterConfiguration extends DefaultConfiguration
     }
 
     @Override
-    public void declareBrokerConfiguration(Channel channel) throws IOException
+    public void declareExchanges(Channel channel) throws IOException
     {
         channel.exchangeDeclare(getDatacenterDirectExchange(), DirectExchange, Durable);
+    }
 
-        channel
-            .queueDeclare(getJobsQueue(datacenterId), Durable, NonExclusive, NonAutodelete, null);
-        channel.queueBind(getJobsQueue(datacenterId), getDatacenterDirectExchange(),
-            getJobsRoutingKey(datacenterId));
+    @Override
+    public void declareQueues(Channel channel) throws IOException
+    {
+        channel.queueDeclare(buildJobsQueue(datacenterId), Durable, NonExclusive, NonAutodelete,
+            null);
+        channel.queueBind(buildJobsQueue(datacenterId), getDatacenterDirectExchange(),
+            buildJobsRoutingKey(datacenterId));
     }
 }

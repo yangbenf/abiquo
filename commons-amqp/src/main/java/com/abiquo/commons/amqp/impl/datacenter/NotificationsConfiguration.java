@@ -35,10 +35,14 @@ public class NotificationsConfiguration extends DefaultConfiguration
     public static final String NOTIFICATIONS_QUEUE = NOTIFICATIONS_ROUTING_KEY;
 
     @Override
-    public void declareBrokerConfiguration(Channel channel) throws IOException
+    public void declareExchanges(Channel channel) throws IOException
     {
         channel.exchangeDeclare(NOTIFICATIONS_EXCHANGE, DirectExchange, Durable);
+    }
 
+    @Override
+    public void declareQueues(Channel channel) throws IOException
+    {
         channel.queueDeclare(NOTIFICATIONS_QUEUE, Durable, NonExclusive, NonAutodelete, null);
         channel.queueBind(NOTIFICATIONS_QUEUE, NOTIFICATIONS_EXCHANGE, NOTIFICATIONS_ROUTING_KEY);
     }

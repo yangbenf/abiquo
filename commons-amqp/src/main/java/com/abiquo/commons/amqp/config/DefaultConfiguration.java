@@ -58,7 +58,9 @@ public abstract class DefaultConfiguration
 
     protected final boolean NonAutodelete = false;
 
-    public abstract void declareBrokerConfiguration(Channel channel) throws IOException;
+    public abstract void declareExchanges(Channel channel) throws IOException;
+
+    public abstract void declareQueues(Channel channel) throws IOException;
 
     public static String getHost()
     {

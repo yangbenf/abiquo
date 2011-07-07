@@ -49,7 +49,7 @@ public abstract class BasicProducer<T extends Queuable> implements ShutdownListe
             channel = ConnectionFactory.getInstance().createChannel();
             channel.addShutdownListener(this);
 
-            configuration.declareBrokerConfiguration(channel);
+            configuration.declareExchanges(channel);
         }
     }
 

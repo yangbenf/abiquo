@@ -28,9 +28,14 @@ import com.rabbitmq.client.Channel;
 
 public class PingConfiguration extends DefaultConfiguration
 {
+    @Override
+    public void declareExchanges(Channel channel) throws IOException
+    {
+        // Intentionally empty
+    }
 
     @Override
-    public void declareBrokerConfiguration(Channel channel) throws IOException
+    public void declareQueues(Channel channel) throws IOException
     {
         // Intentionally empty
     }
