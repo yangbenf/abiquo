@@ -71,8 +71,11 @@
             [Bindable]
             private var languageDP:Array = [ { label: "English", data: "en_US" },
                                              { label: "Español", data: "es_ES" },
-                                             { label: "Japanese", data: "ja_JP" }
-                                              ];
+                                             { label: "日本の言語", data: "ja_JP" },
+                                             { label: "中国", data: "zh_CN" },
+                                             { label: "française", data: "fr_FR" },
+                                             { label: "Deutsch", data: "de_DE" },
+                                             { label: "Nederlands", data: "nl_NL" } ];
 
             [Bindable]
             private var _loginLogo:String;
@@ -147,6 +150,7 @@
             	var indexLanguage:int = AbiCloudModel.getInstance().loginManager.returnLanguageIndex(languageDP,language);
             	if(indexLanguage != -1){
             		setLanguage( languageDP[indexLanguage].data );
+            		languageCombo.prompt = languageDP[indexLanguage].label;
             		return indexLanguage;
             	}
                 return -1;    
