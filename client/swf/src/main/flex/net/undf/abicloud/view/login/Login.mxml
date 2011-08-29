@@ -75,7 +75,8 @@
                                              { label: "中国", data: "zh_CN" },
                                              { label: "française", data: "fr_FR" },
                                              { label: "Deutsch", data: "de_DE" },
-                                             { label: "Nederlands", data: "nl_NL" } ];
+                                             { label: "Nederlands", data: "nl_NL" }, 
+					     { label: "Portuguese", data: "pt_PT" }];
 
             [Bindable]
             private var _loginLogo:String;
